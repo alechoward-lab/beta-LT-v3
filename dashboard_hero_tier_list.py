@@ -14,25 +14,25 @@ import json
 from hero_image_urls import hero_image_urls
 from default_heroes import default_heroes
 from preset_options import preset_options
-
-# Centralized help tip strings for both weighting sliders and hero stats
-help_tips = {
-    "Economy": "Ability to manage resources efficiently.",
-    "Tempo": "Speed at which the hero generates board impact.",
-    "Card Value": "Usefulness and effectiveness of the hero's cards.",
-    "Survivability": "Ability to withstand damage and survive longer in battles.",
-    "Villain Damage": "Capacity to reduce the villain's threat or health.",
-    "Threat Removal": "Efficiency in eliminating enemy threats.",
-    "Reliability": "Consistency of performance in various situations.",
-    "Minion Control": "Effectiveness in managing or countering minions.",
-    "Control Boon": "Bonus that improves control aspects of gameplay.",
-    "Support Boon": "Bonus that enhances team support abilities.",
-    "Unique Broken Builds Boon": "Special effectiveness in non-traditional strategies.",
-    "Late Game Power Boon": "Impact during the later stages of the game.",
-    "Simplicity": "Ease of understanding and playing the hero.",
-    "Stun/Confuse Boon": "Ability to disrupt or hinder opponents.",
-    "Multiplayer Consistency Boon": "Reliability of performance in multiplayer matches."
-}
+from help_tips import help_tips
+# # Centralized help tip strings for both weighting sliders and hero stats
+# help_tips = {
+#     "Economy": "Ability to manage resources efficiently.",
+#     "Tempo": "Speed at which the hero generates board impact.",
+#     "Card Value": "Usefulness and effectiveness of the hero's cards.",
+#     "Survivability": "Ability to withstand damage and survive longer in battles.",
+#     "Villain Damage": "Capacity to reduce the villain's threat or health.",
+#     "Threat Removal": "Efficiency in eliminating enemy threats.",
+#     "Reliability": "Consistency of performance in various situations.",
+#     "Minion Control": "Effectiveness in managing or countering minions.",
+#     "Control Boon": "Bonus that improves control aspects of gameplay.",
+#     "Support Boon": "Bonus that enhances team support abilities.",
+#     "Unique Broken Builds Boon": "Special effectiveness in non-traditional strategies.",
+#     "Late Game Power Boon": "Impact during the later stages of the game.",
+#     "Simplicity": "Ease of understanding and playing the hero.",
+#     "Stun/Confuse Boon": "Ability to disrupt or hinder opponents.",
+#     "Multiplayer Consistency Boon": "Reliability of performance in multiplayer matches."
+# }
 
 socials_banner = st.markdown(
     """
