@@ -463,37 +463,48 @@ for tier, heroes_list in tiers.items():
 # Add background image with custom CSS
 # ----------------------------------------
 background_image_url = "https://raw.githubusercontent.com/alechoward-lab/Marvel-Champions-Hero-Tier-List/refs/heads/main/images/background/marvel_champions_background_image.jpg"
-# st.markdown(
-#     f"""
-#     <style>
-#     .stApp {{
-#         background-image: url({background_image_url});
-#         background-size: cover;
-#         background-position: center;
-#         background-repeat: no-repeat;
-#         position: relative;
-#         color: white;
-#     }}
-#     .stApp::before {{
-#         content: "";
-#         position: absolute;
-#         background: rgba(0, 0, 0, 0.8);
-#         z-index: 1;
-#     }}
-#     .stApp > div {{
-#         position: relative;
-#         z-index: 2;
-#     }}
-#     .stApp, .stApp * {{
-#         color: white !important;
-#     }}
-#     .stApp .stSelectbox div[role="listbox"] * {{
-#         color: black !important;
-#     }}
-#     </style>
-#     """, 
-#     unsafe_allow_html=True
-# )
+background_image_url = "https://raw.githubusercontent.com/alechoward-lab/Marvel-Champions-Hero-Tier-List/refs/heads/main/images/background/marvel_champions_background_image.jpg"
+
+st.markdown(
+    f"""
+    <style>
+    .stApp {{
+        background: url({background_image_url}) no-repeat center center fixed;
+        background-size: cover;
+        color: white;
+    }}
+
+    @media (max-width: 768px) {{
+        .stApp {{
+            background-attachment: scroll;
+            background-size: contain;  /* Ensures it fits smaller screens better */
+        }}
+    }}
+
+    .stApp::before {{
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5); /* Dark overlay for readability */
+        z-index: 1;
+    }}
+
+    .stApp * {{
+        position: relative;
+        z-index: 2;
+        color: white !important;
+    }}
+
+    .stSelectbox div[role="listbox"] * {{
+        color: black !important;
+    }}
+    </style>
+    """, 
+    unsafe_allow_html=True
+)
 
 # ----------------------------------------
 # Display Tier List with Images
