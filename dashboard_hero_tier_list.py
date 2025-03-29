@@ -148,38 +148,158 @@ with col1:
             on_change=update_preset
         )
         
-        economy = st.slider("Economy", min_value=-10, max_value=10,
-                            value=st.session_state.get("economy", 4), key="economy",
-                            help="How efficiently a hero manages resources (e.g., cards, actions, etc.).")
-        tempo = st.slider("Tempo", min_value=-10, max_value=10,
-                          value=st.session_state.get("tempo", 2), key="tempo")
-        card_value = st.slider("Card Value", min_value=-10, max_value=10,
-                               value=st.session_state.get("card_value", 2), key="card_value")
-        survivability = st.slider("Survivability", min_value=-10, max_value=10,
-                                  value=st.session_state.get("survivability", 2), key="survivability")
-        villain_damage = st.slider("Villain Damage", min_value=-10, max_value=10,
-                                   value=st.session_state.get("villain_damage", 1), key="villain_damage")
-        threat_removal = st.slider("Threat Removal", min_value=-10, max_value=10,
-                                   value=st.session_state.get("threat_removal", 2), key="threat_removal")
-        reliability = st.slider("Reliability", min_value=-10, max_value=10,
-                                value=st.session_state.get("reliability", 3), key="reliability")
-        minion_control = st.slider("Minion Control", min_value=-10, max_value=10,
-                                   value=st.session_state.get("minion_control", 1), key="minion_control")
-        control = st.slider("Control Boon", min_value=-10, max_value=10,
-                            value=st.session_state.get("control", 2), key="control")
-        support = st.slider("Support Boon", min_value=-10, max_value=10,
-                            value=st.session_state.get("support", 2), key="support")
-        unique_builds = st.slider("Unique Broken Builds Boon", min_value=-10, max_value=10,
-                                  value=st.session_state.get("unique_builds", 1), key="unique_builds")
-        late_game = st.slider("Late Game Power Boon", min_value=-10, max_value=10,
-                              value=st.session_state.get("late_game", 1), key="late_game")
-        simplicity = st.slider("Simplicity", min_value=-10, max_value=10,
-                               value=st.session_state.get("simplicity", 0), key="simplicity")
-        status_cards = st.slider("Stun/Confuse Boon", min_value=-10, max_value=10,
-                                 value=st.session_state.get("status_cards", 0), key="status_cards")
-        multiplayer_consistency = st.slider("Multiplayer Consistency Boon", min_value=-10, max_value=10,
-                                             value=st.session_state.get("multiplayer_consistency", 0), key="multiplayer_consistency")
-        
+        economy = st.slider(
+        "Economy",
+        min_value=-10,
+        max_value=10,
+        value=st.session_state.get("economy", 4),
+        key="economy",
+        help="Economy: Ability to manage resources efficiently."
+        )
+
+        tempo = st.slider(
+            "Tempo",
+            min_value=-10,
+            max_value=10,
+            value=st.session_state.get("tempo", 2),
+            key="tempo",
+            help="Tempo: Speed at which the hero generates board impact."
+        )
+
+        card_value = st.slider(
+            "Card Value",
+            min_value=-10,
+            max_value=10,
+            value=st.session_state.get("card_value", 2),
+            key="card_value",
+            help="Card Value: Usefulness and effectiveness of the hero's cards."
+        )
+
+        survivability = st.slider(
+            "Survivability",
+            min_value=-10,
+            max_value=10,
+            value=st.session_state.get("survivability", 2),
+            key="survivability",
+            help="Survivability: Ability to withstand damage and survive longer in battles."
+        )
+
+        villain_damage = st.slider(
+            "Villain Damage",
+            min_value=-10,
+            max_value=10,
+            value=st.session_state.get("villain_damage", 1),
+            key="villain_damage",
+            help="Villain Damage: Capacity to reduce the villain's threat or health."
+        )
+
+        threat_removal = st.slider(
+            "Threat Removal",
+            min_value=-10,
+            max_value=10,
+            value=st.session_state.get("threat_removal", 2),
+            key="threat_removal",
+            help="Threat Removal: Efficiency in eliminating enemy threats."
+        )
+
+        reliability = st.slider(
+            "Reliability",
+            min_value=-10,
+            max_value=10,
+            value=st.session_state.get("reliability", 3),
+            key="reliability",
+            help="Reliability: Consistency of performance in various situations."
+        )
+
+        minion_control = st.slider(
+            "Minion Control",
+            min_value=-10,
+            max_value=10,
+            value=st.session_state.get("minion_control", 1),
+            key="minion_control",
+            help="Minion Control: Effectiveness in managing or countering minions."
+        )
+
+        control = st.slider(
+            "Control Boon",
+            min_value=-10,
+            max_value=10,
+            value=st.session_state.get("control", 2),
+            key="control",
+            help="Control Boon: Bonus that improves control aspects of gameplay."
+        )
+
+        support = st.slider(
+            "Support Boon",
+            min_value=-10,
+            max_value=10,
+            value=st.session_state.get("support", 2),
+            key="support",
+            help="Support Boon: Bonus that enhances team support abilities."
+        )
+
+        unique_builds = st.slider(
+            "Unique Broken Builds Boon",
+            min_value=-10,
+            max_value=10,
+            value=st.session_state.get("unique_builds", 1),
+            key="unique_builds",
+            help="Unique Broken Builds Boon: Special effectiveness in non-traditional strategies."
+        )
+
+        late_game = st.slider(
+            "Late Game Power Boon",
+            min_value=-10,
+            max_value=10,
+            value=st.session_state.get("late_game", 1),
+            key="late_game",
+            help="Late Game Power Boon: Impact during the later stages of the game."
+        )
+
+        simplicity = st.slider(
+            "Simplicity",
+            min_value=-10,
+            max_value=10,
+            value=st.session_state.get("simplicity", 0),
+            key="simplicity",
+            help="Simplicity: Ease of understanding and playing the hero."
+        )
+
+        status_cards = st.slider(
+            "Stun/Confuse Boon",
+            min_value=-10,
+            max_value=10,
+            value=st.session_state.get("status_cards", 0),
+            key="status_cards",
+            help="Stun/Confuse Boon: Ability to disrupt or hinder opponents."
+        )
+
+        multiplayer_consistency = st.slider(
+            "Multiplayer Consistency Boon",
+            min_value=-10,
+            max_value=10,
+            value=st.session_state.get("multiplayer_consistency", 0),
+            key="multiplayer_consistency",
+            help="Multiplayer Consistency Boon: Reliability of performance in multiplayer matches."
+        )
+        with st.expander("Weighting Definitions"):
+            st.markdown("**Economy:** Ability to manage resources efficiently.")
+            st.markdown("**Tempo:** Speed at which the hero generates board impact.")
+            st.markdown("**Card Value:** Usefulness and effectiveness of the hero's cards.")
+            st.markdown("**Survivability:** Ability to withstand damage and survive longer in battles.")
+            st.markdown("**Villain Damage:** Capacity to reduce the villain's threat or health.")
+            st.markdown("**Threat Removal:** Efficiency in eliminating enemy threats.")
+            st.markdown("**Reliability:** Consistency of performance in various situations.")
+            st.markdown("**Minion Control:** Effectiveness in managing or countering minions.")
+            st.markdown("**Control Boon:** Bonus that improves control aspects of gameplay.")
+            st.markdown("**Support Boon:** Bonus that enhances team support abilities.")
+            st.markdown("**Unique Broken Builds Boon:** Special effectiveness in non-traditional strategies.")
+            st.markdown("**Late Game Power Boon:** Impact during the later stages of the game.")
+            st.markdown("**Simplicity:** Ease of understanding and playing the hero.")
+            st.markdown("**Stun/Confuse Boon:** Ability to disrupt or hinder opponents.")
+            st.markdown("**Multiplayer Consistency Boon:** Reliability of performance in multiplayer matches.")
+
+
         # Create the weighting array from slider values
         weighting = np.array([
             st.session_state.get("economy", 4),
