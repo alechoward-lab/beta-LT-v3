@@ -462,7 +462,7 @@ for tier, heroes_list in tiers.items():
 # ----------------------------------------
 # Add background image with custom CSS
 # ----------------------------------------
-background_image_url = "https://raw.githubusercontent.com/alechoward-lab/Marvel-Champions-Hero-Tier-List/refs/heads/main/images/background/marvel_champions_background_image_v4.jpg"
+background_image_url = "https://github.com/alechoward-lab/Marvel-Champions-Hero-Tier-List/blob/main/images/background/marvel_champions_background_image_v4.jpg?raw=true"
 st.markdown(
     f"""
     <style>
