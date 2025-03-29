@@ -15,6 +15,25 @@ from hero_image_urls import hero_image_urls
 from default_heroes import default_heroes
 from preset_options import preset_options
 
+# Centralized help tip strings for both weighting sliders and hero stats
+help_tips = {
+    "Economy": "Ability to manage resources efficiently.",
+    "Tempo": "Speed at which the hero generates board impact.",
+    "Card Value": "Usefulness and effectiveness of the hero's cards.",
+    "Survivability": "Ability to withstand damage and survive longer in battles.",
+    "Villain Damage": "Capacity to reduce the villain's threat or health.",
+    "Threat Removal": "Efficiency in eliminating enemy threats.",
+    "Reliability": "Consistency of performance in various situations.",
+    "Minion Control": "Effectiveness in managing or countering minions.",
+    "Control Boon": "Bonus that improves control aspects of gameplay.",
+    "Support Boon": "Bonus that enhances team support abilities.",
+    "Unique Broken Builds Boon": "Special effectiveness in non-traditional strategies.",
+    "Late Game Power Boon": "Impact during the later stages of the game.",
+    "Simplicity": "Ease of understanding and playing the hero.",
+    "Stun/Confuse Boon": "Ability to disrupt or hinder opponents.",
+    "Multiplayer Consistency Boon": "Reliability of performance in multiplayer matches."
+}
+
 socials_banner = st.markdown(
     """
     <style>
@@ -22,16 +41,16 @@ socials_banner = st.markdown(
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: transparent; /* Transparent background */
+            background-color: transparent;
             padding: 5px;
-            border: 2px solid white; /* White border */
+            border: 2px solid white;
             border-radius: 8px;
             box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
         }
         .social-bar .left-content {
             display: flex;
             align-items: center;
-            margin-right: auto; /* Aligns logo and text to the left */
+            margin-right: auto;
         }
         .social-bar .left-content .logo {
             height: 40px;
@@ -42,7 +61,7 @@ socials_banner = st.markdown(
             justify-content: center;
         }
         .social-links a {
-            margin-right: 20px; /* Increased margin between logos */
+            margin-right: 20px;
             transition: opacity 0.3s ease-in-out;
         }
         .social-links a:hover {
@@ -74,7 +93,7 @@ socials_banner = st.markdown(
     """,
     unsafe_allow_html=True
 )
-    
+
 # ----------------------------------------
 # Define update_preset callback so that selecting a weighting preset updates slider values.
 # ----------------------------------------
@@ -82,21 +101,21 @@ def update_preset():
     preset = st.session_state.preset_choice
     if preset != "Custom":
         preset_vals = preset_options[preset]
-        st.session_state["economy"] = int(preset_vals[0])
-        st.session_state["tempo"] = int(preset_vals[1])
-        st.session_state["card_value"] = int(preset_vals[2])
-        st.session_state["survivability"] = int(preset_vals[3])
-        st.session_state["villain_damage"] = int(preset_vals[4])
-        st.session_state["threat_removal"] = int(preset_vals[5])
-        st.session_state["reliability"] = int(preset_vals[6])
-        st.session_state["minion_control"] = int(preset_vals[7])
-        st.session_state["control"] = int(preset_vals[8])
-        st.session_state["support"] = int(preset_vals[9])
-        st.session_state["unique_builds"] = int(preset_vals[10])
-        st.session_state["late_game"] = int(preset_vals[11])
-        st.session_state["simplicity"] = int(preset_vals[12])
-        st.session_state["status_cards"] = int(preset_vals[13])
-        st.session_state["multiplayer_consistency"] = int(preset_vals[14])
+        st.session_state["Economy"] = int(preset_vals[0])
+        st.session_state["Tempo"] = int(preset_vals[1])
+        st.session_state["Card Value"] = int(preset_vals[2])
+        st.session_state["Survivability"] = int(preset_vals[3])
+        st.session_state["Villain Damage"] = int(preset_vals[4])
+        st.session_state["Threat Removal"] = int(preset_vals[5])
+        st.session_state["Reliability"] = int(preset_vals[6])
+        st.session_state["Minion Control"] = int(preset_vals[7])
+        st.session_state["Control Boon"] = int(preset_vals[8])
+        st.session_state["Support Boon"] = int(preset_vals[9])
+        st.session_state["Unique Broken Builds Boon"] = int(preset_vals[10])
+        st.session_state["Late Game Power Boon"] = int(preset_vals[11])
+        st.session_state["Simplicity"] = int(preset_vals[12])
+        st.session_state["Stun/Confuse Boon"] = int(preset_vals[13])
+        st.session_state["Multiplayer Consistency Boon"] = int(preset_vals[14])
 
 # ----------------------------------------
 # Main App Content Header
@@ -108,7 +127,7 @@ st.markdown(
     "Adjust the weighting based on how much you value each aspect of hero strength. "
     "You can choose from preset weighting functions, adjust the sliders manually, or both! "
     "The weighting factors represent how much you personally value each stat, which is used to calculate "
-    "a personalized hero tier list. After updating the hero stats and weighting factors to your liking, you can save your settings and upload them next time you return to the site. "
+    "a personalized hero tier list. After updating the hero stats and weighting factors to your liking, you can save your settings and upload them next time you return to the site."
 )
 st.markdown(
     "For a video tutorial of how to use this, check out this YouTube video: [Daring Lime](https://youtu.be/TxU1NcryRS8). "
@@ -127,10 +146,10 @@ with col1:
         uploaded_weighting = st.file_uploader("Upload Weighting Settings", type="json", key="upload_weighting")
         if uploaded_weighting is not None:
             weighting_settings = json.load(uploaded_weighting)
-            for key in ["preset_choice", "economy", "tempo", "card_value", "survivability",
-                        "villain_damage", "threat_removal", "reliability", "minion_control",
-                        "control", "support", "unique_builds", "late_game", "simplicity",
-                        "status_cards", "multiplayer_consistency"]:
+            for key in ["preset_choice", "Economy", "Tempo", "Card Value", "Survivability",
+                        "Villain Damage", "Threat Removal", "Reliability", "Minion Control",
+                        "Control Boon", "Support Boon", "Unique Broken Builds Boon", "Late Game Power Boon",
+                        "Simplicity", "Stun/Confuse Boon", "Multiplayer Consistency Boon"]:
                 if key in weighting_settings:
                     st.session_state[key] = weighting_settings[key]
             if "weighting" in weighting_settings:
@@ -146,144 +165,144 @@ with col1:
             on_change=update_preset
         )
         
-        economy = st.slider(
+        Economy = st.slider(
             "Economy",
             min_value=-10,
             max_value=10,
-            value=st.session_state.get("economy", 4),
-            key="economy",
-            help="Economy: Ability to manage resources efficiently."
+            value=st.session_state.get("Economy", 4),
+            key="Economy",
+            help=help_tips["Economy"]
         )
-        tempo = st.slider(
+        Tempo = st.slider(
             "Tempo",
             min_value=-10,
             max_value=10,
-            value=st.session_state.get("tempo", 2),
-            key="tempo",
-            help="Tempo: Speed at which the hero generates board impact."
+            value=st.session_state.get("Tempo", 2),
+            key="Tempo",
+            help=help_tips["Tempo"]
         )
-        card_value = st.slider(
+        Card_Value = st.slider(
             "Card Value",
             min_value=-10,
             max_value=10,
-            value=st.session_state.get("card_value", 2),
-            key="card_value",
-            help="Card Value: Usefulness and effectiveness of the hero's cards."
+            value=st.session_state.get("Card Value", 2),
+            key="Card Value",
+            help=help_tips["Card Value"]
         )
-        survivability = st.slider(
+        Survivability = st.slider(
             "Survivability",
             min_value=-10,
             max_value=10,
-            value=st.session_state.get("survivability", 2),
-            key="survivability",
-            help="Survivability: Ability to withstand damage and survive longer in battles."
+            value=st.session_state.get("Survivability", 2),
+            key="Survivability",
+            help=help_tips["Survivability"]
         )
-        villain_damage = st.slider(
+        Villain_Damage = st.slider(
             "Villain Damage",
             min_value=-10,
             max_value=10,
-            value=st.session_state.get("villain_damage", 1),
-            key="villain_damage",
-            help="Villain Damage: Capacity to reduce the villain's threat or health."
+            value=st.session_state.get("Villain Damage", 1),
+            key="Villain Damage",
+            help=help_tips["Villain Damage"]
         )
-        threat_removal = st.slider(
+        Threat_Removal = st.slider(
             "Threat Removal",
             min_value=-10,
             max_value=10,
-            value=st.session_state.get("threat_removal", 2),
-            key="threat_removal",
-            help="Threat Removal: Efficiency in eliminating enemy threats."
+            value=st.session_state.get("Threat Removal", 2),
+            key="Threat Removal",
+            help=help_tips["Threat Removal"]
         )
-        reliability = st.slider(
+        Reliability = st.slider(
             "Reliability",
             min_value=-10,
             max_value=10,
-            value=st.session_state.get("reliability", 3),
-            key="reliability",
-            help="Reliability: Consistency of performance in various situations."
+            value=st.session_state.get("Reliability", 3),
+            key="Reliability",
+            help=help_tips["Reliability"]
         )
-        minion_control = st.slider(
+        Minion_Control = st.slider(
             "Minion Control",
             min_value=-10,
             max_value=10,
-            value=st.session_state.get("minion_control", 1),
-            key="minion_control",
-            help="Minion Control: Effectiveness in managing or countering minions."
+            value=st.session_state.get("Minion Control", 1),
+            key="Minion Control",
+            help=help_tips["Minion Control"]
         )
-        control = st.slider(
+        Control_Boon = st.slider(
             "Control Boon",
             min_value=-10,
             max_value=10,
-            value=st.session_state.get("control", 2),
-            key="control",
-            help="Control Boon: Bonus that improves control aspects of gameplay."
+            value=st.session_state.get("Control Boon", 2),
+            key="Control Boon",
+            help=help_tips["Control Boon"]
         )
-        support = st.slider(
+        Support_Boon = st.slider(
             "Support Boon",
             min_value=-10,
             max_value=10,
-            value=st.session_state.get("support", 2),
-            key="support",
-            help="Support Boon: Bonus that enhances team support abilities."
+            value=st.session_state.get("Support Boon", 2),
+            key="Support Boon",
+            help=help_tips["Support Boon"]
         )
-        unique_builds = st.slider(
+        Unique_Broken_Builds_Boon = st.slider(
             "Unique Broken Builds Boon",
             min_value=-10,
             max_value=10,
-            value=st.session_state.get("unique_builds", 1),
-            key="unique_builds",
-            help="Unique Broken Builds Boon: Special effectiveness in non-traditional strategies."
+            value=st.session_state.get("Unique Broken Builds Boon", 1),
+            key="Unique Broken Builds Boon",
+            help=help_tips["Unique Broken Builds Boon"]
         )
-        late_game = st.slider(
+        Late_Game_Power_Boon = st.slider(
             "Late Game Power Boon",
             min_value=-10,
             max_value=10,
-            value=st.session_state.get("late_game", 1),
-            key="late_game",
-            help="Late Game Power Boon: Impact during the later stages of the game."
+            value=st.session_state.get("Late Game Power Boon", 1),
+            key="Late Game Power Boon",
+            help=help_tips["Late Game Power Boon"]
         )
-        simplicity = st.slider(
+        Simplicity = st.slider(
             "Simplicity",
             min_value=-10,
             max_value=10,
-            value=st.session_state.get("simplicity", 0),
-            key="simplicity",
-            help="Simplicity: Ease of understanding and playing the hero."
+            value=st.session_state.get("Simplicity", 0),
+            key="Simplicity",
+            help=help_tips["Simplicity"]
         )
-        status_cards = st.slider(
+        Stun_Confuse_Boon = st.slider(
             "Stun/Confuse Boon",
             min_value=-10,
             max_value=10,
-            value=st.session_state.get("status_cards", 0),
-            key="status_cards",
-            help="Stun/Confuse Boon: Ability to disrupt or hinder opponents."
+            value=st.session_state.get("Stun/Confuse Boon", 0),
+            key="Stun/Confuse Boon",
+            help=help_tips["Stun/Confuse Boon"]
         )
-        multiplayer_consistency = st.slider(
+        Multiplayer_Consistency_Boon = st.slider(
             "Multiplayer Consistency Boon",
             min_value=-10,
             max_value=10,
-            value=st.session_state.get("multiplayer_consistency", 0),
-            key="multiplayer_consistency",
-            help="Multiplayer Consistency Boon: Reliability of performance in multiplayer matches."
+            value=st.session_state.get("Multiplayer Consistency Boon", 0),
+            key="Multiplayer Consistency Boon",
+            help=help_tips["Multiplayer Consistency Boon"]
         )
         
         # Create the weighting array from slider values
         weighting = np.array([
-            st.session_state.get("economy", 4),
-            st.session_state.get("tempo", 2),
-            st.session_state.get("card_value", 2),
-            st.session_state.get("survivability", 2),
-            st.session_state.get("villain_damage", 1),
-            st.session_state.get("threat_removal", 2),
-            st.session_state.get("reliability", 3),
-            st.session_state.get("minion_control", 1),
-            st.session_state.get("control", 2),
-            st.session_state.get("support", 2),
-            st.session_state.get("unique_builds", 1),
-            st.session_state.get("late_game", 1),
-            st.session_state.get("simplicity", 0),
-            st.session_state.get("status_cards", 0),
-            st.session_state.get("multiplayer_consistency", 0)
+            st.session_state.get("Economy", 4),
+            st.session_state.get("Tempo", 2),
+            st.session_state.get("Card Value", 2),
+            st.session_state.get("Survivability", 2),
+            st.session_state.get("Villain Damage", 1),
+            st.session_state.get("Threat Removal", 2),
+            st.session_state.get("Reliability", 3),
+            st.session_state.get("Minion Control", 1),
+            st.session_state.get("Control Boon", 2),
+            st.session_state.get("Support Boon", 2),
+            st.session_state.get("Unique Broken Builds Boon", 1),
+            st.session_state.get("Late Game Power Boon", 1),
+            st.session_state.get("Simplicity", 0),
+            st.session_state.get("Stun/Confuse Boon", 0),
+            st.session_state.get("Multiplayer Consistency Boon", 0)
         ])
         
         # Determine plot title from preset
@@ -295,45 +314,25 @@ with col1:
         # Download button to save weighting settings
         weighting_settings = {
             "preset_choice": st.session_state.preset_choice,
-            "economy": st.session_state.economy,
-            "tempo": st.session_state.tempo,
-            "card_value": st.session_state.card_value,
-            "survivability": st.session_state.survivability,
-            "villain_damage": st.session_state.villain_damage,
-            "threat_removal": st.session_state.threat_removal,
-            "reliability": st.session_state.reliability,
-            "minion_control": st.session_state.minion_control,
-            "control": st.session_state.control,
-            "support": st.session_state.support,
-            "unique_builds": st.session_state.unique_builds,
-            "late_game": st.session_state.late_game,
-            "simplicity": st.session_state.simplicity,
-            "status_cards": st.session_state.status_cards,
-            "multiplayer_consistency": st.session_state.multiplayer_consistency,
+            "Economy": st.session_state.Economy,
+            "Tempo": st.session_state.Tempo,
+            "Card Value": st.session_state["Card Value"],
+            "Survivability": st.session_state.Survivability,
+            "Villain Damage": st.session_state["Villain Damage"],
+            "Threat Removal": st.session_state["Threat Removal"],
+            "Reliability": st.session_state.Reliability,
+            "Minion Control": st.session_state["Minion Control"],
+            "Control Boon": st.session_state["Control Boon"],
+            "Support Boon": st.session_state["Support Boon"],
+            "Unique Broken Builds Boon": st.session_state["Unique Broken Builds Boon"],
+            "Late Game Power Boon": st.session_state["Late Game Power Boon"],
+            "Simplicity": st.session_state.Simplicity,
+            "Stun/Confuse Boon": st.session_state["Stun/Confuse Boon"],
+            "Multiplayer Consistency Boon": st.session_state["Multiplayer Consistency Boon"],
             "weighting": weighting.tolist()
         }
         weighting_json = json.dumps(weighting_settings)
         st.download_button("Download Weighting Settings", weighting_json, "weighting_settings.json")
-
-    # End of Edit Weighting Factors expander
-    
-    # Standalone expander for weighting definitions (not nested)
-    with st.expander("Weighting Definitions"):
-        st.markdown("**Economy:** Ability to manage resources efficiently.")
-        st.markdown("**Tempo:** Speed at which the hero generates board impact.")
-        st.markdown("**Card Value:** Usefulness and effectiveness of the hero's cards.")
-        st.markdown("**Survivability:** Ability to withstand damage and survive longer in battles.")
-        st.markdown("**Villain Damage:** Capacity to reduce the villain's threat or health.")
-        st.markdown("**Threat Removal:** Efficiency in eliminating enemy threats.")
-        st.markdown("**Reliability:** Consistency of performance in various situations.")
-        st.markdown("**Minion Control:** Effectiveness in managing or countering minions.")
-        st.markdown("**Control Boon:** Bonus that improves control aspects of gameplay.")
-        st.markdown("**Support Boon:** Bonus that enhances team support abilities.")
-        st.markdown("**Unique Broken Builds Boon:** Special effectiveness in non-traditional strategies.")
-        st.markdown("**Late Game Power Boon:** Impact during the later stages of the game.")
-        st.markdown("**Simplicity:** Ease of understanding and playing the hero.")
-        st.markdown("**Stun/Confuse Boon:** Ability to disrupt or hinder opponents.")
-        st.markdown("**Multiplayer Consistency Boon:** Reliability of performance in multiplayer matches.")
 
 # ----------------------------------------
 # Column 2: Hero Stats with separate upload expander
@@ -355,7 +354,7 @@ with col2:
             st.session_state.heroes = copy.deepcopy(default_heroes)
             st.session_state.default_heroes = copy.deepcopy(default_heroes)
         
-        # List of stat names
+        # List of stat names that match our help_tips keys
         stat_names = ["Economy", "Tempo", "Card Value", "Survivability", "Villain Damage",
                       "Threat Removal", "Reliability", "Minion Control", "Control Boon", "Support Boon",
                       "Unique Broken Builds Boon", "Late Game Power Boon", "Simplicity", "Stun/Confuse Boon",
@@ -371,14 +370,18 @@ with col2:
                 new_stats.append(st.session_state.get(f"{hero_to_modify}_{stat}", 0))
             st.session_state.heroes[hero_to_modify] = np.array(new_stats)
         
-        # Display number inputs with automatic update on change
+        # Display number inputs with help tips for each stat
         current_stats = st.session_state.heroes[hero_to_modify]
         for i, stat in enumerate(stat_names):
-            st.number_input(f"{hero_to_modify} - {stat}",
-                            value=int(current_stats[i]),
-                            min_value=-10, max_value=10,
-                            key=f"{hero_to_modify}_{stat}",
-                            on_change=update_current_hero_stats)
+            st.number_input(
+                f"{hero_to_modify} - {stat}",
+                value=int(current_stats[i]),
+                min_value=-10,
+                max_value=10,
+                key=f"{hero_to_modify}_{stat}",
+                on_change=update_current_hero_stats,
+                help=help_tips.get(stat, "")
+            )
         
         # Button to update all heroes to match the selected hero's stats
         if st.button("Update All Heroes to These Stats"):
