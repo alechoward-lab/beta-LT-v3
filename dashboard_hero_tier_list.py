@@ -463,37 +463,37 @@ for tier, heroes_list in tiers.items():
 # Add background image with custom CSS
 # ----------------------------------------
 background_image_url = "https://raw.githubusercontent.com/alechoward-lab/Marvel-Champions-Hero-Tier-List/refs/heads/main/images/background/marvel_champions_background_image.jpg"
-st.markdown(
-    f"""
-    <style>
-    .stApp {{
-        background-image: url({background_image_url});
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        position: relative;
-        color: white;
-    }}
-    .stApp::before {{
-        content: "";
-        position: absolute;
-        background: rgba(0, 0, 0, 0.8);
-        z-index: 1;
-    }}
-    .stApp > div {{
-        position: relative;
-        z-index: 2;
-    }}
-    .stApp, .stApp * {{
-        color: white !important;
-    }}
-    .stApp .stSelectbox div[role="listbox"] * {{
-        color: black !important;
-    }}
-    </style>
-    """, 
-    unsafe_allow_html=True
-)
+# st.markdown(
+#     f"""
+#     <style>
+#     .stApp {{
+#         background-image: url({background_image_url});
+#         background-size: cover;
+#         background-position: center;
+#         background-repeat: no-repeat;
+#         position: relative;
+#         color: white;
+#     }}
+#     .stApp::before {{
+#         content: "";
+#         position: absolute;
+#         background: rgba(0, 0, 0, 0.8);
+#         z-index: 1;
+#     }}
+#     .stApp > div {{
+#         position: relative;
+#         z-index: 2;
+#     }}
+#     .stApp, .stApp * {{
+#         color: white !important;
+#     }}
+#     .stApp .stSelectbox div[role="listbox"] * {{
+#         color: black !important;
+#     }}
+#     </style>
+#     """, 
+#     unsafe_allow_html=True
+# )
 
 # ----------------------------------------
 # Display Tier List with Images
