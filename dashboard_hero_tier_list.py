@@ -472,11 +472,13 @@ st.markdown(
         background-position: center;
         background-repeat: no-repeat;
         position: relative;
+        padding: 40px;
         color: white;
     }}
     .stApp::before {{
         content: "";
         position: absolute;
+        inset: 40px;
         background: rgba(0, 0, 0, 0.8);
         z-index: 1;
     }}
