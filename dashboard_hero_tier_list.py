@@ -15,24 +15,6 @@ from hero_image_urls import hero_image_urls
 from default_heroes import default_heroes
 from preset_options import preset_options
 from help_tips import help_tips
-# # Centralized help tip strings for both weighting sliders and hero stats
-# help_tips = {
-#     "Economy": "Ability to manage resources efficiently.",
-#     "Tempo": "Speed at which the hero generates board impact.",
-#     "Card Value": "Usefulness and effectiveness of the hero's cards.",
-#     "Survivability": "Ability to withstand damage and survive longer in battles.",
-#     "Villain Damage": "Capacity to reduce the villain's threat or health.",
-#     "Threat Removal": "Efficiency in eliminating enemy threats.",
-#     "Reliability": "Consistency of performance in various situations.",
-#     "Minion Control": "Effectiveness in managing or countering minions.",
-#     "Control Boon": "Bonus that improves control aspects of gameplay.",
-#     "Support Boon": "Bonus that enhances team support abilities.",
-#     "Unique Broken Builds Boon": "Special effectiveness in non-traditional strategies.",
-#     "Late Game Power Boon": "Impact during the later stages of the game.",
-#     "Simplicity": "Ease of understanding and playing the hero.",
-#     "Stun/Confuse Boon": "Ability to disrupt or hinder opponents.",
-#     "Multiplayer Consistency Boon": "Reliability of performance in multiplayer matches."
-# }
 
 socials_banner = st.markdown(
     """
@@ -146,15 +128,36 @@ with col1:
         uploaded_weighting = st.file_uploader("Upload Weighting Settings", type="json", key="upload_weighting")
         if uploaded_weighting is not None:
             weighting_settings = json.load(uploaded_weighting)
-            for key in ["preset_choice", "Economy", "Tempo", "Card Value", "Survivability",
-                        "Villain Damage", "Threat Removal", "Reliability", "Minion Control",
-                        "Control Boon", "Support Boon", "Unique Broken Builds Boon", "Late Game Power Boon",
-                        "Simplicity", "Stun/Confuse Boon", "Multiplayer Consistency Boon"]:
-                if key in weighting_settings:
-                    st.session_state[key] = weighting_settings[key]
+            # Map keys from the file to the keys used in the app
+            key_map = {
+                "preset_choice": "preset_choice",
+                "economy": "Economy",
+                "tempo": "Tempo",
+                "card_value": "Card Value",
+                "survivability": "Survivability",
+                "villain_damage": "Villain Damage",
+                "threat_removal": "Threat Removal",
+                "reliability": "Reliability",
+                "minion_control": "Minion Control",
+                "control": "Control Boon",
+                "support": "Support Boon",
+                "unique_builds": "Unique Broken Builds Boon",
+                "late_game": "Late Game Power Boon",
+                "simplicity": "Simplicity",
+                "status_cards": "Stun/Confuse Boon",
+                "multiplayer_consistency": "Multiplayer Consistency Boon",
+                "weighting": "weighting"
+            }
+            # Update session state using the mapped keys
+            for file_key, file_value in weighting_settings.items():
+                mapped_key = key_map.get(file_key, file_key)
+                st.session_state[mapped_key] = file_value
+
+            # If the file has a "weighting" key, update session_state.weighting
             if "weighting" in weighting_settings:
                 st.session_state.weighting = np.array(weighting_settings["weighting"])
             st.success("Weighting settings loaded successfully!")
+
     
     with st.expander("Edit Weighting Factors (click to expand)"):
         # Select weighting preset and sliders
