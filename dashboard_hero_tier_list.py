@@ -75,7 +75,6 @@ socials_banner = st.markdown(
     unsafe_allow_html=True
 )
     
-
 # ----------------------------------------
 # Define update_preset callback so that selecting a weighting preset updates slider values.
 # ----------------------------------------
@@ -315,24 +314,26 @@ with col1:
         }
         weighting_json = json.dumps(weighting_settings)
         st.download_button("Download Weighting Settings", weighting_json, "weighting_settings.json")
-        
-        # Nested expander for detailed definitions
-        with st.expander("Weighting Definitions"):
-            st.markdown("**Economy:** Ability to manage resources efficiently.")
-            st.markdown("**Tempo:** Speed at which the hero generates board impact.")
-            st.markdown("**Card Value:** Usefulness and effectiveness of the hero's cards.")
-            st.markdown("**Survivability:** Ability to withstand damage and survive longer in battles.")
-            st.markdown("**Villain Damage:** Capacity to reduce the villain's threat or health.")
-            st.markdown("**Threat Removal:** Efficiency in eliminating enemy threats.")
-            st.markdown("**Reliability:** Consistency of performance in various situations.")
-            st.markdown("**Minion Control:** Effectiveness in managing or countering minions.")
-            st.markdown("**Control Boon:** Bonus that improves control aspects of gameplay.")
-            st.markdown("**Support Boon:** Bonus that enhances team support abilities.")
-            st.markdown("**Unique Broken Builds Boon:** Special effectiveness in non-traditional strategies.")
-            st.markdown("**Late Game Power Boon:** Impact during the later stages of the game.")
-            st.markdown("**Simplicity:** Ease of understanding and playing the hero.")
-            st.markdown("**Stun/Confuse Boon:** Ability to disrupt or hinder opponents.")
-            st.markdown("**Multiplayer Consistency Boon:** Reliability of performance in multiplayer matches.")
+
+    # End of Edit Weighting Factors expander
+    
+    # Standalone expander for weighting definitions (not nested)
+    with st.expander("Weighting Definitions"):
+        st.markdown("**Economy:** Ability to manage resources efficiently.")
+        st.markdown("**Tempo:** Speed at which the hero generates board impact.")
+        st.markdown("**Card Value:** Usefulness and effectiveness of the hero's cards.")
+        st.markdown("**Survivability:** Ability to withstand damage and survive longer in battles.")
+        st.markdown("**Villain Damage:** Capacity to reduce the villain's threat or health.")
+        st.markdown("**Threat Removal:** Efficiency in eliminating enemy threats.")
+        st.markdown("**Reliability:** Consistency of performance in various situations.")
+        st.markdown("**Minion Control:** Effectiveness in managing or countering minions.")
+        st.markdown("**Control Boon:** Bonus that improves control aspects of gameplay.")
+        st.markdown("**Support Boon:** Bonus that enhances team support abilities.")
+        st.markdown("**Unique Broken Builds Boon:** Special effectiveness in non-traditional strategies.")
+        st.markdown("**Late Game Power Boon:** Impact during the later stages of the game.")
+        st.markdown("**Simplicity:** Ease of understanding and playing the hero.")
+        st.markdown("**Stun/Confuse Boon:** Ability to disrupt or hinder opponents.")
+        st.markdown("**Multiplayer Consistency Boon:** Reliability of performance in multiplayer matches.")
 
 # ----------------------------------------
 # Column 2: Hero Stats with separate upload expander
