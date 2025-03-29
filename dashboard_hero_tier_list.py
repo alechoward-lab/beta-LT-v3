@@ -149,7 +149,8 @@ with col1:
         )
         
         economy = st.slider("Economy", min_value=-10, max_value=10,
-                            value=st.session_state.get("economy", 4), key="economy")
+                            value=st.session_state.get("economy", 4), key="economy",
+                            help="How efficiently a hero manages resources (e.g., cards, actions, etc.).")
         tempo = st.slider("Tempo", min_value=-10, max_value=10,
                           value=st.session_state.get("tempo", 2), key="tempo")
         card_value = st.slider("Card Value", min_value=-10, max_value=10,
