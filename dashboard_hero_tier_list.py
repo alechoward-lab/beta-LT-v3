@@ -356,7 +356,7 @@ with col2:
     
     with st.expander("Edit Hero Stats (click to expand)"):
         st.markdown(
-        "I limited myself to -5 to 5 when choosing hero stats, but left you the option to go from -10 to 10 if you want the difference between heroes to be more extreme."
+        "I limited myself to -5 to 5 when choosing hero stats, but left you the option to go from -10 to 10. This was to allow you to make difference between heroes to be more extreme if you wanted."
     )
         # Initialize hero stats if not set
         if "heroes" not in st.session_state:
