@@ -1,6 +1,6 @@
 import numpy as np
-default_heroes = {          #              e, t, cv,s, d, th,re,mi,c, s, 0, br,lg,si,sc,mu  
-        "Captain Marvel":       np.array([ 4, 3,-1, 3, 4, 2, 4, 1, 1, 2, 0, 0, 5, 1, 1]),
+default_heroes = {          #              e, t, cv,s, d, th,re,mi,c, s, br,lg,si,sc,mu  
+        "Captain Marvel":       np.array([ 5, 3,-1, 3, 4, 2, 4, 1, 0, 3, 0, 0, 5, 1, 1]),
         "Iron Man":             np.array([ 4,-5, 4, 2, 5, 2, 0, 3, 0, 0, 1, 4,-5, 0, 5]),
         "Spider-Man Peter":     np.array([ 4, 0, 3, 5, 3,-2, 2, 0, 4, 1, 2, 0, 0, 0, 0]),
         "Black Panther":        np.array([ 3,-1, 4, 3, 3, 1, 1, 5, 0, 0, 0, 3,-1, 0, 1]),
@@ -9,25 +9,25 @@ default_heroes = {          #              e, t, cv,s, d, th,re,mi,c, s, 0, br,l
         "Ms. Marvel":           np.array([ 3,-2, 1, 3, 0, 3, 3, 1, 0, 0, 3, 3, 0, 0, 0]),
         "Thor":                 np.array([ 2,-4,-4, 3, 3,-1,-2, 5,-1, 0, 1, 0, 3, 0, 2]),
         "Black Widow":          np.array([ 2, 0, 3,-2,-4, 3, 2, 3, 4, 0, 0, 0,-5, 4, 1]),
-        "Doctor Strange":       np.array([ 4, 3, 5, 4, 2, 5, 5, 0, 5, 5, 5, 5, 3, 5, 4]),
+        "Doctor Strange":       np.array([ 4, 3, 5, 4, 2, 5, 5, 0, 5, 5, 4, 5, 3, 5, 4]),
         "Hulk":                 np.array([-3, 5,-2, 4, 4,-5,-5, 3, 0, 0, 1, 0, 2, 0, 0]),
                                 #          e, t, cv,s, d, th,re,mi,c, s, br,lg,si,sc,mu  
         "Hawkeye":              np.array([ 1,-1, 4,-3, 2, 1,-2, 5, 3, 0, 0, 0,-3, 5, 0]),
-        "Spider-Woman":         np.array([ 3, 3, 4, 3, 2, 4, 3, 2, 3, 1, 2, 0,-3, 5, 0]),
+        "Spider-Woman":         np.array([ 3, 1, 4, 3, 2, 4, 2, 2, 3, 1, 2, 0,-3, 5, 0]),
         "Ant-Man":              np.array([ 2, 0, 3, 3, 4, 1, 2, 4, 2, 0, 0, 2,-3, 1, 0]),
         "Wasp":                 np.array([ 1, 3, 0, 1, 4, 2, 3, 4, 0, 1, 1, 0,-5, 0, 0]),
         "Quicksilver":          np.array([ 1,-3, 3,-1, 3, 4, 3, 3, 0, 1, 0, 3, 0, 0, 0]),
         "Scarlet Witch":        np.array([ 2, 3, 5, 3, 3, 2, 3, 1, 3, 4, 1, 0,-3, 2, 0]),
                                 #          e, t, cv,s, d, th,re,mi,c, s, br,lg,si,sc,mu          
         "Star-Lord":            np.array([ 4, 5, 3, 1, 5, 3, 2, 3,-3, 0, 1, 0,-5, 0, 0]),
-        "Groot":                np.array([ 0,-3, 2, 4, 3, 2,-2, 2, 0, 3, 0, 1, 2, 0, 2]),
+        "Groot":                np.array([ 0,-3, 2, 4, 3, 2,-2, 2, 0, 2, 0, 1, 2, 0, 2]),
         "Rocket":               np.array([ 3,-1, 0, 0,-2, 2,-2, 4, 0, 0, 1, 1,-3, 0, 1]),
-        "Gamora":               np.array([ 1, 4, 3, 1, 3, 4, 4, 3, 0, 0, 1, 0, 3, 0, 0]),
+        "Gamora":               np.array([ 2, 5, 3, 1, 3, 5, 4, 3, 0, 0, 1, 0, 5, 0, 0]),
         "Drax":                 np.array([ 2,-3, 4, 2, 4,-1,-5, 3, 0, 1, 1, 0,-2, 0, 0]),
         "Venom (Flash)":        np.array([ 3, 2, 4, 3, 3, 4, 5, 5, 3, 0, 0, 1,-3, 5, 0]),
         "Spectrum":             np.array([ 3, 3, 2, 2, 2, 3,-2, 3, 0, 0, 2, 0,-5, 0, 0]),
         "Adam Warlock":         np.array([ 3,-3, 2, 3, 2, 4,-1, 1, 3, 2, 3, 2,-5, 0, 1]),
-        "Nebula":               np.array([ 2, 1, 2, 1,-3, 2, 3, 1, 1, 0, 0, 0,-5, 0, 1]),
+        "Nebula":               np.array([ 2, 1, 2, 1,-3, 2, 0, 1, 1, 0, 0, 0,-5, 0, 1]),
         "War Machine":          np.array([ 1,-2, 1, 2, 4, 0,-2, 5, 0, 0, 0, 1,-3, 0, 2]),
         "Valkyrie":             np.array([ 1, 2,-2, 2, 2,-2,-1, 4, 0, 0, 0, 0,-3, 0, 1]),
         "Vision":               np.array([ 2, 3, 3, 3, 4, 3, 4, 2, 2, 0, 1, 0, 0, 1, 0]),
@@ -44,7 +44,7 @@ default_heroes = {          #              e, t, cv,s, d, th,re,mi,c, s, 0, br,l
         "Cyclops":              np.array([ 1,-2, 5, 3, 4, 4, 3, 3, 0, 2, 2, 1,-3, 0, 0]),
         "Phoenix":              np.array([ 2, 3, 3, 3, 4, 4, 3, 4, 3, 1, 2, 0, 0, 4, 0]),
         "Wolverine":            np.array([ 3, 5, 3, 4, 5, 3, 4, 5, 0, 0, 1, 0, 1, 0, 0]),
-        "Storm":                np.array([ 1, 3, 3, 1, 4, 4, 3, 3, 1, 3, 1, 0,-3, 0, 2]),
+        "Storm":                np.array([ 1, 4, 3, 1, 5, 4, 3, 4, 1, 3, 1, 0,-3, 0, 4]),
         "Gambit":               np.array([ 1,-1, 2, 2, 3, 3, 2, 4, 2, 1, 0, 0,-1, 4, 0]),
         "Rogue":                np.array([ 0, 3, 3, 3, 3, 3, 1, 2, 2, 0, 1, 0, 0, 1, 2]),
                                 #          e, t, cv,s, d, th,re,mi,c, s, br,lg,si,sc,mu        
@@ -55,13 +55,16 @@ default_heroes = {          #              e, t, cv,s, d, th,re,mi,c, s, 0, br,l
         "X-23":                 np.array([ 1, 5, 4, 3, 5, 5, 5, 4, 0, 0, 1, 2,-2, 0, 0]),
         "Deadpool":             np.array([ 1, 5, 5, 5, 5, 5,-3, 2, 1, 3, 1, 0,-1, 1, 0]),
                                 #          e, t, cv,s, d, th,re,mi,c, s, br,lg,si,sc,mu        
-        "Bishop":               np.array([ 5, 2, 4, 4, 5, 1, 3, 2, 0, 0, 1, 1,-3, 0, 0]),
+        "Bishop":               np.array([ 5, 2, 4, 4, 5, 3, 3, 3, 0, 0, 1, 1,-3, 0, 0]),
         "Magik":                np.array([ 4, 1, 4, 3, 2, 4, 3, 3, 2, 0, 1, 1,-5, 5, 0]),
         "Iceman":               np.array([ 3, 2, 3, 3, 2, 2, 3, 4, 3, 2, 0, 0, 0, 0, 1]),
         "Jubilee":              np.array([ 3,-1, 4, 0, 2, 4, 3, 3, 4, 1, 0, 1,-1, 5, 1]),
-        "Nightcrawler":         np.array([ 1, 2, 3, 4, 1, 3, 4, 4, 1, 3, 0, 0,-1, 1, 2]),
+        "Nightcrawler":         np.array([ 1, 2, 3, 4, 1, 3, 4, 4, 1, 2, 0, 0,-1, 1, 2]),
         "Magneto":              np.array([ 3, 3, 3, 4, 3, 4, 5, 4, 2, 0, 0, 1, 3, 0, 1]),
                                 #          e, t, cv,s, d, th,re,mi,c, s, br,lg,si,sc,mu        
-        "Maria Hill":           np.array([ 2, 1, 5, 1, 2, 5, 5, 1, 1, 2, 2, 5,-3, 0, 2]),
-        "Nick Fury":            np.array([ 1, 2, 1, 3, 2, 4, 4, 5, 2, 0, 0, 0,-3, 0, 0]),
+        "Maria Hill":           np.array([ 2, 1, 5, 2, 2, 5, 5, 1, 2, 2, 2, 5,-3, 0, 2]),
+        "Nick Fury":            np.array([ 1, 2, 3, 4, 2, 4, 4, 5, 2, 0, 0, 0,-3, 0, 1]),
+        "Shuri":                np.array([ 3, 1, 4, 3, 4, 4, 4, 5, 1, 0, 1, 0, 0, 3, 0]),
+        "Silk":                 np.array([ 3,-1, 5, 4, 4, 5, 2, 4, 4, 1, 2, 2,-5, 0, 1]),
+
     }

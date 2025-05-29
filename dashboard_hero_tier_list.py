@@ -161,7 +161,7 @@ with col1:
     
     with st.expander("Edit Weighting Factors (click to expand)"):
         st.markdown(
-        "If you don't want a category to affect the list, set it to 0. If you set something negative, then the heroes with negative stats will go up, and the heroes with positive stats will go down."
+        "If you don't want a category to affect the list, set it to 0. If you set something negative, the heroes with negative stats will go up, and the heroes with positive stats will go down."
     )
         # Select weighting preset and sliders
         preset_choice = st.selectbox(
@@ -356,7 +356,7 @@ with col2:
     
     with st.expander("Edit Hero Stats (click to expand)"):
         st.markdown(
-        "I limited myself to -5 to 5 when choosing hero stats, but left you the option to go from -10 to 10. This was to allow you to make difference between heroes to be more extreme if you wanted."
+        "I limited myself to -5 to 5 when choosing hero stats, but I left you the option to go from -10 to 10. This was to allow you to make the difference between heroes more extreme if you wanted."
     )
         # Initialize hero stats if not set
         if "heroes" not in st.session_state:
