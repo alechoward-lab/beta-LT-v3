@@ -1,31 +1,56 @@
-"""
-This will become the villain Tier List Page
-
-
-"""
-
-# pages/About the Tier List.py
-
 import streamlit as st
+import numpy as np
+import pandas as pd
+import json
+from copy import deepcopy
+from villain_weights import villain_weights
+from default_heroes import default_heroes
+from hero_image_urls import hero_image_urls
 
-st.title("About the Tier List")
-st.markdown("""
-Welcome to the Living Marvel Champions Tier List!
+st.title("Tier List by Villain")
+st.subheader("Choose a villain to see how heroes rank against them")
 
-This project is built by **Daring Lime** to help players analyze and rank heroes
-based on a customizable scoring system. On this page, you can learn more about how
-scores are computed, how to contribute, or contact me via Discord or YouTube.
+# ----------------------------------------
+# Step 1: Villain Selection
+# ----------------------------------------
+villain = st.selectbox("Select a Villain", list(villain_weights.keys()))
 
-If you have feedback or ideas for improvements, feel free to reach out!
+if villain not in villain_weights:
+    st.error("Selected villain doesn't have weighting data yet.")
+    st.stop()
 
-### Calculation Method
-Each hero is given scores in categories like:
-- **Economy**
-- **Tempo**
-- **Villain Damage**
-- *(etc.)*
+weights = np.array(villain_weights[villain])
 
-Your chosen weightings are applied to these categories to compute a final score.
+# ----------------------------------------
+# Step 2: Score Heroes Based on Villain Weights
+# ----------------------------------------
+heroes = deepcopy(default_heroes)
 
----
-""")
+for hero in heroes:
+    stats = np.array(hero["stats"])  # assuming 'stats' is a 15-element list
+    score = float(np.dot(stats, weights))
+    hero["score"] = score
+
+# Sort heroes by score descending
+sorted_heroes = sorted(heroes, key=lambda h: h["score"], reverse=True)
+
+# ----------------------------------------
+# Step 3: Output Tier List Table
+# ----------------------------------------
+st.markdown(f"### Results: Hero Tier List vs. {villain}")
+df = pd.DataFrame([
+    {
+        "Hero": hero["name"],
+        "Score": round(hero["score"], 2)
+    } for hero in sorted_heroes
+])
+st.dataframe(df, use_container_width=True)
+
+# Optional: Display hero images with scores
+with st.expander("Show Hero Images with Scores"):
+    for hero in sorted_heroes:
+        col1, col2 = st.columns([1, 4])
+        with col1:
+            st.image(hero_image_urls.get(hero["name"], ""), width=80)
+        with col2:
+            st.markdown(f"**{hero['name']}** — Score: {round(hero['score'], 2)}")
