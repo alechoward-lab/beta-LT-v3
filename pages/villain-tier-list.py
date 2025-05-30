@@ -1,100 +1,122 @@
 import streamlit as st
 import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.patches import Patch
 import os
-from PIL import Image
 from copy import deepcopy
 from villain_weights import villain_weights
 from default_heroes import default_heroes
+from hero_image_urls import hero_image_urls
 
 # ----------------------------------------
-# Page Title and Villain Selection
+# Page header
 # ----------------------------------------
-st.title("Tier List by Villain")
-st.subheader("Choose a villain to see how heroes rank against them")
+plot_title = "Hero Tier List by Villain"
+st.title(plot_title)
+st.subheader("Pick a villain, apply its preset weights, and see your tiered hero lineup!")
 
+# ----------------------------------------
+# Villain selector
+# ----------------------------------------
 villain = st.selectbox("Select a Villain", list(villain_weights.keys()))
 if villain not in villain_weights:
-    st.error("Selected villain doesn't have weighting data yet.")
+    st.error("No weighting defined for that villain yet.")
     st.stop()
 
 weighting = np.array(villain_weights[villain])
-heroes = deepcopy(default_heroes)
 
 # ----------------------------------------
-# Hero Image Loading (Local Path)
+# Score heroes
 # ----------------------------------------
-hero_images_path = "images/heroes"  # Adjust if needed for your repo layout
-hero_images = {}
-for hero in heroes:
-    image_name = hero.replace(' ', '_').replace('.', '').replace('(', '').replace(')', '').lower() + ".png"
-    image_path = os.path.join(hero_images_path, image_name)
-    if os.path.exists(image_path):
-        hero_images[hero] = Image.open(image_path)
-    else:
-        hero_images[hero] = None
+heroes = deepcopy(default_heroes)  # { name: np.array([...]), … }
+scores = {name: float(np.dot(stats, weighting)) for name, stats in heroes.items()}
+sorted_scores = dict(sorted(scores.items(), key=lambda kv: kv[1]))
 
 # ----------------------------------------
-# Calculate Scores & Assign Tiers (mean ± stddev)
+# Compute dynamic tier thresholds
 # ----------------------------------------
-def weight(stats, weighting):
-    return np.dot(stats, weighting)
-
-scores = {hero: weight(stats, weighting) for hero, stats in heroes.items()}
-sorted_scores = dict(sorted(scores.items(), key=lambda item: item[1]))
-
-hero_scores = np.array(list(scores.values()))
-mean_score = np.mean(hero_scores)
-std_score = np.std(hero_scores)
-threshold_S = mean_score + 1.5 * std_score
-threshold_A = mean_score + 0.5 * std_score
-threshold_B_lower = mean_score - 0.5 * std_score
-threshold_C = mean_score - 1.5 * std_score
+all_scores = np.array(list(scores.values()))
+mean, std = all_scores.mean(), all_scores.std()
+thr_S = mean + 1.5 * std
+thr_A = mean + 0.5 * std
+thr_B = mean - 0.5 * std
+thr_C = mean - 1.5 * std
 
 tiers = {"S": [], "A": [], "B": [], "C": [], "D": []}
-for hero, score in scores.items():
-    if score >= threshold_S:
-        tiers["S"].append((hero, score))
-    elif score >= threshold_A:
-        tiers["A"].append((hero, score))
-    elif score >= threshold_B_lower:
-        tiers["B"].append((hero, score))
-    elif score >= threshold_C:
-        tiers["C"].append((hero, score))
-    else:
-        tiers["D"].append((hero, score))
+for hero, sc in scores.items():
+    if   sc >= thr_S:        tiers["S"].append((hero, sc))
+    elif sc >= thr_A:        tiers["A"].append((hero, sc))
+    elif sc >= thr_B:        tiers["B"].append((hero, sc))
+    elif sc >= thr_C:        tiers["C"].append((hero, sc))
+    else:                    tiers["D"].append((hero, sc))
 
 for tier in tiers:
-    tiers[tier] = sorted(tiers[tier], key=lambda x: x[1], reverse=True)
+    tiers[tier].sort(key=lambda x: x[1], reverse=True)
+
+# Map each hero to its tier (used for bar-chart coloring later)
+hero_to_tier = {h: t for t, lst in tiers.items() for h, _ in lst}
 
 # ----------------------------------------
-# Background Styling
+# Background CSS (same as home.py)
 # ----------------------------------------
-background_image_url = "https://github.com/alechoward-lab/Marvel-Champions-Hero-Tier-List/blob/main/images/background/marvel_champions_background_image_v4.jpg?raw=true"
-st.markdown(
-    f"""
+bg = "https://github.com/alechoward-lab/Marvel-Champions-Hero-Tier-List/blob/main/images/background/marvel_champions_background_image_v4.jpg?raw=true"
+st.markdown(f"""
     <style>
-    .stApp {{
-        background: url({background_image_url}) no-repeat center center fixed;
+      .stApp {{
+        background: url({bg}) no-repeat center center fixed;
         background-size: cover;
-    }}
+      }}
     </style>
-    """,
-    unsafe_allow_html=True
-)
+""", unsafe_allow_html=True)
 
 # ----------------------------------------
-# Display Tiered Hero List
+# Display Tiered Grid of Hero Portraits
 # ----------------------------------------
-st.markdown(f"### Hero Tiers vs. **{villain}**")
+st.markdown(f"### Results: **{villain}** Preset → Tier List")
+
+tier_colors = {"S": "red", "A": "orange", "B": "green", "C": "blue", "D": "purple"}
+num_cols = 5
 
 for tier in ["S", "A", "B", "C", "D"]:
-    if not tiers[tier]:
+    members = tiers[tier]
+    if not members:
         continue
 
-    st.markdown(f"#### {tier} Tier")
-    tier_cols = st.columns(len(tiers[tier]))
-    for col, (hero, score) in zip(tier_cols, tiers[tier]):
-        with col:
-            if hero_images[hero] is not None:
-                st.image(hero_images[hero], width=120)
-            st.markdown(f"**{hero}**  \nScore: {round(score, 2)}")
+    st.markdown(f"<h2 style='color:{tier_colors[tier]};'>Tier {tier}</h2>", unsafe_allow_html=True)
+
+    # break into rows of `num_cols`
+    rows = [members[i : i + num_cols] for i in range(0, len(members), num_cols)]
+    for row in rows:
+        cols = st.columns(num_cols)
+        for idx, (hero, score) in enumerate(row):
+            with cols[idx]:
+                # portrait from URL (same as home.py)
+                img_url = hero_image_urls.get(hero, None)
+                if img_url:
+                    st.image(img_url, use_container_width=True)
+                st.markdown(f"**{hero}**  \nScore: {round(score, 1)}")
+
+# ----------------------------------------
+# (Optional) Also show the bar chart if you like  
+# ----------------------------------------
+st.header("Hero Scores (Bar Chart)")
+names = list(sorted_scores.keys())
+vals  = list(sorted_scores.values())
+colors = [tier_colors[hero_to_tier[h]] for h in names]
+
+fig, ax = plt.subplots(figsize=(14,7), dpi=200)
+bars = ax.bar(names, vals, color=colors)
+ax.set_title(plot_title, fontsize=18, fontweight="bold")
+ax.set_ylabel("Score", fontsize=14)
+plt.xticks(rotation=45, ha="right")
+
+# color-code the x-labels
+for lbl in ax.get_xticklabels():
+    hero = lbl.get_text()
+    lbl.set_color(tier_colors.get(hero_to_tier.get(hero, ""), "black"))
+
+# legend
+handles = [Patch(color=c, label=f"Tier {t}") for t, c in tier_colors.items()]
+ax.legend(handles=handles, title="Tiers", loc="upper left", fontsize=12, title_fontsize=12)
+
+st.pyplot(fig)
