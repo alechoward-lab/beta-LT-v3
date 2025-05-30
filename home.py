@@ -433,26 +433,37 @@ for hero in default_heroes.keys():
 def weight(hero_stats, weighting):
     return np.dot(hero_stats, weighting)
 
-weighting = np.array(sliders)
+scores = {hero: weight(stats, weighting) for hero, stats in heroes.items()}
+sorted_scores = dict(sorted(scores.items(), key=lambda item: item[1]))
 
-scores = {hero: float(np.dot(stats, weighting)) for hero, stats in default_heroes.items()}
-sorted_scores = dict(sorted(scores.items(), key=lambda kv: kv[1]))
-all_scores = np.array(list(scores.values()))
-mean, std = all_scores.mean(), all_scores.std()
-thr_S = mean + 1.5 * std
-thr_A = mean + 0.5 * std
-thr_B = mean - 0.5 * std
-thr_C = mean - 1.5 * std
+hero_scores = np.array(list(scores.values()))
+mean_score = np.mean(hero_scores)
+std_score = np.std(hero_scores)
+threshold_S = mean_score + 1.5 * std_score
+threshold_A = mean_score + 0.5 * std_score
+threshold_B_lower = mean_score - 0.5 * std_score
+threshold_C = mean_score - 1.5 * std_score
 
-tiers = {"S":[],"A":[],"B":[],"C":[],"D":[]}
-for h, sc in scores.items():
-    if sc>=thr_S: tiers["S"].append((h,sc))
-    elif sc>=thr_A: tiers["A"].append((h,sc))
-    elif sc>=thr_B: tiers["B"].append((h,sc))
-    elif sc>=thr_C: tiers["C"].append((h,sc))
-    else: tiers["D"].append((h,sc))
-for t in tiers: tiers[t].sort(key=lambda x: x[1], reverse=True)
-hero_to_tier = {hero:t for t,l in tiers.items() for hero,_ in l}
+tiers = {"S": [], "A": [], "B": [], "C": [], "D": []}
+for hero, score in scores.items():
+    if score >= threshold_S:
+        tiers["S"].append((hero, score))
+    elif score >= threshold_A:
+        tiers["A"].append((hero, score))
+    elif score >= threshold_B_lower:
+        tiers["B"].append((hero, score))
+    elif score >= threshold_C:
+        tiers["C"].append((hero, score))
+    else:
+        tiers["D"].append((hero, score))
+
+for tier in tiers:
+    tiers[tier] = sorted(tiers[tier], key=lambda x: x[1], reverse=True)
+
+hero_to_tier = {}
+for tier, heroes_list in tiers.items():
+    for hero, _ in heroes_list:
+        hero_to_tier[hero] = tier
 
 # ----------------------------------------
 # Add background image with custom CSS
