@@ -7,7 +7,6 @@ villain_image_urls = {
     "Risky Business": "https://i.imgur.com/RjjNSrR.jpeg",
     "Mutagen Formula": "https://i.imgur.com/E9LJfJK.jpeg",
     "Wrecking Crew": "https://i.imgur.com/odJwudi.jpeg",
-## Rise of Red Skull
     "Crossbones": "https://i.imgur.com/Yh1nlna.jpeg",
     "Absorbing Man": "https://i.imgur.com/nefdKCJ.jpeg",
     "Taskmaster": "https://i.imgur.com/Q8yTJjF.jpeg",
