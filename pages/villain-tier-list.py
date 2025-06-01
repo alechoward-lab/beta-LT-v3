@@ -153,7 +153,6 @@ st.markdown(
 # ----------------------------------------
 # Display Tiered Grid of Hero Portraits
 # ----------------------------------------
-st.markdown(f"### Results: **{villain}** Preset → Tier List")
 
 tier_colors = {
     "S": "#FF69B4",     # Hot Pink
