@@ -18,7 +18,7 @@ st.subheader(
 )
 
 # ----------------------------------------
-# Define your factor names (must match length/order of each weighting array)
+# Factor names must match order/length of each villain_weights[villain] array
 # ----------------------------------------
 factor_names = [
     "Economy",
@@ -35,40 +35,36 @@ factor_names = [
     "Late Game Power Boon",
     "Simplicity",
     "Stun/Confuse Boon",
-    "Multiplayer Consistency Boon"
+    "Multiplayer Consistency Boon",
 ]
 
 # ----------------------------------------
-# Callback: load the selected villain's default weights into session_state
+# Select a villain
 # ----------------------------------------
-def load_villain_weights():
-    v = st.session_state.villain_select
-    vals = villain_weights[v]
-    if len(vals) != len(factor_names):
+villain = st.selectbox("Select a Villain", list(villain_weights.keys()))
+
+if villain not in villain_weights:
+    st.error("No weighting defined for that villain yet.")
+    st.stop()
+
+# ----------------------------------------
+# If the villain just changed, load its preset into session_state
+# ----------------------------------------
+if st.session_state.get("loaded_villain") != villain:
+    preset_array = villain_weights[villain]
+    if len(preset_array) != len(factor_names):
         st.error(
-            f"villain_weights for '{v}' has length {len(vals)}, but factor_names has length {len(factor_names)}."
+            f"villain_weights['{villain}'] has length {len(preset_array)}, "
+            f"but factor_names has length {len(factor_names)}."
         )
         st.stop()
-    for name, w in zip(factor_names, vals):
-        st.session_state[name] = int(w)
-    st.session_state["loaded_villain"] = v
+    # Populate session_state[...] for each factor BEFORE creating sliders
+    for idx, name in enumerate(factor_names):
+        st.session_state[name] = int(preset_array[idx])
+    st.session_state["loaded_villain"] = villain
 
 # ----------------------------------------
-# Villain selector (with callback)
-# ----------------------------------------
-villain = st.selectbox(
-    "Select a Villain",
-    list(villain_weights.keys()),
-    key="villain_select",
-    on_change=load_villain_weights
-)
-
-# Ensure session_state is initialized on first run or when villain changes
-if st.session_state.get("loaded_villain") != villain:
-    load_villain_weights()
-
-# ----------------------------------------
-# Layout: two equal-width columns
+# Layout: two equal-width columns for image vs. sliders + scrollable display
 # ----------------------------------------
 col_img, col_weights = st.columns([1, 1])
 
@@ -79,36 +75,37 @@ with col_img:
         st.write("No image available for this villain.")
 
 with col_weights:
-    # Expander for sliders
+    # Expander containing all sliders
     with st.expander("Edit Weighting Factors"):
         st.markdown(
             "Use these sliders to tweak how much you value each factor. "
-            "The default values come from this villain’s preset."
+            "The defaults come from this villain’s preset."
         )
         for name in factor_names:
-            st.session_state[name] = st.slider(
+            # The initial `value=` comes from session_state[name], but once the slider
+            # is created, Streamlit auto‐updates session_state[name] when the user moves it.
+            st.slider(
                 label=name,
                 min_value=-10,
                 max_value=10,
-                value=st.session_state.get(name, 0),
-                key=name
+                value=st.session_state[name],
+                key=name,
             )
 
-    # Build HTML for a scrollable display of current weights
+    # Build an HTML block that shows each name:value pair in a fixed-size scrollable box
     lines = []
     for name in factor_names:
         val = st.session_state[name]
         lines.append(f"<strong>{name}:</strong> {val}")
     weights_html = "<br>".join(lines)
 
-    # Scrollable container: fixed width=200px to match the villain image
     st.markdown(
         f"""
         <div style="
-            width: 200px;
-            height: 200px;
-            overflow-y: auto;
-            border: 1px solid #fff;
+            width: 200px;               /* match the villain image width */
+            height: 200px;              /* adjust to taste to force a scrollbar */
+            overflow-y: auto;           /* vertical scrollbar when needed */
+            border: 1px solid #ffffff;  /* white border to stand out */
             border-radius: 8px;
             padding: 8px;
             background: rgba(255,255,255,0.8);
@@ -120,12 +117,12 @@ with col_weights:
     )
 
 # ----------------------------------------
-# Gather the (possibly edited) weights into a numpy array
+# After sliders, gather the (possibly edited) weights
 # ----------------------------------------
 weights = np.array([st.session_state[name] for name in factor_names])
 
 # ----------------------------------------
-# Score heroes
+# Score heroes (no changes needed here)
 # ----------------------------------------
 heroes = deepcopy(default_heroes)  # dict of {name: np.array([...])}
 scores = {name: float(np.dot(stats, weights)) for name, stats in heroes.items()}
@@ -160,7 +157,7 @@ for tier in tiers:
 hero_to_tier = {h: t for t, lst in tiers.items() for h, _ in lst}
 
 # ----------------------------------------
-# Background CSS
+# Background CSS (unchanged)
 # ----------------------------------------
 bg = (
     "https://github.com/alechoward-lab/"
@@ -180,7 +177,7 @@ st.markdown(
 )
 
 # ----------------------------------------
-# Display Tiered Grid of Hero Portraits
+# Display Tiered Grid of Hero Portraits (unchanged)
 # ----------------------------------------
 st.markdown(f"### Results: **{villain}** Preset → Tier List")
 
@@ -210,7 +207,7 @@ for tier in ["S", "A", "B", "C", "D"]:
                 )
 
 # ----------------------------------------
-# Bar Chart of Scores
+# Bar Chart of Scores (unchanged)
 # ----------------------------------------
 st.header("Hero Scores (Bar Chart)")
 names = list(sorted_scores.keys())
