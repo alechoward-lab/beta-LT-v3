@@ -64,13 +64,21 @@ if st.session_state.get("loaded_villain") != villain:
     st.session_state["loaded_villain"] = villain
 
 # ----------------------------------------
-# Layout: two equal-width columns for image vs. sliders + strategy text
+# Layout: two responsive columns for image vs. sliders + strategy text
 # ----------------------------------------
-col_img, col_content = st.columns([1, 1])
+col_img, col_content = st.columns(2)
 
 with col_img:
     if villain in villain_image_urls:
-        st.image(villain_image_urls[villain], width=200, caption=villain)
+        # use_container_width ensures the image scales on mobile
+        st.image(
+            villain_image_urls[villain],
+            caption=villain,
+            use_container_width=True,
+            clamp=False,
+            output_format="auto",
+            channels="RGB",
+        )
     else:
         st.write("No image available for this villain.")
 
@@ -78,8 +86,8 @@ with col_content:
     # Expander containing all sliders
     with st.expander("Edit Weighting Factors"):
         st.markdown(
-            "Use these sliders to tweak how much you value each factor. "
-            "The defaults come from this villain’s preset."
+            "Use these sliders to adjust how much you value each factor. "
+            "Defaults come from this villain’s preset."
         )
         for name in factor_names:
             st.slider(
@@ -90,8 +98,8 @@ with col_content:
                 key=name,
             )
 
-    # Placeholder section for strategy explanation
-    st.markdown("### Strategy Tips")
+    # Section for strategy explanation
+    st.markdown("### Strategy to Defeat This Villain")
     st.markdown("Placeholder text on strategy goes here")
 
 # ----------------------------------------
@@ -155,7 +163,7 @@ st.markdown(
 )
 
 # ----------------------------------------
-# Display Tiered Grid of Hero Portraits (unchanged)
+# Display Tiered Grid of Hero Portraits
 # ----------------------------------------
 st.markdown(f"### Results: **{villain}** Preset → Tier List")
 
