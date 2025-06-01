@@ -10,33 +10,28 @@ villain_strategies = {
     "Taskmaster": "Taskmaster punishes identity flips. Timing your changes and rescuing allies is key.",
     "Zola": "Zola brings tough minions and tech. High burst damage and minion control help here.",
     "Red Skull": "Side schemes pile up fast. Balancing scheme control and damage is crucial.",
-
     "Kang": "Kang is a multi-stage fight with changing rules. Versatility and adaptability shine.",
     "Drang": "Drang pressures threat and uses the Badoon swarm. Solid thwarting and crowd control are useful.",
     "Collector 1": "Collector 1 adds your cards to the collection. Low ally and upgrade spam helps.",
     "Collector 2": "Collector 2 emphasizes escaping the museum. Focus on main scheme progress.",
     "Nebula": "Nebula charges up techniques. Interrupts and burst windows are strong against her.",
     "Ronan": "Ronan hits hard and fast with tough attachments. Stun-lock and tempo play are essential.",
-
     "Ebony Maw": "Maw’s spells have delayed effects. Planning and damage windows are key.",
     "Tower Defense": "Two villains and two towers. Split focus and coordinated threat removal help.",
     "Thanos": "Thanos shrugs off stun/confuse. Bring raw power and sustain.",
     "Hela": "Hela’s stages involve reviving minions. Momentum and targeted removal matter.",
     "Loki": "Loki swaps forms mid-fight. Adaptation and all-around coverage pay off.",
-
     "The Hood": "The Hood chains modulars. Expect surprises—build a flexible deck.",
     "Sandman": "Sandman scales threat and discards cards. Steady pacing and thwarting are important.",
     "Venom": "Venom has aggressive tempo. Efficient damage and heal mitigation are helpful.",
     "Mysterio": "Mysterio fills your deck with junk. Deck manipulation and resource filtering are strong.",
     "Sinister Six": "Multiple villains rotate. Focused damage and crowd control keep things stable.",
     "Venom Goblin": "Venom Goblin spreads threat across schemes. Efficient thwart and AOE are key.",
-
     "Sabertooth": "Sabertooth heals often. Burst damage and healing denial help you keep up.",
     "Project Wideawake": "Lots of Sentinels and capture mechanics. Prioritize freeing allies.",
     "Master Mold": "Master Mold produces sentinels quickly. Minion control is essential.",
     "Mansion Attack": "Team-based scenario with split threats. Coordination and area control work well.",
     "Magneto": "Magneto builds momentum with upgrades. Aggression and thwart balance are crucial.",
-
     "Magog": "Magog builds a stadium score. Deny points and pivot to burst damage.",
     "Spiral": "Spiral hides in side schemes. Thwart-heavy decks can find and defeat her quickly.",
     "Mojo": "Mojo’s changing shows alter the fight. Stay versatile and ready for surprises.",
@@ -45,7 +40,6 @@ villain_strategies = {
     "Juggernaut": "Juggernaut hits hard and often. Defense and healing are crucial.",
     "Mister Sinister": "Sinister mutates minions and stats. Removal and control are valuable.",
     "Stryfe": "Stryfe mixes threat and force. Versatile decks and reactiveness are helpful.",
-
     "Unus": "Unus uses barriers and resistance. High-damage and piercing cards work best.",
     "Four Horsemen": "Multiple strong villains—balance is key. Adapt between damage and control.",
     "Apocalypse 1": "Stage one of a long battle. Build up carefully and conserve resources.",
