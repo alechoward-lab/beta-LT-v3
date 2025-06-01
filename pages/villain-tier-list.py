@@ -107,9 +107,7 @@ for tier in ["S", "A", "B", "C", "D"]:
                     st.image(img_url, use_container_width=True)
                 # hero name, tier letter, and score
                 st.markdown(
-                    f"**{hero}**  \n"
-                    f"<span style='font-size:18px; color:{tier_colors[tier]};'>Tier {tier}</span>  \n"
-                    f"Score: {round(score, 1)}",
+                    f"Score: {int(score)}",
                     unsafe_allow_html=True
                 )
 
