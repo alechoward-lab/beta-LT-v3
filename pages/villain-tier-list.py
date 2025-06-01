@@ -200,11 +200,12 @@ for tier in ["S", "A", "B", "C", "D"]:
 # ----------------------------------------
 # Bar Chart of Scores (unchanged)
 # ----------------------------------------
-# Show factor weight breakdown
+
+
+villain_name = st.session_state.get("selected_villain", "Unknown Villain")
 st.markdown(f"### Factor Weight Breakdown for **{villain_name}**")
 st.bar_chart(df_weights.set_index("Factor")["Weight"])
 
-# Show hero score bar chart
 st.header("Hero Scores (Bar Chart)")
 names = list(sorted_scores.keys())
 vals = list(sorted_scores.values())
@@ -221,9 +222,10 @@ for lbl in ax.get_xticklabels():
     hero_label = lbl.get_text()
     lbl.set_color(tier_colors.get(hero_to_tier.get(hero_label, ""), "black"))
 
-# Add legend for tiers
+# Add legend
 handles = [Patch(color=c, label=f"Tier {t}") for t, c in tier_colors.items()]
 ax.legend(handles=handles, title="Tiers", loc="upper left", fontsize=12, title_fontsize=12)
 
 st.pyplot(fig)
+
 
