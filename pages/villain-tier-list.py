@@ -200,10 +200,6 @@ for tier in ["S", "A", "B", "C", "D"]:
 # ----------------------------------------
 # Bar Chart of Scores (unchanged)
 # ----------------------------------------
-# Right before showing the bar chart:
-st.markdown(f"### Factor Weight Breakdown for **{villain_name}**")
-st.bar_chart(df_weights.set_index("Factor")["Weight"])
-
 st.header("Hero Scores (Bar Chart)")
 names = list(sorted_scores.keys())
 vals = list(sorted_scores.values())
@@ -211,7 +207,7 @@ colors = [tier_colors[hero_to_tier[h]] for h in names]
 
 fig, ax = plt.subplots(figsize=(14, 7), dpi=200)
 bars = ax.bar(names, vals, color=colors)
-ax.set_title(plot_title, fontsize=18, fontweight="bold")
+ax.set_title(f"Hero Scores Against {villain_name}", fontsize=18, fontweight="bold")
 ax.set_ylabel("Score", fontsize=14)
 plt.xticks(rotation=45, ha="right")
 
