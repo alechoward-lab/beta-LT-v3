@@ -2,7 +2,6 @@ import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
-import os
 from copy import deepcopy
 from villain_weights import villain_weights
 from villain_image_urls import villain_image_urls
@@ -21,7 +20,6 @@ st.subheader(
 # ----------------------------------------
 # Define your factor names (must match length/order of each weighting array)
 # ----------------------------------------
-# Example: if each weight corresponds to [Economy, Tempo, Card Value, …]
 factor_names = [
     "Economy",
     "Tempo",
@@ -41,57 +39,90 @@ factor_names = [
 ]
 
 # ----------------------------------------
-# Villain selector
+# Callback: load the selected villain's default weights into session_state
 # ----------------------------------------
-villain = st.selectbox("Select a Villain", list(villain_weights.keys()))
-
-if villain not in villain_weights:
-    st.error("No weighting defined for that villain yet.")
-    st.stop()
-
-weights = np.array(villain_weights[villain])
-
-if len(factor_names) != len(weights):
-    st.error(
-        f"Number of factor names ({len(factor_names)}) does not match number of weights ({len(weights)})."
-    )
-    st.stop()
+def load_villain_weights():
+    v = st.session_state.villain_select
+    vals = villain_weights[v]
+    if len(vals) != len(factor_names):
+        st.error(
+            f"villain_weights for '{v}' has length {len(vals)}, but factor_names has length {len(factor_names)}."
+        )
+        st.stop()
+    for name, w in zip(factor_names, vals):
+        st.session_state[name] = int(w)
+    st.session_state["loaded_villain"] = v
 
 # ----------------------------------------
-# Two‐column layout: portrait (left) + scrollable weights (right)
+# Villain selector (with callback)
+# ----------------------------------------
+villain = st.selectbox(
+    "Select a Villain",
+    list(villain_weights.keys()),
+    key="villain_select",
+    on_change=load_villain_weights
+)
+
+# Ensure session_state is initialized on first run or when villain changes
+if st.session_state.get("loaded_villain") != villain:
+    load_villain_weights()
+
+# ----------------------------------------
+# Layout: two equal-width columns
 # ----------------------------------------
 col_img, col_weights = st.columns([1, 1])
 
 with col_img:
     if villain in villain_image_urls:
         st.image(villain_image_urls[villain], width=200, caption=villain)
+    else:
+        st.write("No image available for this villain.")
 
 with col_weights:
-    # Build a block of HTML containing each "Factor: IntegerValue" on its own line.
-    items_html = "<br>".join(
-        f"<strong>{name}:</strong> {int(w)}" for name, w in zip(factor_names, weights)
-    )
+    # Expander for sliders
+    with st.expander("Edit Weighting Factors"):
+        st.markdown(
+            "Use these sliders to tweak how much you value each factor. "
+            "The default values come from this villain’s preset."
+        )
+        for name in factor_names:
+            st.session_state[name] = st.slider(
+                label=name,
+                min_value=-10,
+                max_value=10,
+                value=st.session_state.get(name, 0),
+                key=name
+            )
 
-    # Wrap in a styled <div> that matches your site’s aesthetic.
+    # Build HTML for a scrollable display of current weights
+    lines = []
+    for name in factor_names:
+        val = st.session_state[name]
+        lines.append(f"<strong>{name}:</strong> {val}")
+    weights_html = "<br>".join(lines)
+
+    # Scrollable container: fixed width=200px to match the villain image
     st.markdown(
         f"""
         <div style="
             width: 200px;
-            max-height: 240px;
+            height: 200px;
             overflow-y: auto;
-            border: 2px solid white;
+            border: 1px solid #fff;
             border-radius: 8px;
             padding: 8px;
-            background-color: rgba(255, 255, 255, 0.85);
-            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
-            font-family: Arial, sans-serif;
-            color: #333;
+            background: rgba(255,255,255,0.8);
         ">
-            {items_html}
+            {weights_html}
         </div>
         """,
         unsafe_allow_html=True,
     )
+
+# ----------------------------------------
+# Gather the (possibly edited) weights into a numpy array
+# ----------------------------------------
+weights = np.array([st.session_state[name] for name in factor_names])
 
 # ----------------------------------------
 # Score heroes
@@ -129,7 +160,7 @@ for tier in tiers:
 hero_to_tier = {h: t for t, lst in tiers.items() for h, _ in lst}
 
 # ----------------------------------------
-# Background CSS (unchanged)
+# Background CSS
 # ----------------------------------------
 bg = (
     "https://github.com/alechoward-lab/"
@@ -174,7 +205,9 @@ for tier in ["S", "A", "B", "C", "D"]:
                 img_url = hero_image_urls.get(hero)
                 if img_url:
                     st.image(img_url, use_container_width=True)
-                st.markdown(f"Score: {int(score)}", unsafe_allow_html=True)
+                st.markdown(
+                    f"Score: {int(score)}", unsafe_allow_html=True
+                )
 
 # ----------------------------------------
 # Bar Chart of Scores
@@ -191,8 +224,8 @@ ax.set_ylabel("Score", fontsize=14)
 plt.xticks(rotation=45, ha="right")
 
 for lbl in ax.get_xticklabels():
-    hero = lbl.get_text()
-    lbl.set_color(tier_colors.get(hero_to_tier.get(hero, ""), "black"))
+    hero_label = lbl.get_text()
+    lbl.set_color(tier_colors.get(hero_to_tier.get(hero_label, ""), "black"))
 
 handles = [Patch(color=c, label=f"Tier {t}") for t, c in tier_colors.items()]
 ax.legend(handles=handles, title="Tiers", loc="upper left", fontsize=12, title_fontsize=12)
