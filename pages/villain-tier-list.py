@@ -14,7 +14,7 @@ from hero_image_urls import hero_image_urls
 # ----------------------------------------
 plot_title = "Hero Tier List by Villain"
 st.title(plot_title)
-st.subheader("Pick a villain, apply its preset weights, and see your tiered hero lineup!")
+st.subheader("Choose a villain from the dropdown menu to see a custom hero tier list for defeating them!")
 
 # ----------------------------------------
 # Villain selector & portrait
