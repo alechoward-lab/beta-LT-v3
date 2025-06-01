@@ -7,6 +7,7 @@ from villain_weights import villain_weights
 from villain_image_urls import villain_image_urls
 from default_heroes import default_heroes
 from hero_image_urls import hero_image_urls
+from villain_strategies import villain_strategies
 
 # ----------------------------------------
 # Page header
@@ -88,7 +89,7 @@ with col_content:
 
     # Section for strategy explanation
     st.markdown("### Strategy Tips")
-    st.markdown("Placeholder text on strategy goes here")
+    st.markdown(villain_strategies.get(villain, "No strategy tips written yet."))
 
 # ----------------------------------------
 # After sliders, gather the (possibly edited) weights
