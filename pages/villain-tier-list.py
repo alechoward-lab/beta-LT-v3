@@ -200,6 +200,10 @@ for tier in ["S", "A", "B", "C", "D"]:
 # ----------------------------------------
 # Bar Chart of Scores (unchanged)
 # ----------------------------------------
+# Right before showing the bar chart:
+st.markdown(f"### Factor Weight Breakdown for **{villain_name}**")
+st.bar_chart(df_weights.set_index("Factor")["Weight"])
+
 st.header("Hero Scores (Bar Chart)")
 names = list(sorted_scores.keys())
 vals = list(sorted_scores.values())
