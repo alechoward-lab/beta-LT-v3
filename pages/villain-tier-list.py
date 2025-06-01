@@ -87,7 +87,7 @@ with col_content:
             )
 
     # Section for strategy explanation
-    st.markdown("### Strategy to Defeat This Villain")
+    st.markdown("### Strategy Tips")
     st.markdown("Placeholder text on strategy goes here")
 
 # ----------------------------------------
