@@ -64,9 +64,9 @@ if st.session_state.get("loaded_villain") != villain:
     st.session_state["loaded_villain"] = villain
 
 # ----------------------------------------
-# Layout: two equal-width columns for image vs. sliders + scrollable display
+# Layout: two equal-width columns for image vs. sliders + strategy text
 # ----------------------------------------
-col_img, col_weights = st.columns([1, 1])
+col_img, col_content = st.columns([1, 1])
 
 with col_img:
     if villain in villain_image_urls:
@@ -74,7 +74,7 @@ with col_img:
     else:
         st.write("No image available for this villain.")
 
-with col_weights:
+with col_content:
     # Expander containing all sliders
     with st.expander("Edit Weighting Factors"):
         st.markdown(
@@ -82,8 +82,6 @@ with col_weights:
             "The defaults come from this villain’s preset."
         )
         for name in factor_names:
-            # The initial `value=` comes from session_state[name], but once the slider
-            # is created, Streamlit auto‐updates session_state[name] when the user moves it.
             st.slider(
                 label=name,
                 min_value=-10,
@@ -92,29 +90,9 @@ with col_weights:
                 key=name,
             )
 
-    # Build an HTML block that shows each name:value pair in a fixed-size scrollable box
-    lines = []
-    for name in factor_names:
-        val = st.session_state[name]
-        lines.append(f"<strong>{name}:</strong> {val}")
-    weights_html = "<br>".join(lines)
-
-    st.markdown(
-        f"""
-        <div style="
-            width: 200px;               /* match the villain image width */
-            height: 200px;              /* adjust to taste to force a scrollbar */
-            overflow-y: auto;           /* vertical scrollbar when needed */
-            border: 1px solid #ffffff;  /* white border to stand out */
-            border-radius: 8px;
-            padding: 8px;
-            background: rgba(255,255,255,0.8);
-        ">
-            {weights_html}
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    # Placeholder section for strategy explanation
+    st.markdown("### Strategy to Defeat This Villain")
+    st.markdown("Placeholder text on strategy goes here")
 
 # ----------------------------------------
 # After sliders, gather the (possibly edited) weights
