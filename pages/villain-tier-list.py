@@ -162,7 +162,7 @@ tier_colors = {
     "A": "purple",      # purple
     "B": "#3CB371",     # MediumSeaGreen
     "C": "#FF8C00",     # DarkOrange
-    "D": "#B22222",     # FireBrick
+    "D": "red",         # red
 }
 num_cols = 5
 
