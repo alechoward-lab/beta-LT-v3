@@ -73,7 +73,6 @@ with col_img:
         # use_container_width ensures the image scales on mobile
         st.image(
             villain_image_urls[villain],
-            caption=villain,
             use_container_width=True,
             clamp=False,
             output_format="auto",
