@@ -200,7 +200,7 @@ for tier in ["S", "A", "B", "C", "D"]:
 # ----------------------------------------
 # Bar Chart of Scores
 # ----------------------------------------
-st.header("Hero Scores (Bar Chart)")
+st.header("Villain Specific Hero Scores")
 names = list(sorted_scores.keys())
 vals = list(sorted_scores.values())
 colors = [tier_colors[hero_to_tier[h]] for h in names]
