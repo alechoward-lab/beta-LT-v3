@@ -37,11 +37,9 @@ factor_names = [
 ]
 
 # ----------------------------------------
-# Villain selector & portrait
+# Villain selector
 # ----------------------------------------
 villain = st.selectbox("Select a Villain", list(villain_weights.keys()))
-if villain in villain_image_urls:
-    st.image(villain_image_urls[villain], use_container_width=True, caption=villain)
 if villain not in villain_weights:
     st.error("No weighting defined for that villain yet.")
     st.stop()
@@ -62,7 +60,7 @@ if st.session_state.get("loaded_villain") != villain:
     st.session_state["loaded_villain"] = villain
 
 # ----------------------------------------
-# Layout: two responsive columns for sliders + strategy text
+# Layout: two responsive columns for portrait + sliders/strategy
 # ----------------------------------------
 col_img, col_content = st.columns(2)
 
@@ -159,10 +157,10 @@ st.markdown(f"### Results: **{villain}** Preset → Tier List")
 
 tier_colors = {
     "S": "#FF69B4",     # Hot Pink
-    "A": "purple",      # purple
+    "A": "purple",
     "B": "#3CB371",     # MediumSeaGreen
     "C": "#FF8C00",     # DarkOrange
-    "D": "red",         # red
+    "D": "red",
 }
 num_cols = 5
 
