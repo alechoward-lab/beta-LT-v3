@@ -21,7 +21,7 @@ st.subheader(
 # ----------------------------------------
 # Define your factor names (must match length/order of each weighting array)
 # ----------------------------------------
-# Example: if each weight corresponds to [Strength, Defense, Willpower, Attack, Health]
+# Example: if each weight corresponds to [Economy, Tempo, Card Value, …]
 factor_names = [
     "Economy",
     "Tempo",
@@ -37,12 +37,11 @@ factor_names = [
     "Late Game Power Boon",
     "Simplicity",
     "Stun/Confuse Boon",
-    "Multiplayer Consistency Boon",
+    "Multiplayer Consistency Boon"
 ]
 
-
 # ----------------------------------------
-# Villain selector & portrait + weights box
+# Villain selector
 # ----------------------------------------
 villain = st.selectbox("Select a Villain", list(villain_weights.keys()))
 
@@ -50,17 +49,17 @@ if villain not in villain_weights:
     st.error("No weighting defined for that villain yet.")
     st.stop()
 
-# Raw weighting array for this villain
 weights = np.array(villain_weights[villain])
 
-# Make sure our labels match the length of the weights array
 if len(factor_names) != len(weights):
     st.error(
         f"Number of factor names ({len(factor_names)}) does not match number of weights ({len(weights)})."
     )
     st.stop()
 
-# Two equal-width columns: left for portrait, right for scrollable weight list
+# ----------------------------------------
+# Two‐column layout: portrait (left) + scrollable weights (right)
+# ----------------------------------------
 col_img, col_weights = st.columns([1, 1])
 
 with col_img:
@@ -68,15 +67,30 @@ with col_img:
         st.image(villain_image_urls[villain], width=200, caption=villain)
 
 with col_weights:
-    # Build a newline-separated string of "Name: IntegerValue"
-    weights_str = "\n".join(
-        f"{name}: {int(w)}" for name, w in zip(factor_names, weights)
+    # Build a block of HTML containing each "Factor: IntegerValue" on its own line.
+    items_html = "<br>".join(
+        f"<strong>{name}:</strong> {int(w)}" for name, w in zip(factor_names, weights)
     )
-    st.text_area(
-        label="Weighting Factors (integers)",
-        value=weights_str,
-        height=200,  # adjust so that a scrollbar appears when there are many lines
-        help="Each line shows a factor name and its integer weight.",
+
+    # Wrap in a styled <div> that matches your site’s aesthetic.
+    st.markdown(
+        f"""
+        <div style="
+            width: 200px;
+            max-height: 240px;
+            overflow-y: auto;
+            border: 2px solid white;
+            border-radius: 8px;
+            padding: 8px;
+            background-color: rgba(255, 255, 255, 0.85);
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+            font-family: Arial, sans-serif;
+            color: #333;
+        ">
+            {items_html}
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
 # ----------------------------------------
@@ -115,7 +129,7 @@ for tier in tiers:
 hero_to_tier = {h: t for t, lst in tiers.items() for h, _ in lst}
 
 # ----------------------------------------
-# Background CSS
+# Background CSS (unchanged)
 # ----------------------------------------
 bg = (
     "https://github.com/alechoward-lab/"
@@ -160,6 +174,27 @@ for tier in ["S", "A", "B", "C", "D"]:
                 img_url = hero_image_urls.get(hero)
                 if img_url:
                     st.image(img_url, use_container_width=True)
-                st.markdown(
-                    f"Score: {int(score)}", unsafe_allow_html=True
-                )
+                st.markdown(f"Score: {int(score)}", unsafe_allow_html=True)
+
+# ----------------------------------------
+# Bar Chart of Scores
+# ----------------------------------------
+st.header("Hero Scores (Bar Chart)")
+names = list(sorted_scores.keys())
+vals = list(sorted_scores.values())
+colors = [tier_colors[hero_to_tier[h]] for h in names]
+
+fig, ax = plt.subplots(figsize=(14, 7), dpi=200)
+bars = ax.bar(names, vals, color=colors)
+ax.set_title(plot_title, fontsize=18, fontweight="bold")
+ax.set_ylabel("Score", fontsize=14)
+plt.xticks(rotation=45, ha="right")
+
+for lbl in ax.get_xticklabels():
+    hero = lbl.get_text()
+    lbl.set_color(tier_colors.get(hero_to_tier.get(hero, ""), "black"))
+
+handles = [Patch(color=c, label=f"Tier {t}") for t, c in tier_colors.items()]
+ax.legend(handles=handles, title="Tiers", loc="upper left", fontsize=12, title_fontsize=12)
+
+st.pyplot(fig)
