@@ -198,14 +198,8 @@ for tier in ["S", "A", "B", "C", "D"]:
                 )
 
 # ----------------------------------------
-# Bar Chart of Scores (unchanged)
+# Bar Chart of Scores
 # ----------------------------------------
-
-
-villain_name = st.session_state.get("selected_villain", "Unknown Villain")
-st.markdown(f"### Factor Weight Breakdown for **{villain_name}**")
-st.bar_chart(df_weights.set_index("Factor")["Weight"])
-
 st.header("Hero Scores (Bar Chart)")
 names = list(sorted_scores.keys())
 vals = list(sorted_scores.values())
@@ -213,19 +207,20 @@ colors = [tier_colors[hero_to_tier[h]] for h in names]
 
 fig, ax = plt.subplots(figsize=(14, 7), dpi=200)
 bars = ax.bar(names, vals, color=colors)
-ax.set_title(f"Hero Scores Against {villain_name}", fontsize=18, fontweight="bold")
+ax.set_title(plot_title, fontsize=18, fontweight="bold")
 ax.set_ylabel("Score", fontsize=14)
 plt.xticks(rotation=45, ha="right")
 
-# Color the x-axis labels based on tier
+# color-code the x-labels
 for lbl in ax.get_xticklabels():
-    hero_label = lbl.get_text()
-    lbl.set_color(tier_colors.get(hero_to_tier.get(hero_label, ""), "black"))
+    hero = lbl.get_text()
+    lbl.set_color(tier_colors.get(hero_to_tier.get(hero, ""), "black"))
 
-# Add legend
+# legend
 handles = [Patch(color=c, label=f"Tier {t}") for t, c in tier_colors.items()]
 ax.legend(handles=handles, title="Tiers", loc="upper left", fontsize=12, title_fontsize=12)
 
 st.pyplot(fig)
+
 
 
