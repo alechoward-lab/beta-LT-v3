@@ -166,7 +166,7 @@ st.markdown(
 # ----------------------------------------
 st.markdown(f"### Results: **{villain}** Preset → Tier List")
 
-tier_colors = {"S": "purple", "A": "green", "B": "blue", "C": "orange", "D": "red"}
+tier_colors = {"S": "pink", "A": "green", "B": "blue", "C": "orange", "D": "red"}
 num_cols = 5
 
 for tier in ["S", "A", "B", "C", "D"]:
