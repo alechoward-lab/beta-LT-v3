@@ -1,4 +1,4 @@
- villain_strategies = {
+villain_strategies = {
     "Rhino": "Look out for his charge attacks. In solo be careful about going to alter-ego. Always keep track of how many advances are in the discard pile.",
     "Klaw": "Klaw adds a lot of pressure early. Minion control, tempo, and threat removal are key to defeating him.",
     "Ultron": "Ultron floods the board with drones. Make sure you can take them out. If your hero is bad at defeating multiple minions, add Hawkeye to your deck. If your hero deals with minions easily, still consider adding Hawkeye. Try to keep him on stage 1 of his main scheme. Building up your board while controlling minions is key to winning.",
