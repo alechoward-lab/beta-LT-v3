@@ -18,7 +18,7 @@ villain_image_urls = {
     "Collector 2": "https://i.imgur.com/IrZCVgk.jpeg",
     "Nebula": "https://i.imgur.com/ps53aG2.jpeg",
     "Ronan": "https://i.imgur.com/U0VL9R3.jpeg",
-    "Ebony Maw": "https://example.com/ebonymaw",
+    "Ebony Maw": "https://i.imgur.com/selZFWt.jpeg",
     "Tower Defense": "https://example.com/towerdefense",
     "Thanos": "https://example.com/thanos",
     "Hela": "https://example.com/hela",
