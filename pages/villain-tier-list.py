@@ -67,7 +67,7 @@ col_img, col_content = st.columns(2)
 
 with col_img:
     if villain in villain_image_urls:
-        st.image(villain_image_urls[villain], use_container_width=True, caption=villain)
+        st.image(villain_image_urls[villain], use_container_width=True)
     else:
         st.write("No image available for this villain.")
 
