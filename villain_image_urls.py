@@ -12,7 +12,7 @@ villain_image_urls = {
     "Taskmaster": "https://i.imgur.com/Q8yTJjF.jpeg",
     "Zola": "https://i.imgur.com/8Lw7gFK.jpeg",
     "Red Skull": "https://i.imgur.com/si4YArG.jpeg",
-    "Kang": "https://i.imgur.com/536AAJ0.jpeg",
+    "Kang": "https://i.imgur.com/u8EeB5R.jpeg",
     "Drang": "https://i.imgur.com/Ix5MWe1.jpeg",
     "Collector 1": "https://i.imgur.com/Wy1PSxd.jpeg",
     "Collector 2": "https://i.imgur.com/IrZCVgk.jpeg",
