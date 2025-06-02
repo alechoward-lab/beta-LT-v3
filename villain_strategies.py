@@ -1,93 +1,48 @@
 villain_strategies = {
-    "Rhino": "Look out for his charge attacks. In solo, be careful about going to Alter-Ego. Always keep track of how many Advances are in the discard pile.",
-    
+    "Rhino": "Look out for his charge attacks. In solo be careful about going to alter-ego. Always keep track of how many advances are in the discard pile.",
     "Klaw": "Klaw adds a lot of pressure early. Minion control, tempo, and threat removal are key to defeating him.",
-    
     "Ultron": "Ultron floods the board with drones. Make sure you can take them out. If your hero is bad at defeating multiple minions, add Hawkeye to your deck. If your hero deals with minions easily, still consider adding Hawkeye. Try to keep him on stage 1 of his main scheme. Building up your board while controlling minions is key to winning.",
-    
     "Risky Business": "This is a bizarre scenario. Don't flip Norman unless you can deal a big chunk of damage. Building your upgrades and supports while he is Norman Osborn is key to winning.",
-    
-    "Mutagen Formula": "There will be a lot of pressure early due to the encounter cards. His deck isn't that scary, but he can flood the board with mid-health minions. Stay in control of the minions, build your board, and try to one-shot him on stage 3 to avoid extra encounter cards.",
-    
-    "Wrecking Crew": "Prioritize taking out one villain at a time. Make heavy use of Alter-Ego since there is little pressure from threat.",
-    
-    "Crossbones": "Crossbones has a lot of damage, but a generous main scheme. Playing heroes with good survivability will help. His scariest card is Full Auto. Keep track of both copies and maintain high health to avoid random losses.",
-    
-    "Absorbing Man": "Absorbing Man unfortunately just doesn't do much. The Super Absorbing Power side scheme can boost him, so prioritize finishing it when it's out. A good opportunity to try lower-tier heroes.",
-    
-    "Taskmaster": "Taskmaster does a bit of everything, but nothing is particularly scary. Rescuing the allies Captured by Hydra helps a lot—they're very powerful!",
-    
-    "Zola": "Zola brings in a lot of tough minions, and his Retaliate 1 is tough to deal with. He doesn't have high health though, so take every chance to do big chunks of damage. Overkill ignores Retaliate. Relentless Assault is great here. Do not underestimate Zola—the game can collapse quickly!",
-    
-    "Red Skull": "Red Skull's constant side schemes and boosted attack are a lot to handle. Don’t let the side schemes pile up. Bring a Justice player to manage them. Be ready to deal with The Sleeper when it appears.",
-    
-    "Kang": "Kang throws many different challenges at the players. Especially in stage 2 when players are split, having a reliable, self-sufficient hero is key to surviving.",
-    
-    "Drang": "Drang adds a lot of threat. In solo, using the Milano to remove 3 threat is strong. In multiplayer, someone should bring a solid Justice deck. Be ready to handle side schemes every turn.",
-    
-    "Collector 1": "The Collection fills up quickly—he even collects his own cards! Use high-tempo decks. Avoid building a wide board, as allies sent to the collection make survivability tough. Event-heavy decks shine here.",
-    
-    "Collector 2": "This scenario revolves around threat control. You can thwart the main scheme or reduce Collector's HP. Don't complete the scheme unless you can thwart afterward—losing to a single Advance is possible.",
-    
-    "Nebula": "Very swingy scenario. Surge trains are common, especially at 2–4 players. In solo, outcomes can vary widely. Keep evasion counters on the main scheme low, and defeat her fast before encounter card chaos defeats you.",
-    
-    "Ronan": "Ronan is the toughest boss in the game. He starts with Stalwart and high base ATK and often hits for 8–10 damage. Flipping to Alter-Ego often loses you the scheme. Fanaticism is brutal—surges, gives Overkill and Piercing. Avoid or cancel it when possible. Sunfire can remove the Universal Weapon. Bring broken combos—you’ll need them.",
-    
-    "Ebony Maw": "Maw’s spells have delayed effects. Plan around damage windows and upcoming threats.",
-    
-    "Tower Defense": "Two villains and two towers. Coordinate threat removal and divide responsibilities effectively.",
-    
-    "Thanos": "Thanos ignores Stun and Confuse. Bring raw damage, sustain, and consistent status-free tools.",
-    
-    "Hela": "Hela revives powerful minions as her scheme progresses. Targeted removal and tempo control are essential.",
-    
-    "Loki": "Loki swaps forms during the fight, each with different effects. Versatile decks and adaptation are key.",
-    
-    "The Hood": "The Hood chains modular sets together. Be ready for unpredictable effects. Build flexible, resilient decks.",
-    
-    "Sandman": "Sandman ramps threat and discards cards. Maintain steady pacing and strong thwart options.",
-    
-    "Venom": "Venom brings fast tempo and burst damage. Prioritize efficient damage and healing mitigation.",
-    
-    "Mysterio": "Mysterio clogs your deck with encounter cards. Deck filtering and resource smoothing help a lot.",
-    
-    "Sinister Six": "Multiple rotating villains. Focus damage efficiently and manage the board with crowd control.",
-    
-    "Venom Goblin": "Spreads threat across multiple schemes. Use AOE and efficient thwarting to keep control.",
-    
-    "Sabretooth": "Sabretooth heals frequently. Burst damage and preventing healing are key strategies.",
-    
-    "Project Wideawake": "Sentinels and capture mechanics dominate. Freeing captured allies should be top priority.",
-    
-    "Master Mold": "Master Mold produces Sentinel minions fast. Strong minion control is essential.",
-    
-    "Mansion Attack": "Team-focused scenario with split threat zones. Coordination and AOE help significantly.",
-    
-    "Magneto": "Magneto gains power through upgrades. You’ll need to balance aggression with good threat control.",
-    
-    "Magog": "Magog gains points in the arena. Deny his score and pivot to burst damage windows.",
-    
-    "Spiral": "Spiral hides in side schemes. Heavy thwart decks can find and take her out more easily.",
-    
-    "Mojo": "Mojo’s changing shows create unpredictable effects. Stay versatile and adapt quickly.",
-    
-    "Morlock Siege": "Rescue allies and manage swarms of minions. Balanced stats and control are key.",
-    
-    "On The Run": "The villain shifts across different zones. Mobility and fast thwarting will help a lot.",
-    
-    "Juggernaut": "Juggernaut deals heavy damage consistently. Defense, healing, and mitigation are vital.",
-    
-    "Mister Sinister": "Sinister mutates minions and boosts stats. Prioritize control and clean removal.",
-    
-    "Stryfe": "Stryfe mixes heavy threat and raw power. Decks with flexibility and responsiveness work well.",
-    
-    "Unus": "Unus uses barriers and resistance. Piercing effects and high-damage events perform best.",
-    
-    "Four Horsemen": "Face multiple strong villains. Balancing burst damage and control will carry you.",
-    
-    "Apocalypse 1": "This is just the beginning. Focus on building carefully and conserving key resources.",
-    
-    "Dark Beast": "Dark Beast specializes in sabotage. Denial and event-based disruption shine here.",
-    
-    "Apocalypse 2": "Endgame boss mode. Bring your most consistent and powerful builds to survive.",
+    "Mutagen Formula": "There will be a lot of pressure early due to the encounter cards. His encounter deck isn't that scary, but he can flood the board with mid-health minions. Stay in control of the minions, build your board, and try to one-shot him on stage 3 if you can to avoid dealing with all the encounter cards.",
+    "Wrecking Crew": "Prioritize taking out one villain at a time. Make heavy use of alter-ego since there is little pressure due to threat.",
+    "Crossbones": "Crossbones has a lot of damage, but a generous main scheme. Playing heroes with good survivability will be helpful. His scariest card is Full Auto. Keep track of both copies, and make sure to keep your health high to avoid random losses.",
+    "Absorbing Man": "Absorbing Man unfortunately just doesn't do much. The Super Absorbing Power side scheme can give him a boost in power, so prioritize finishing that scheme when it's out. Absorbing Man is a good opportunity to try some of the heroes that are lower on the tier list.",
+    "Taskmaster": "Taskmaster does a bit of everything, but nothing is that scary. Don't expect an easy game though! Rescuing the allies that have been Captured By Hydra will help a lot because they're very powerful!",
+    "Zola": "Zola brings in a lot of tough minions and having Retaliate 1 is difficult to deal with. He doesn't have high health though. Take every opportunity you get to do big chunks of damage to him. Overkill ignores retaliate damage. Relentless Assault is a great card to add because it solves two problems at once (Minions and Retaliate). Do not underestimate Zola. The game can go bad in an instant!",
+    "Red Skull": "Red Skull's ability to bring a side scheme into play every turn and increase his attack is very powerful. It's a lot to deal with. You can't let them pile up. Make sure to bring a Justice player to the table to help keep those schemes in line. Be prepared to deal with The Sleeper. You need to have a source of damage at the ready when The Sleeper comes into play.",
+    "Kang": "Kang will throw many different challenges at the players. Particularly on stage 2 when he splits everyone up, you don't know what challenges you will face. Having a reliable hero that is self-sufficient is key to surviving the second stage.",
+    "Drang": "Drang adds a lot of threat to the board. The main scheme goes up by 2 per player each turn, and there are a lot of side schemes. In solo the action to exhaust the Milano to remove 3 threat from the schemes is powerful and will help a lot, but at 2–4 players you need more removal. In multiplayer I suggest at least one hero brings a powerful Justice deck.",
+    "Collector 1": "The Collection fills up very quickly, especially when you realize that the Collector collects his own cards! I recommend a high-tempo strategy against him. You don't want to stick around building your board against him because it will give him more chances to steal your cards. Allies aren't as good against him because they go into the collection if they block for you. This makes survivability more difficult to solve. Use event-heavy decks because events don't go into the collection and defeat him as quick as possible.",
+    "Collector 2": "This scenario is all about removing threat from the main scheme. You can do that either by reducing the Collector's HP to 0 or by thwarting normally. As long as you have a decent deck and make thoughtful decisions, you should be able to win. Be careful about completing the main scheme too quickly. The starting threat is high enough that you can lose to 1 advance. Make sure that you can thwart a little bit after completing each main scheme to help protect against bad luck in the encounter deck.",
+    "Nebula": "This scenario is very swingy. Nebula is prone to surge trains. In solo, some games will be easy, and some will be difficult. In 2–4 player count expect to see multiple surge trains. The evasion counters on the main scheme can get out of control quickly. Keep those low at all costs and try to defeat her as soon as possible. The longer you stick around in this scenario the more likely it is that you'll run into a crazy string of encounter cards that will defeat you.",
+    "Ronan": "Ronan is the premier final boss of the game. He starts stalwart with high base ATK and will frequently hit for 8–10 damage. To make matters worse, his main scheme goes up by 2 per player each round and has a low threshold. In solo, flipping to alter-ego essentially guarantees you'll lose the main scheme. To make matters worse, Fanaticism is possibly the worst encounter card in the whole game. It gives his next attacks piercing and overkill, and for some reason it also surges. Avoiding this card through either luck or encounter deck manipulation is key to winning. Sunfire is a great ally to take because you can get rid of the Universal weapon without needing to shuffle it into the encounter deck and dealing yourself an encounter card. Fight broken with broken. Go all out to find as many gamebreaking combos as you can when you face Ronan. You'll need them.",
+    "Ebony Maw": "Maw’s spells have delayed effects. Planning and damage windows are key.",
+    "Tower Defense": "Two villains and two towers. Split focus and coordinated threat removal help.",
+    "Thanos": "Thanos shrugs off stun/confuse. Bring raw power and sustain.",
+    "Hela": "Hela’s stages involve reviving minions. Momentum and targeted removal matter.",
+    "Loki": "Loki swaps forms mid-fight. Adaptation and all-around coverage pay off.",
+    "The Hood": "The Hood chains modulars. Expect surprises—build a flexible deck.",
+    "Sandman": "Sandman scales threat and discards cards. Steady pacing and thwarting are important.",
+    "Venom": "Venom has aggressive tempo. Efficient damage and heal mitigation are helpful.",
+    "Mysterio": "Mysterio fills your deck with junk. Deck manipulation and resource filtering are strong.",
+    "Sinister Six": "Multiple villains rotate. Focused damage and crowd control keep things stable.",
+    "Venom Goblin": "Venom Goblin spreads threat across schemes. Efficient thwart and AOE are key.",
+    "Sabertooth": "Sabertooth heals often. Burst damage and healing denial help you keep up.",
+    "Project Wideawake": "Lots of Sentinels and capture mechanics. Prioritize freeing allies.",
+    "Master Mold": "Master Mold produces sentinels quickly. Minion control is essential.",
+    "Mansion Attack": "Team-based scenario with split threats. Coordination and area control work well.",
+    "Magneto": "Magneto builds momentum with upgrades. Aggression and thwart balance are crucial.",
+    "Magog": "Magog builds a stadium score. Deny points and pivot to burst damage.",
+    "Spiral": "Spiral hides in side schemes. Thwart-heavy decks can find and defeat her quickly.",
+    "Mojo": "Mojo’s changing shows alter the fight. Stay versatile and ready for surprises.",
+    "Morlock Siege": "Rescue allies and control minions. Balanced stat lines shine here.",
+    "On The Run": "A mobile villain that shifts zones. Mobility and quick scheme clears are helpful.",
+    "Juggernaut": "Juggernaut hits hard and often. Defense and healing are crucial.",
+    "Mister Sinister": "Sinister mutates minions and stats. Removal and control are valuable.",
+    "Stryfe": "Stryfe mixes threat and force. Versatile decks and reactiveness are helpful.",
+    "Unus": "Unus uses barriers and resistance. High-damage and piercing cards work best.",
+    "Four Horsemen": "Multiple strong villains—balance is key. Adapt between damage and control.",
+    "Apocalypse 1": "Stage one of a long battle. Build up carefully and conserve resources.",
+    "Dark Beast": "Dark Beast uses science and sabotage. Denial and disruption shine here.",
+    "Apocalypse 2": "Endgame boss mode. Bring your strongest builds and consistent answers.",
 }
