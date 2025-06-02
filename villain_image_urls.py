@@ -47,4 +47,9 @@ villain_image_urls = {
     "Apocalypse 1": "https://i.imgur.com/39XOEFs.jpeg",
     "Dark Beast": "https://i.imgur.com/JUpNfNG.jpeg",
     "Apocalypse 2": "https://i.imgur.com/kVJA1D1.jpeg",
+    "Black Widow": "https://i.imgur.com/Hk3mhos.jpeg",
+    "Batroc": "https://i.imgur.com/4k0b1a2.jpeg",
+    "M.O.D.O.K.": "https://i.imgur.com/3b1k0a2.jpeg",
+    "Thunderbolts": "https://i.imgur.com/3b1k0a2.jpeg",
+    "Baron Zemo": "https://i.imgur.com/3b1k0a2.jpeg",
 }
