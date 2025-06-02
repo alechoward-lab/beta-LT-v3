@@ -1,8 +1,8 @@
 villain_strategies = {
-    "Rhino": "Rhino is a straightforward bruiser. Expect a fast and aggressive game that tests your defenses.",
-    "Klaw": "Klaw brings a lot of boost icons and side schemes. Be prepared for swingy turns and sudden threats.",
-    "Ultron": "Ultron floods the board with drones. Area-of-effect damage and board control are key.",
-    "Risky Business": "Risky Business requires managing Norman's flips and reacting to shifting priorities.",
+    "Rhino": "Look out for his charge attacks. In solo be careful about going to alter-ego. Always keep track of how many advances are in the discard pile.",
+    "Klaw": "Klaw adds a lot of pressure early. Minion control, tempo, and threat removal are key to defeating him.",
+    "Ultron": "Ultron floods the board with drones. Make sure you can take them out. If your hero is bad at defeating multiple minions, add Hawkeye to your deck. If your hero deals with minions easy, still consider adding Hawkeye. Try to keep him on stage 1 of his main scheme. Building up your board while controlling minions is key to winning.",
+    "Risky Business": "This is a bizzarre scenario. Don't flip Norman unless you can deal a big chunk of damage. Building your upgrades and supports while he is Norman Osborn is key to winning.",
     "Mutagen Formula": "Expect early chaos with lots of minions. Quick removal and tempo control matter.",
     "Wrecking Crew": "Four villains at once! Managing multiple threats and prioritizing targets is essential.",
     "Crossbones": "Crossbones scales quickly with weapons. Control the tech and watch for nasty upgrades.",
