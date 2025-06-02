@@ -40,7 +40,7 @@ villain_image_urls = {
     "Morlock Siege": "https://i.imgur.com/LEyGu1W.jpeg",
     "On The Run": "https://i.imgur.com/sgqkAVE.jpeg",
     "Juggernaut": "https://i.imgur.com/OndyFaZ.jpeg",
-    "Mister Sinister": "https://i.imgur.com/OndyFaZ.jpeg",
+    "Mister Sinister": "https://i.imgur.com/GSeUBjs.jpeg",
     "Stryfe": "https://i.imgur.com/Z5UBBDu.jpeg",
     "Unus": "https://example.com/unus",
     "Four Horsemen": "https://example.com/fourhorsemen",
