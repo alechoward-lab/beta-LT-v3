@@ -10,7 +10,7 @@ villain_strategies = {
     "Taskmaster": "Taskmaster does a bit of everything, but nothing is that scary. Don't expect an easy game though! Rescuing the allies that have been Captured By Hydra will help a lot because they're very powerful!",
     "Zola": "Zola brings in a lot of tough minions and having Retaliate 1 is difficult to deal with. He doesn't have high health though. Take every opportunity you get to do big chunks of damage to him. Overkill ignores retaliate damage. Relentless Assault is a great card to add because it solves two problems at once (Minions and Retaliate). Do not underestimate Zola. The game can go bad in an instant!",
     "Red Skull": "Red Skull's ability to bring a side scheme into play every turn and increase his attack is very powerful. It's a lot to deal with. You can't let them pile up. Make sure to bring a Justice player to the table to help keep those schemes in line. Be prepared to deal with The Sleeper. You need to have a source of damage at the ready when The Sleeper comes into play.",
-    "Kang": "Kang is a multi-stage fight with changing rules. Versatility and adaptability shine.",
+    "Kang": "Kang will throw many different challenges at the players. Particularly on stage 2 when he splits everyone up, you don't know what challenges you will face. Having a reliable hero that is self sufficient is key to surviving the second stage.",
     "Drang": "Drang pressures threat and uses the Badoon swarm. Solid thwarting and crowd control are useful.",
     "Collector 1": "Collector 1 adds your cards to the collection. Low ally and upgrade spam helps.",
     "Collector 2": "Collector 2 emphasizes escaping the museum. Focus on main scheme progress.",
