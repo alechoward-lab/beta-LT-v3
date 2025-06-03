@@ -1,6 +1,6 @@
 villain_strategies = {
-    "Rhino": "Look out for his charge attacks. In solo be careful about going to alter-ego. Always keep track of how many advances are in the discard pile.",
-    "Klaw": "Klaw adds a lot of pressure early. Minion control, tempo, and threat removal are key to defeating him.",
+    "Rhino": "Look out for his charge attacks. In solo be careful about going to alter-ego. Always keep track of how many advances are in the discard pile. In expert mode, make sure to finish his side scheme as soon as possible to get rid of the hazard icon.",
+    "Klaw": "Klaw adds a lot of pressure early. Minion control, tempo, and threat removal are key to defeating him. Klaw has 2 triple boost cards in his kit. It can be deadly if he gets both of them for the same activation. Keep track of where those cards are.",
     "Ultron": "Ultron floods the board with drones. Make sure you can take them out. If your hero is bad at defeating multiple minions, add Hawkeye to your deck. If your hero deals with minions easily, still consider adding Hawkeye. Try to keep him on stage 1 of his main scheme. Building up your board while controlling minions is key to winning.",
     "Risky Business": "This is a bizarre scenario. Don't flip Norman unless you can deal a big chunk of damage. Building your upgrades and supports while he is Norman Osborn is key to winning.",
     "Mutagen Formula": "There will be a lot of pressure early due to the encounter cards. His encounter deck isn't that scary, but he can flood the board with mid-health minions. Stay in control of the minions, build your board, and try to one-shot him on stage 3 if you can to avoid dealing with all the encounter cards.",
