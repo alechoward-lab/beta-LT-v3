@@ -8,7 +8,17 @@ from villain_image_urls import villain_image_urls
 from default_heroes import default_heroes
 from hero_image_urls import hero_image_urls
 from villain_strategies import villain_strategies
+
+# Set the browser tab’s title:
 st.set_page_config(page_title="Hero Tier List For Each Villain")
+
+# ----------------------------------------
+# Page header
+# ----------------------------------------
+plot_title = "Hero Tier List For Each Villain"
+st.title(plot_title)
+st.subheader("Choose a villain from the dropdown menu to see a custom hero tier list for defeating them!")
+…
 
 # ----------------------------------------
 # Page header
