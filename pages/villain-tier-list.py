@@ -170,7 +170,7 @@ for tier in ["S", "A", "B", "C", "D"]:
         continue
 
     st.markdown(
-        f"<h2 style='color:{tier_colors[tier]};'>Tier {tier}</h2>",
+        f"<h2 style='color:{tier_colors[tier]};'>{tier} Tier</h2>",
         unsafe_allow_html=True,
     )
 
