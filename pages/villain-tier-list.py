@@ -10,7 +10,6 @@ from hero_image_urls import hero_image_urls
 from villain_strategies import villain_strategies
 
 # Set the browser tab’s title:
-st.set_page_config(page_title="Hero Tier List For Each Villain")
 
 # ----------------------------------------
 # Page header
