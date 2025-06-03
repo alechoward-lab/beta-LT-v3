@@ -8,6 +8,7 @@ from villain_image_urls import villain_image_urls
 from default_heroes import default_heroes
 from hero_image_urls import hero_image_urls
 from villain_strategies import villain_strategies
+st.set_page_config(page_title="Hero Tier List For Each Villain")
 
 # ----------------------------------------
 # Page header
