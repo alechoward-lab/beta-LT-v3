@@ -1,17 +1,8 @@
-"""
-villain-tier-list.py
-
-This Streamlit page lets users pick a Villain and see a custom Hero tier list
-based on that Villain’s preset weighting factors. By default, Rhino’s weights
-are loaded first.
-"""
-
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
 from copy import deepcopy
-
 from villain_weights import villain_weights
 from villain_image_urls import villain_image_urls
 from default_heroes import default_heroes
@@ -24,10 +15,10 @@ from villain_strategies import villain_strategies
 plot_title = "Villain Specific Hero Tier List"
 st.set_page_config(page_title=plot_title, layout="wide")
 st.title(plot_title)
-st.subheader("Choose a villain from the dropdown to see a custom hero tier list for defeating them!")
+st.subheader("Choose a villain from the dropdown menu to see a custom hero tier list for defeating them!")
 
 # ----------------------------------------
-# Factor names (must match length/order of each villain_weights[villain] array)
+# Factor names must match order/length of each villain_weights[villain] array
 # ----------------------------------------
 factor_names = [
     "Economy",
@@ -48,23 +39,27 @@ factor_names = [
 ]
 
 # ----------------------------------------
-# Ensure "Rhino" is first in the dropdown, so its preset loads by default
+# On first load, initialize session_state with Rhino’s preset if it’s not already set
 # ----------------------------------------
-villain_list = list(villain_weights.keys())
-if "Rhino" in villain_list:
-    villain_list.remove("Rhino")
-    villain_list.insert(0, "Rhino")
+if "loaded_villain" not in st.session_state:
+    # Use Rhino’s preset array as the default
+    default_villain = "Rhino"
+    preset_array = villain_weights[default_villain]
+    for idx, name in enumerate(factor_names):
+        st.session_state[name] = int(preset_array[idx])
+    st.session_state["loaded_villain"] = default_villain
 
 # ----------------------------------------
 # Villain selector
 # ----------------------------------------
-villain = st.selectbox("Select a Villain", villain_list)
+# Keep the dropdown list order identical to the original dict order
+villain = st.selectbox("Select a Villain", list(villain_weights.keys()))
 if villain not in villain_weights:
     st.error("No weighting defined for that villain yet.")
     st.stop()
 
 # ----------------------------------------
-# If the villain just changed (or on first load), load its preset into session_state
+# If the villain just changed, load its preset into session_state
 # ----------------------------------------
 if st.session_state.get("loaded_villain") != villain:
     preset_array = villain_weights[villain]
@@ -79,7 +74,7 @@ if st.session_state.get("loaded_villain") != villain:
     st.session_state["loaded_villain"] = villain
 
 # ----------------------------------------
-# Layout: two columns for image + sliders/strategy
+# Layout: two responsive columns for portrait + sliders/strategy
 # ----------------------------------------
 col_img, col_content = st.columns(2)
 
