@@ -181,7 +181,7 @@ st.markdown(
 )
 
 # ----------------------------------------
-# Display Tiered Grid of Hero Portraits (tighter spacing + smaller images)
+# Display Tiered Grid of Hero Portraits (no gaps, full-width images)
 # ----------------------------------------
 tier_colors = {
     "S": "#FF69B4",     # Hot Pink
@@ -202,16 +202,16 @@ for tier in ["S", "A", "B", "C", "D"]:
         unsafe_allow_html=True,
     )
 
-    # Break into rows of num_cols each
+    # Break into rows of num_cols each, with no gaps
     rows = [members[i : i + num_cols] for i in range(0, len(members), num_cols)]
     for row in rows:
-        cols = st.columns(num_cols, gap="small")
+        cols = st.columns(num_cols, gap="none")
         for idx, (hero, score) in enumerate(row):
             with cols[idx]:
                 img_url = hero_image_urls.get(hero)
                 if img_url:
-                    # Fixed, modest width so multiple rows fit on one screen
-                    st.image(img_url, width=140)
+                    # Fill each column fully
+                    st.image(img_url, use_container_width=True)
                 st.markdown(f"Score: {int(score)}", unsafe_allow_html=True)
 
 # ----------------------------------------
