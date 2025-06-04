@@ -205,7 +205,8 @@ with outer_col_center:
                 with cols[idx]:
                     img_url = hero_image_urls.get(hero)
                     if img_url:
-                        st.image(img_url, use_container_width=True)
+                        # Use a fixed width so multiple rows of cards fit on-screen
+                        st.image(img_url, width=120)
                     st.markdown(f"Score: {int(score)}", unsafe_allow_html=True)
 
     # ----------------------------------------
