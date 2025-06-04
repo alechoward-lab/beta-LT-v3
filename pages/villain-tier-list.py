@@ -1,81 +1,33 @@
+"""
+villain-tier-list.py
+
+This Streamlit page lets users pick a Villain and see a custom Hero tier list
+based on that Villain’s preset weighting factors. By default, Rhino’s weights
+are loaded first.
+"""
+
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
 from copy import deepcopy
+
 from villain_weights import villain_weights
 from villain_image_urls import villain_image_urls
 from default_heroes import default_heroes
 from hero_image_urls import hero_image_urls
 from villain_strategies import villain_strategies
-import streamlit as st
-
-# List all the stats that your page will need:
-stat_names = [
-    "Economy", "Tempo", "Card Value", "Survivability", "Villain Damage",
-    "Threat Removal", "Reliability", "Minion Control", "Control Boon",
-    "Support Boon", "Unique Broken Builds Boon", "Late Game Power Boon",
-    "Simplicity", "Stun/Confuse Boon", "Multiplayer Consistency Boon"
-]
-
-# 1) If any stat is missing, give it a default (e.g. same defaults as home.py)
-for stat in stat_names:
-    if stat not in st.session_state:
-        # set the default here—use whatever makes sense (e.g., 4 for Economy, 2 for Tempo, etc.)
-        if stat == "Economy":
-            st.session_state[stat] = 4
-        elif stat == "Tempo":
-            st.session_state[stat] = 2
-        elif stat == "Card Value":
-            st.session_state[stat] = 2
-        elif stat == "Survivability":
-            st.session_state[stat] = 2
-        elif stat == "Villain Damage":
-            st.session_state[stat] = 1
-        elif stat == "Threat Removal":
-            st.session_state[stat] = 2
-        elif stat == "Reliability":
-            st.session_state[stat] = 3
-        elif stat == "Minion Control":
-            st.session_state[stat] = 1
-        elif stat == "Control Boon":
-            st.session_state[stat] = 2
-        elif stat == "Support Boon":
-            st.session_state[stat] = 2
-        elif stat == "Unique Broken Builds Boon":
-            st.session_state[stat] = 1
-        elif stat == "Late Game Power Boon":
-            st.session_state[stat] = 1
-        elif stat == "Simplicity":
-            st.session_state[stat] = 0
-        elif stat == "Stun/Confuse Boon":
-            st.session_state[stat] = 0
-        elif stat == "Multiplayer Consistency Boon":
-            st.session_state[stat] = 0
-
-# Now it’s safe to do:
-for name in stat_names:
-    st.slider(
-        name,
-        min_value=-10,
-        max_value=10,
-        value=st.session_state[name],   # guaranteed to exist
-        key=name,
-        # …any other args…
-    )
-
-# …the rest of your villain-tier-list page…
-
 
 # ----------------------------------------
 # Page header
 # ----------------------------------------
 plot_title = "Villain Specific Hero Tier List"
+st.set_page_config(page_title=plot_title, layout="wide")
 st.title(plot_title)
-st.subheader("Choose a villain from the dropdown menu to see a custom hero tier list for defeating them!")
+st.subheader("Choose a villain from the dropdown to see a custom hero tier list for defeating them!")
 
 # ----------------------------------------
-# Factor names must match order/length of each villain_weights[villain] array
+# Factor names (must match length/order of each villain_weights[villain] array)
 # ----------------------------------------
 factor_names = [
     "Economy",
@@ -96,15 +48,23 @@ factor_names = [
 ]
 
 # ----------------------------------------
+# Ensure "Rhino" is first in the dropdown, so its preset loads by default
+# ----------------------------------------
+villain_list = list(villain_weights.keys())
+if "Rhino" in villain_list:
+    villain_list.remove("Rhino")
+    villain_list.insert(0, "Rhino")
+
+# ----------------------------------------
 # Villain selector
 # ----------------------------------------
-villain = st.selectbox("Select a Villain", list(villain_weights.keys()))
+villain = st.selectbox("Select a Villain", villain_list)
 if villain not in villain_weights:
     st.error("No weighting defined for that villain yet.")
     st.stop()
 
 # ----------------------------------------
-# If the villain just changed, load its preset into session_state
+# If the villain just changed (or on first load), load its preset into session_state
 # ----------------------------------------
 if st.session_state.get("loaded_villain") != villain:
     preset_array = villain_weights[villain]
@@ -119,13 +79,13 @@ if st.session_state.get("loaded_villain") != villain:
     st.session_state["loaded_villain"] = villain
 
 # ----------------------------------------
-# Layout: two responsive columns for portrait + sliders/strategy
+# Layout: two columns for image + sliders/strategy
 # ----------------------------------------
 col_img, col_content = st.columns(2)
 
 with col_img:
     if villain in villain_image_urls:
-        st.image(villain_image_urls[villain], use_container_width=True)
+        st.image(villain_image_urls[villain], use_column_width=True)
     else:
         st.write("No image available for this villain.")
 
@@ -212,7 +172,6 @@ st.markdown(
 # ----------------------------------------
 # Display Tiered Grid of Hero Portraits
 # ----------------------------------------
-
 tier_colors = {
     "S": "#FF69B4",     # Hot Pink
     "A": "purple",
@@ -239,7 +198,7 @@ for tier in ["S", "A", "B", "C", "D"]:
             with cols[idx]:
                 img_url = hero_image_urls.get(hero)
                 if img_url:
-                    st.image(img_url, use_container_width=True)
+                    st.image(img_url, use_column_width=True)
                 st.markdown(f"Score: {int(score)}", unsafe_allow_html=True)
 
 # ----------------------------------------
