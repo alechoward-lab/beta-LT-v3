@@ -13,7 +13,6 @@ from villain_strategies import villain_strategies
 # Page header
 # ----------------------------------------
 plot_title = "Villain Specific Hero Tier List"
-st.set_page_config(page_title=plot_title, layout="wide")
 st.title(plot_title)
 st.subheader("Choose a villain from the dropdown menu to see a custom hero tier list for defeating them!")
 
@@ -39,20 +38,8 @@ factor_names = [
 ]
 
 # ----------------------------------------
-# On first load, initialize session_state with Rhino’s preset if it’s not already set
-# ----------------------------------------
-if "loaded_villain" not in st.session_state:
-    # Use Rhino’s preset array as the default
-    default_villain = "Rhino"
-    preset_array = villain_weights[default_villain]
-    for idx, name in enumerate(factor_names):
-        st.session_state[name] = int(preset_array[idx])
-    st.session_state["loaded_villain"] = default_villain
-
-# ----------------------------------------
 # Villain selector
 # ----------------------------------------
-# Keep the dropdown list order identical to the original dict order
 villain = st.selectbox("Select a Villain", list(villain_weights.keys()))
 if villain not in villain_weights:
     st.error("No weighting defined for that villain yet.")
@@ -80,7 +67,7 @@ col_img, col_content = st.columns(2)
 
 with col_img:
     if villain in villain_image_urls:
-        st.image(villain_image_urls[villain], use_column_width=True)
+        st.image(villain_image_urls[villain], use_container_width=True)
     else:
         st.write("No image available for this villain.")
 
@@ -167,6 +154,7 @@ st.markdown(
 # ----------------------------------------
 # Display Tiered Grid of Hero Portraits
 # ----------------------------------------
+
 tier_colors = {
     "S": "#FF69B4",     # Hot Pink
     "A": "purple",
@@ -193,7 +181,7 @@ for tier in ["S", "A", "B", "C", "D"]:
             with cols[idx]:
                 img_url = hero_image_urls.get(hero)
                 if img_url:
-                    st.image(img_url, use_column_width=True)
+                    st.image(img_url, use_container_width=True)
                 st.markdown(f"Score: {int(score)}", unsafe_allow_html=True)
 
 # ----------------------------------------
