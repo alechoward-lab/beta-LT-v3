@@ -51,7 +51,7 @@ factor_names = [
 # Ensure that any missing factor key in session_state gets initialized to Rhino’s preset
 # (so that returning from another page can’t leave any factor missing)
 # ----------------------------------------
-rhino_preset = villain_weights.get("Rhino", [0]*len(factor_names))
+rhino_preset = villain_weights.get("Rhino", [0] * len(factor_names))
 for idx, name in enumerate(factor_names):
     if name not in st.session_state:
         st.session_state[name] = int(rhino_preset[idx])
@@ -86,7 +86,7 @@ col_img, col_content = st.columns(2)
 
 with col_img:
     if villain in villain_image_urls:
-        st.image(villain_image_urls[villain], use_column_width=True)
+        st.image(villain_image_urls[villain], use_container_width=True)
     else:
         st.write("No image available for this villain.")
 
@@ -199,7 +199,7 @@ for tier in ["S", "A", "B", "C", "D"]:
             with cols[idx]:
                 img_url = hero_image_urls.get(hero)
                 if img_url:
-                    st.image(img_url, use_column_width=True)
+                    st.image(img_url, use_container_width=True)
                 st.markdown(f"Score: {int(score)}", unsafe_allow_html=True)
 
 # ----------------------------------------
