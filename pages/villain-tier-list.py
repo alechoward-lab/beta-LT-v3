@@ -8,6 +8,64 @@ from villain_image_urls import villain_image_urls
 from default_heroes import default_heroes
 from hero_image_urls import hero_image_urls
 from villain_strategies import villain_strategies
+import streamlit as st
+
+# List all the stats that your page will need:
+stat_names = [
+    "Economy", "Tempo", "Card Value", "Survivability", "Villain Damage",
+    "Threat Removal", "Reliability", "Minion Control", "Control Boon",
+    "Support Boon", "Unique Broken Builds Boon", "Late Game Power Boon",
+    "Simplicity", "Stun/Confuse Boon", "Multiplayer Consistency Boon"
+]
+
+# 1) If any stat is missing, give it a default (e.g. same defaults as home.py)
+for stat in stat_names:
+    if stat not in st.session_state:
+        # set the default here—use whatever makes sense (e.g., 4 for Economy, 2 for Tempo, etc.)
+        if stat == "Economy":
+            st.session_state[stat] = 4
+        elif stat == "Tempo":
+            st.session_state[stat] = 2
+        elif stat == "Card Value":
+            st.session_state[stat] = 2
+        elif stat == "Survivability":
+            st.session_state[stat] = 2
+        elif stat == "Villain Damage":
+            st.session_state[stat] = 1
+        elif stat == "Threat Removal":
+            st.session_state[stat] = 2
+        elif stat == "Reliability":
+            st.session_state[stat] = 3
+        elif stat == "Minion Control":
+            st.session_state[stat] = 1
+        elif stat == "Control Boon":
+            st.session_state[stat] = 2
+        elif stat == "Support Boon":
+            st.session_state[stat] = 2
+        elif stat == "Unique Broken Builds Boon":
+            st.session_state[stat] = 1
+        elif stat == "Late Game Power Boon":
+            st.session_state[stat] = 1
+        elif stat == "Simplicity":
+            st.session_state[stat] = 0
+        elif stat == "Stun/Confuse Boon":
+            st.session_state[stat] = 0
+        elif stat == "Multiplayer Consistency Boon":
+            st.session_state[stat] = 0
+
+# Now it’s safe to do:
+for name in stat_names:
+    st.slider(
+        name,
+        min_value=-10,
+        max_value=10,
+        value=st.session_state[name],   # guaranteed to exist
+        key=name,
+        # …any other args…
+    )
+
+# …the rest of your villain-tier-list page…
+
 
 # ----------------------------------------
 # Page header
