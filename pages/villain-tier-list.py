@@ -10,6 +10,10 @@ from default_heroes import default_heroes
 from hero_image_urls import hero_image_urls
 from villain_strategies import villain_strategies
 
+st.markdown("**Watch the video tutorial here:** [Video Tutorial](https://youtu.be/9eEMPnSwVLw)")
+st.markdown("**Join the Discord to ask questions or give feedback:** [Discord Invite](https://discord.gg/ReF5jDSHqV)")
+
+
 # ----------------------------------------
 # Page header
 # ----------------------------------------
