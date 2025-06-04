@@ -1,11 +1,3 @@
-"""
-villain-tier-list.py
-
-This Streamlit page lets users pick a Villain and see a custom Hero tier list
-based on that Villain’s preset weighting factors. By default, Rhino’s weights
-are loaded first, and missing session_state keys are always initialized to Rhino’s preset.
-"""
-
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
@@ -19,24 +11,10 @@ from hero_image_urls import hero_image_urls
 from villain_strategies import villain_strategies
 
 # ----------------------------------------
-# Page header & CSS to center content with a max width
+# Page header
 # ----------------------------------------
-st.set_page_config(page_title="Villain Specific Hero Tier List", layout="wide")
-st.markdown(
-    """
-    <style>
-      /* Constrain the overall content width and center it */
-      .reportview-container .main .block-container {
-        max-width: 1200px;
-        margin-left: auto;
-        margin-right: auto;
-      }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
-
-st.title("Villain Specific Hero Tier List")
+plot_title = "Villain Specific Hero Tier List"
+st.title(plot_title)
 st.subheader("Choose a villain from the dropdown menu to see a custom hero tier list for defeating them!")
 
 # ----------------------------------------
@@ -61,7 +39,7 @@ factor_names = [
 ]
 
 # ----------------------------------------
-# Initialize any missing session_state keys to Rhino’s preset
+# Initialize any missing session_state keys to Rhino’s preset (prevents KeyError when returning)
 # ----------------------------------------
 rhino_preset = villain_weights.get("Rhino", [0] * len(factor_names))
 for idx, name in enumerate(factor_names):
@@ -69,7 +47,7 @@ for idx, name in enumerate(factor_names):
         st.session_state[name] = int(rhino_preset[idx])
 
 # ----------------------------------------
-# Villain selector (preserve dict order)
+# Villain selector
 # ----------------------------------------
 villain = st.selectbox("Select a Villain", list(villain_weights.keys()))
 if villain not in villain_weights:
@@ -92,9 +70,9 @@ if st.session_state.get("loaded_villain") != villain:
     st.session_state["loaded_villain"] = villain
 
 # ----------------------------------------
-# Two responsive columns: one for the villain image, one for sliders & strategy
+# Layout: two responsive columns for portrait + sliders/strategy
 # ----------------------------------------
-col_img, col_content = st.columns([1, 3])
+col_img, col_content = st.columns(2)
 
 with col_img:
     if villain in villain_image_urls:
@@ -103,6 +81,7 @@ with col_img:
         st.write("No image available for this villain.")
 
 with col_content:
+    # Expander containing all sliders
     with st.expander("Edit Weighting Factors"):
         st.markdown(
             "Use these sliders to adjust how much you value each factor. "
@@ -117,6 +96,7 @@ with col_content:
                 key=name
             )
 
+    # Section for strategy explanation
     st.markdown("### Strategy Tips")
     st.markdown(villain_strategies.get(villain, "No strategy tips written yet."))
 
@@ -181,7 +161,7 @@ st.markdown(
 )
 
 # ----------------------------------------
-# Display Tiered Grid of Hero Portraits (no gaps, full-width images)
+# Display Tiered Grid of Hero Portraits
 # ----------------------------------------
 tier_colors = {
     "S": "#FF69B4",     # Hot Pink
@@ -202,15 +182,14 @@ for tier in ["S", "A", "B", "C", "D"]:
         unsafe_allow_html=True,
     )
 
-    # Break into rows of num_cols each, with no gaps
+    # Break into rows of num_cols each
     rows = [members[i : i + num_cols] for i in range(0, len(members), num_cols)]
     for row in rows:
-        cols = st.columns(num_cols, gap="none")
+        cols = st.columns(num_cols)
         for idx, (hero, score) in enumerate(row):
             with cols[idx]:
                 img_url = hero_image_urls.get(hero)
                 if img_url:
-                    # Fill each column fully
                     st.image(img_url, use_container_width=True)
                 st.markdown(f"Score: {int(score)}", unsafe_allow_html=True)
 
