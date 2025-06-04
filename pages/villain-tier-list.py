@@ -1,8 +1,17 @@
+"""
+villain-tier-list.py
+
+This Streamlit page lets users pick a Villain and see a custom Hero tier list
+based on that Villain’s preset weighting factors. By default, Rhino’s weights
+are loaded first, and missing session_state keys are always initialized to Rhino’s preset.
+"""
+
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
 from copy import deepcopy
+
 from villain_weights import villain_weights
 from villain_image_urls import villain_image_urls
 from default_heroes import default_heroes
@@ -13,6 +22,7 @@ from villain_strategies import villain_strategies
 # Page header
 # ----------------------------------------
 plot_title = "Villain Specific Hero Tier List"
+st.set_page_config(page_title=plot_title, layout="wide")
 st.title(plot_title)
 st.subheader("Choose a villain from the dropdown menu to see a custom hero tier list for defeating them!")
 
@@ -38,7 +48,16 @@ factor_names = [
 ]
 
 # ----------------------------------------
-# Villain selector
+# Ensure that any missing factor key in session_state gets initialized to Rhino’s preset
+# (so that returning from another page can’t leave any factor missing)
+# ----------------------------------------
+rhino_preset = villain_weights.get("Rhino", [0]*len(factor_names))
+for idx, name in enumerate(factor_names):
+    if name not in st.session_state:
+        st.session_state[name] = int(rhino_preset[idx])
+
+# ----------------------------------------
+# Villain selector (keep original dict order)
 # ----------------------------------------
 villain = st.selectbox("Select a Villain", list(villain_weights.keys()))
 if villain not in villain_weights:
@@ -46,7 +65,7 @@ if villain not in villain_weights:
     st.stop()
 
 # ----------------------------------------
-# If the villain just changed, load its preset into session_state
+# If the villain just changed (or on first load), load its preset into session_state
 # ----------------------------------------
 if st.session_state.get("loaded_villain") != villain:
     preset_array = villain_weights[villain]
@@ -67,7 +86,7 @@ col_img, col_content = st.columns(2)
 
 with col_img:
     if villain in villain_image_urls:
-        st.image(villain_image_urls[villain], use_container_width=True)
+        st.image(villain_image_urls[villain], use_column_width=True)
     else:
         st.write("No image available for this villain.")
 
@@ -154,7 +173,6 @@ st.markdown(
 # ----------------------------------------
 # Display Tiered Grid of Hero Portraits
 # ----------------------------------------
-
 tier_colors = {
     "S": "#FF69B4",     # Hot Pink
     "A": "purple",
@@ -181,7 +199,7 @@ for tier in ["S", "A", "B", "C", "D"]:
             with cols[idx]:
                 img_url = hero_image_urls.get(hero)
                 if img_url:
-                    st.image(img_url, use_container_width=True)
+                    st.image(img_url, use_column_width=True)
                 st.markdown(f"Score: {int(score)}", unsafe_allow_html=True)
 
 # ----------------------------------------
