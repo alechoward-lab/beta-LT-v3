@@ -118,4 +118,6 @@ hero_image_urls = {
     "Magneto": "images/heroes/55_Magneto.jpg",
     "Maria Hill": "images/heroes/56_Maria_Hill.jpg",
     "Nick Fury": "images/heroes/57_Nick_Fury.jpg",
+    "Silk": "images/heroes/56_Silk.jpg",
+    "Black Panther (Shuri)": "images/heroes/57_Shuri.jpg",
 }
