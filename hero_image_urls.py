@@ -64,4 +64,7 @@ hero_image_urls = {
     "Nick Fury": "images/heroes/57_Nick_Fury.jpg",
     "Silk": "images/heroes/58_Silk.jpg",
     "Shuri": "images/heroes/59_Shuri.jpg",
+    "Falcon": "images/heroes/60_Falcon.jpg",
+    "Shuri": "images/heroes/61_Winter_Soldier.jpg",
+
 }
