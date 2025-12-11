@@ -1,7 +1,7 @@
 import numpy as np
                             #              e, t, cv,s, d, th,re,mi,c, s, br,lg,si,sc,mu
 default_heroes = {  
-        "Captain Marvel":       np.array([ 5, 3,-1, 3, 4, 2, 4, 1, 0, 3, 0, 0, 5, 1, 1]),
+        "Captain Marvel":       np.array([ 5, 4,-1, 3, 4, 2, 4, 1, 0, 3, 0, 0, 5, 1, 1]),
         "Iron Man":             np.array([ 4,-5, 4, 2, 5, 2, 0, 3, 0, 0, 1, 4,-5, 0, 5]),
         "Spider-Man Peter":     np.array([ 4, 0, 3, 5, 3,-2, 2, 0, 4, 1, 2, 0, 0, 0, 0]),
         "Black Panther":        np.array([ 3,-1, 4, 3, 3, 1, 1, 5, 0, 0, 0, 3,-1, 0, 1]),
