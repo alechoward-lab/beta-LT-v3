@@ -16,8 +16,7 @@ st.subheader(
 )
 
 st.markdown(
-    "A hero is considered **weak** in a stat if it is below **3**. "
-    "Partner heroes are scored based on how well they compensate for those weaknesses."
+    "This is a beta build. It is not complete. Do not take these as correct pairings. "
 )
 
 # ----------------------------------------
