@@ -16,7 +16,8 @@ st.subheader(
 )
 
 st.markdown(
-    "This is a beta build. It is not complete. Do not take these as correct pairings. "
+    "This is a **beta build**. These pairings are experimental and are meant to model "
+    "**synergy**, not raw power. Strong heroes do not automatically make good partners."
 )
 
 # ----------------------------------------
@@ -36,11 +37,11 @@ stats_A = heroes[hero_A]
 # ----------------------------------------
 TARGET = 3  # anything below this is a weakness
 
-# Compute needs (weakness magnitude)
+# Compute Hero A weaknesses (needs)
 needs = np.maximum(0, TARGET - stats_A)
 
 # ----------------------------------------
-# Score partner heroes
+# Score partner heroes (TRUE SYNERGY)
 # ----------------------------------------
 scores = {}
 
@@ -48,13 +49,16 @@ for hero_B, stats_B in heroes.items():
     if hero_B == hero_A:
         continue
 
-    # Only positive contributions from partner
-    strengths_B = np.maximum(0, stats_B)
+    # Partner can only contribute where Hero A is weak
+    usable_strengths = np.minimum(
+        np.maximum(0, stats_B),  # partner must be positive
+        needs                     # and actually needed
+    )
 
     # Core synergy score
-    score = np.dot(needs, strengths_B)
+    score = np.dot(needs, usable_strengths)
 
-    # Normalize so heroes with more weaknesses don't dominate
+    # Normalize so heroes with many weaknesses don't inflate scores
     score /= (np.sum(needs) + 1e-6)
 
     scores[hero_B] = score
@@ -141,7 +145,11 @@ colors = [tier_colors[hero_to_tier[h]] for h in names]
 fig, ax = plt.subplots(figsize=(14, 7), dpi=200)
 ax.bar(names, vals, color=colors)
 ax.set_ylabel("Synergy Score")
-ax.set_title(f"Hero Pairing Synergy with {hero_A}", fontsize=18, fontweight="bold")
+ax.set_title(
+    f"Hero Pairing Synergy with {hero_A}",
+    fontsize=18,
+    fontweight="bold"
+)
 plt.xticks(rotation=45, ha="right")
 
 for lbl in ax.get_xticklabels():
