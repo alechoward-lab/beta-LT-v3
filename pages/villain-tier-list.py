@@ -13,7 +13,6 @@ from villain_strategies import villain_strategies
 st.markdown("**Watch the video tutorial here:** [Video Tutorial](https://youtu.be/9eEMPnSwVLw)")
 st.markdown("**Join the Discord to ask questions or give feedback:** [Discord Invite](https://discord.gg/ReF5jDSHqV)")
 
-
 # ----------------------------------------
 # Page header
 # ----------------------------------------
@@ -22,7 +21,7 @@ st.title(plot_title)
 st.subheader("Choose a villain from the dropdown menu to see a custom hero tier list for defeating them!")
 
 # ----------------------------------------
-# Factor names must match order/length of each villain_weights[villain] array
+# Factor names (ORDER MATTERS)
 # ----------------------------------------
 factor_names = [
     "Economy",
@@ -43,38 +42,43 @@ factor_names = [
 ]
 
 # ----------------------------------------
-# Initialize any missing session_state keys to Rhino’s preset (prevents KeyError when returning)
+# Initialize villain session_state keys safely
 # ----------------------------------------
 rhino_preset = villain_weights.get("Rhino", [0] * len(factor_names))
 for idx, name in enumerate(factor_names):
-    if name not in st.session_state:
-        st.session_state[name] = int(rhino_preset[idx])
+    key = f"villain_{name}"
+    if key not in st.session_state:
+        st.session_state[key] = int(rhino_preset[idx])
 
 # ----------------------------------------
 # Villain selector
 # ----------------------------------------
 villain = st.selectbox("Select a Villain", list(villain_weights.keys()))
+
 if villain not in villain_weights:
     st.error("No weighting defined for that villain yet.")
     st.stop()
 
 # ----------------------------------------
-# If the villain just changed (or on first load), load its preset into session_state
+# Load villain preset ON CHANGE
 # ----------------------------------------
 if st.session_state.get("loaded_villain") != villain:
     preset_array = villain_weights[villain]
+
     if len(preset_array) != len(factor_names):
         st.error(
             f"villain_weights['{villain}'] has length {len(preset_array)}, "
             f"but factor_names has length {len(factor_names)}."
         )
         st.stop()
+
     for idx, name in enumerate(factor_names):
-        st.session_state[name] = int(preset_array[idx])
+        st.session_state[f"villain_{name}"] = int(preset_array[idx])
+
     st.session_state["loaded_villain"] = villain
 
 # ----------------------------------------
-# Layout: two responsive columns for portrait + sliders/strategy
+# Layout
 # ----------------------------------------
 col_img, col_content = st.columns(2)
 
@@ -85,42 +89,42 @@ with col_img:
         st.write("No image available for this villain.")
 
 with col_content:
-    # Expander containing all sliders
     with st.expander("Edit Weighting Factors"):
         st.markdown(
             "Use these sliders to adjust how much you value each factor. "
             "Defaults come from this villain’s preset."
         )
+
         for name in factor_names:
             st.slider(
                 label=name,
                 min_value=-10,
                 max_value=10,
-                value=st.session_state[name],
-                key=name
+                value=st.session_state[f"villain_{name}"],
+                key=f"villain_{name}",
             )
 
-    # Section for strategy explanation
     st.markdown("### Strategy Tips")
     st.markdown(villain_strategies.get(villain, "No strategy tips written yet."))
 
 # ----------------------------------------
-# After sliders, gather the (possibly edited) weights
+# Gather villain weights
 # ----------------------------------------
-weights = np.array([st.session_state[name] for name in factor_names])
+weights = np.array([st.session_state[f"villain_{name}"] for name in factor_names])
 
 # ----------------------------------------
 # Score heroes
 # ----------------------------------------
-heroes = deepcopy(default_heroes)  # dict of {name: np.array([...])}
+heroes = deepcopy(default_heroes)
 scores = {name: float(np.dot(stats, weights)) for name, stats in heroes.items()}
 sorted_scores = dict(sorted(scores.items(), key=lambda kv: kv[1]))
 
 # ----------------------------------------
-# Compute dynamic tier thresholds
+# Tier thresholds
 # ----------------------------------------
 all_scores = np.array(list(scores.values()))
 mean, std = all_scores.mean(), all_scores.std()
+
 thr_S = mean + 1.5 * std
 thr_A = mean + 0.5 * std
 thr_B = mean - 0.5 * std
@@ -145,13 +149,14 @@ for tier in tiers:
 hero_to_tier = {h: t for t, lst in tiers.items() for h, _ in lst}
 
 # ----------------------------------------
-# Background CSS (unchanged)
+# Background CSS
 # ----------------------------------------
 bg = (
     "https://github.com/alechoward-lab/"
     "Marvel-Champions-Hero-Tier-List/blob/main/"
     "images/background/marvel_champions_background_image_v4.jpg?raw=true"
 )
+
 st.markdown(
     f"""
     <style>
@@ -165,15 +170,16 @@ st.markdown(
 )
 
 # ----------------------------------------
-# Display Tiered Grid of Hero Portraits
+# Tier grid
 # ----------------------------------------
 tier_colors = {
-    "S": "#FF69B4",     # Hot Pink
+    "S": "#FF69B4",
     "A": "purple",
-    "B": "#3CB371",     # MediumSeaGreen
-    "C": "#FF8C00",     # DarkOrange
+    "B": "#3CB371",
+    "C": "#FF8C00",
     "D": "red",
 }
+
 num_cols = 5
 
 for tier in ["S", "A", "B", "C", "D"]:
@@ -186,8 +192,7 @@ for tier in ["S", "A", "B", "C", "D"]:
         unsafe_allow_html=True,
     )
 
-    # Break into rows of num_cols each
-    rows = [members[i : i + num_cols] for i in range(0, len(members), num_cols)]
+    rows = [members[i:i + num_cols] for i in range(0, len(members), num_cols)]
     for row in rows:
         cols = st.columns(num_cols)
         for idx, (hero, score) in enumerate(row):
@@ -198,9 +203,10 @@ for tier in ["S", "A", "B", "C", "D"]:
                 st.markdown(f"Score: {int(score)}", unsafe_allow_html=True)
 
 # ----------------------------------------
-# Bar Chart of Hero Scores (with dynamic title)
+# Bar chart
 # ----------------------------------------
 st.header("Villain Specific Hero Scores")
+
 names = list(sorted_scores.keys())
 vals = list(sorted_scores.values())
 colors = [tier_colors[hero_to_tier[h]] for h in names]
@@ -211,12 +217,10 @@ ax.set_title(f"Hero Scores Against {villain}", fontsize=18, fontweight="bold")
 ax.set_ylabel("Score", fontsize=14)
 plt.xticks(rotation=45, ha="right")
 
-# Color the x-axis labels based on tier
 for lbl in ax.get_xticklabels():
     hero_label = lbl.get_text()
     lbl.set_color(tier_colors.get(hero_to_tier.get(hero_label, ""), "black"))
 
-# Add legend for tiers
 handles = [Patch(color=c, label=f"Tier {t}") for t, c in tier_colors.items()]
 ax.legend(handles=handles, title="Tiers", loc="upper left", fontsize=12, title_fontsize=12)
 
