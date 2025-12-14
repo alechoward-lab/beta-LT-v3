@@ -1,3 +1,6 @@
+"""
+Need to add extra wweight to high tempo being paired with low tempo characters.
+"""
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
