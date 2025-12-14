@@ -16,8 +16,7 @@ st.subheader(
 )
 
 st.markdown(
-    "This is a **beta build**. These pairings are experimental and are meant to model "
-    "**synergy**, not raw power. Strong heroes do not automatically make good partners."
+    "This is a **beta build**. These pairings are not to be taken as good at this point. Also, it doesn't currently account for specific syergies. "
 )
 
 # ----------------------------------------
