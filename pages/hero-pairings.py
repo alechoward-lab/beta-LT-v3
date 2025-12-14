@@ -133,7 +133,7 @@ for tier in ["S", "A", "B", "C", "D"]:
                 img = hero_image_urls.get(hero)
                 if img:
                     st.image(img, use_container_width=True)
-                st.markdown(f"**Synergy Score:** {score:.2f}")
+                #st.markdown(f"**Synergy Score:** {score:.2f}")
 
 # ----------------------------------------
 # Bar chart of synergy scores
