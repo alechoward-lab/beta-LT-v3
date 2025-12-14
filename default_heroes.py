@@ -14,6 +14,7 @@ default_heroes = {
         "Hulk":                 np.array([-3, 5,-2, 4, 4,-5,-5, 3, 0, 0, 1, 0, 2, 0, 0]),
         "Hawkeye":              np.array([ 1,-1, 4,-3, 2, 1,-2, 5, 3, 0, 0, 0,-3, 5, 0]),
         "Spider-Woman":         np.array([ 3, 1, 4, 3, 2, 4, 2, 2, 3, 1, 2, 0,-3, 5, 0]),
+                            #              e, t, cv,s, d, th,re,mi,c, s, br,lg,si,sc,mu
         "Ant-Man":              np.array([ 2, 0, 3, 3, 4, 1, 2, 4, 2, 0, 0, 2,-3, 1, 0]),
         "Wasp":                 np.array([ 1, 3, 0, 1, 4, 2, 3, 4, 0, 1, 1, 0,-5, 0, 0]),
         "Quicksilver":          np.array([ 1,-3, 3,-1, 3, 4, 3, 3, 0, 1, 0, 3, 0, 0, 0]),
@@ -30,6 +31,7 @@ default_heroes = {
         "War Machine":          np.array([ 1,-2, 1, 2, 4, 0,-2, 5, 0, 0, 0, 1,-3, 0, 2]),
         "Valkyrie":             np.array([ 1, 2,-2, 2, 2,-2,-1, 4, 0, 0, 0, 0,-3, 0, 1]),
         "Vision":               np.array([ 3, 3, 3, 3, 4, 3, 4, 2, 2, 0, 1, 0, 0, 1, 0]),
+                            #              e, t, cv,s, d, th,re,mi,c, s, br,lg,si,sc,mu
         "Ghost Spider":         np.array([ 3, 3, 3, 3, 3, 2, 2, 2, 4, 1, 1, 0,-3, 0, 0]),
         "Spider-Man (Miles)":   np.array([ 2, 4, 5, 3, 5, 4, 5, 1, 4, 0, 1, 0, 3, 5, 0]),
         "Nova":                 np.array([ 4, 4, 4, 1, 2, 3, 4, 3, 0, 1, 2, 0, 2, 0, 2]),
@@ -44,6 +46,7 @@ default_heroes = {
         "Storm":                np.array([ 2, 4, 5, 1, 5, 4, 3, 4, 1, 3, 1, 0,-3, 0, 4]),
         "Gambit":               np.array([ 1,-1, 2, 2, 3, 3, 2, 4, 2, 1, 0, 0,-1, 4, 0]),
         "Rogue":                np.array([ 0, 3, 3, 3, 3, 3, 1, 2, 2, 0, 1, 0, 0, 1, 2]),
+                            #              e, t, cv,s, d, th,re,mi,c, s, br,lg,si,sc,mu
         "Cable":                np.array([ 2, 3, 4, 3, 3, 5, 5, 2, 3, 3, 2, 4,-5, 0,-4]),
         "Domino":               np.array([ 3,-2, 4, 1, 4, 3, 2, 4, 1, 0, 0, 3,-5, 0, 1]),
         "Psylocke":             np.array([ 4, 4, 4, 1, 1, 5, 4, 3, 5, 0, 2, 0,-3, 5, 0]),
@@ -55,8 +58,9 @@ default_heroes = {
         "Iceman":               np.array([ 3, 2, 3, 3, 2, 2, 3, 4, 3, 2, 0, 0, 0, 0, 1]),
         "Jubilee":              np.array([ 3,-1, 4, 0, 2, 4, 3, 3, 4, 1, 0, 1,-1, 5, 1]),
         "Nightcrawler":         np.array([ 1, 2, 3, 4, 1, 3, 4, 4, 1, 2, 0, 0,-1, 1, 2]),
+                            #              e, t, cv,s, d, th,re,mi,c, s, br,lg,si,sc,mu
         "Magneto":              np.array([ 3, 3, 3, 4, 3, 4, 5, 4, 2, 0, 0, 1, 3, 0, 1]),
-        "Maria Hill":           np.array([ 2, 1, 5, 2, 3, 5, 5, 2, 2, 2, 2, 6,-3, 0, 2]),
+        "Maria Hill":           np.array([ 2, 1, 6, 2, 3, 5, 5, 2, 2, 2, 2, 6,-3, 1, 2]),
         "Nick Fury":            np.array([ 1, 2, 3, 4, 2, 4, 4, 5, 2, 0, 0, 0,-3, 0, 1]),
         "Shuri":                np.array([ 3, 1, 4, 3, 4, 4, 4, 5, 1, 0, 1, 0, 0, 3, 0]),
         "Silk":                 np.array([ 3,-1, 5, 4, 4, 5, 2, 4, 4, 1, 2, 2,-5, 0, 1]),
