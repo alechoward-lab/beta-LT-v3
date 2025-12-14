@@ -35,7 +35,7 @@ stats_A = heroes[hero_A]
 # ----------------------------------------
 # Define weakness threshold
 # ----------------------------------------
-TARGET = 2  # anything below this is a weakness
+TARGET = 1  # anything below this is a weakness
 
 # Compute Hero A weaknesses (needs)
 needs = np.maximum(0, TARGET - stats_A)
