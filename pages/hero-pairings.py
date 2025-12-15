@@ -52,8 +52,7 @@ with col1:
 with col2:
     st.markdown("""
     **Strengths and Shortcomings of This List:**
-    - Helps find balanced and comfortable 2-player pairings
-    - Encourages role diversity instead of raw power
+    - Helps find balanced and fun 2-player pairings
     - Does not model card-level synergies or traits
     - Aspect-agnostic by design
     - Inherits assumptions from the General Power tier list
