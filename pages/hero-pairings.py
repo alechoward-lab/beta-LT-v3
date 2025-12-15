@@ -128,3 +128,107 @@ for hero_B, stats_B in heroes.items():
     # 3. Late-game hero + high thwart bonus
     # ----------------------------------
     if tempo_A < TARGET and stats_B[THWART_INDEX] > TARGET:
+        synergy_score += LATE_GAME_THWART_BONUS * stats_B[THWART_INDEX]
+
+    # ----------------------------------
+    # 4. Low survivability + blocker/support bonus
+    # ----------------------------------
+    if stats_A[SURVIVABILITY_INDEX] < TARGET:
+        blocking_value = (
+            max(0, stats_B[SURVIVABILITY_INDEX]) +
+            max(0, stats_B[SUPPORT_INDEX])
+        )
+        synergy_score += BLOCKING_SUPPORT_BONUS * blocking_value
+
+    # ----------------------------------
+    # 5. Strong + strong disincentive
+    # ----------------------------------
+    if power_A >= STRONG_HERO_THRESHOLD and power_B >= STRONG_HERO_THRESHOLD:
+        synergy_score *= POWER_DISINCENTIVE
+
+    # ----------------------------------
+    # 6. Weak + weak disincentive
+    # ----------------------------------
+    if power_A <= WEAK_HERO_THRESHOLD and power_B <= WEAK_HERO_THRESHOLD:
+        synergy_score *= WEAK_PAIR_DISINCENTIVE
+
+    scores[hero_B] = synergy_score
+
+# ----------------------------------------
+# Tiering
+# ----------------------------------------
+vals = np.array(list(scores.values()))
+mean, std = vals.mean(), vals.std()
+
+thr_S = mean + 1.5 * std
+thr_A = mean + 0.5 * std
+thr_B = mean - 0.5 * std
+thr_C = mean - 1.5 * std
+
+tiers = {"S": [], "A": [], "B": [], "C": [], "D": []}
+
+for hero, sc in scores.items():
+    if sc >= thr_S:
+        tiers["S"].append(hero)
+    elif sc >= thr_A:
+        tiers["A"].append(hero)
+    elif sc >= thr_B:
+        tiers["B"].append(hero)
+    elif sc >= thr_C:
+        tiers["C"].append(hero)
+    else:
+        tiers["D"].append(hero)
+
+# ----------------------------------------
+# Display tiered hero grid
+# ----------------------------------------
+tier_colors = {
+    "S": "#FF69B4",
+    "A": "purple",
+    "B": "#3CB371",
+    "C": "#FF8C00",
+    "D": "red",
+}
+
+num_cols = 5
+st.header(f"Best Partners for {hero_A}")
+
+for tier in ["S", "A", "B", "C", "D"]:
+    members = tiers[tier]
+    if not members:
+        continue
+
+    st.markdown(
+        f"<h2 style='color:{tier_colors[tier]};'>{tier} Tier</h2>",
+        unsafe_allow_html=True,
+    )
+
+    rows = [members[i:i + num_cols] for i in range(0, len(members), num_cols)]
+    for row in rows:
+        cols = st.columns(num_cols)
+        for idx, hero in enumerate(row):
+            with cols[idx]:
+                img = hero_image_urls.get(hero)
+                if img:
+                    st.image(img, use_container_width=True)
+
+# ----------------------------------------
+# Background image
+# ----------------------------------------
+background_image_url = (
+    "https://github.com/alechoward-lab/"
+    "Marvel-Champions-Hero-Tier-List/blob/main/"
+    "images/background/marvel_champions_background_image_v4.jpg?raw=true"
+)
+
+st.markdown(
+    f"""
+    <style>
+    .stApp {{
+        background: url({background_image_url}) no-repeat center center fixed;
+        background-size: cover;
+    }}
+    </style>
+    """,
+    unsafe_allow_html=True
+)
