@@ -1,34 +1,58 @@
 """
-Hi ChatGPT, here are the changes I wawnt you to make to the code.
-
-Need to add extra wweight to high tempo being paired with low tempo characters.
-
-Need to add the  background from the home page.
-
-Fix the formatting of the st.subheader to be a bulleted list explaining the criteria.
+Hero Pairings – 2 Player Synergy
+This page focuses on complementary strength, not raw power.
 """
+
+# ----------------------------------------
+# Tuning Variables
+# ----------------------------------------
+TARGET = 2                  # anything below this is a weakness
+TEMPO_INDEX = 1              # index of Tempo in hero stat arrays
+TEMPO_PAIR_BONUS = 0.35      # weight for high-tempo <-> low-tempo pairing
+POWER_DISINCENTIVE = 0.6     # penalty for strong+strong pairings
+
+# ----------------------------------------
+# Imports
+# ----------------------------------------
 import streamlit as st
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.patches import Patch
 from copy import deepcopy
 
 from default_heroes import default_heroes
 from hero_image_urls import hero_image_urls
+from preset_options import preset_options
 
 # ----------------------------------------
 # Page header
 # ----------------------------------------
 st.title("Hero Pairings (2-Player Synergy)")
-# st.subheader(
-#     "Select a hero to view good pairings in multiplayer. The pairings are determined based on these criteria:
-#     1. They fix each others weaknesses
-#     2. Strong heroes are paired with weaker heroes
-#     3. Low tempo late game heroes are paired with high tempo early game heroes."
-# )
 
-st.markdown(
-    "This is a **beta build**. These pairings are not to be taken as good at this point. Also, it doesn't currently account for specific syergies. "
+st.markdown("""
+**This tool evaluates hero pairings based on complementary strengths, not raw power.**
+
+**Pairings are influenced by:**
+- Fixing each other’s weaknesses
+- Pairing strong heroes with weaker heroes
+- Pairing low-tempo heroes with high-tempo heroes
+- Avoiding redundant high-power combinations
+""")
+
+# ----------------------------------------
+# Assumptions / explanation section
+# ----------------------------------------
+if "pairing_notes" not in st.session_state:
+    st.session_state.pairing_notes = (
+        "This list assumes generic multiplayer scenarios.\n\n"
+        "It does not currently account for specific card synergies, "
+        "aspect choices, or scenario-specific requirements.\n\n"
+        "The model works best for general 2-player play where tempo, "
+        "threat management, and role coverage matter more than raw damage."
+    )
+
+st.text_area(
+    "Assumptions, Shortcomings, and Intended Use",
+    key="pairing_notes",
+    height=160
 )
 
 # ----------------------------------------
@@ -38,21 +62,35 @@ heroes = deepcopy(default_heroes)
 hero_names = list(heroes.keys())
 
 # ----------------------------------------
+# Compute GENERAL POWER (2 Player preset)
+# ----------------------------------------
+general_weights = np.array(preset_options["General Power: 2 Player"])
+general_scores = {
+    hero: float(np.dot(stats, general_weights))
+    for hero, stats in heroes.items()
+}
+
+gp_values = np.array(list(general_scores.values()))
+gp_mean = gp_values.mean()
+gp_std = gp_values.std()
+
+# Define "strong hero" cutoff (A tier and above)
+STRONG_HERO_THRESHOLD = gp_mean + 0.5 * gp_std
+
+# ----------------------------------------
 # Select primary hero
 # ----------------------------------------
 hero_A = st.selectbox("Select Primary Hero", hero_names)
 stats_A = heroes[hero_A]
+power_A = general_scores[hero_A]
 
 # ----------------------------------------
-# Define weakness threshold
+# Compute Hero A weaknesses
 # ----------------------------------------
-TARGET = 2  # anything below this is a weakness
-
-# Compute Hero A weaknesses (needs)
 needs = np.maximum(0, TARGET - stats_A)
 
 # ----------------------------------------
-# Score partner heroes (TRUE SYNERGY)
+# Score partner heroes (SYNERGY, NOT POWER)
 # ----------------------------------------
 scores = {}
 
@@ -60,19 +98,37 @@ for hero_B, stats_B in heroes.items():
     if hero_B == hero_A:
         continue
 
-    # Partner can only contribute where Hero A is weak
+    # ----------------------------------
+    # 1. Weakness coverage
+    # ----------------------------------
     usable_strengths = np.minimum(
-        np.maximum(0, stats_B),  # partner must be positive
-        needs                     # and actually needed
+        np.maximum(0, stats_B),
+        needs
     )
 
-    # Core synergy score
-    score = np.dot(needs, usable_strengths)
+    synergy_score = np.dot(needs, usable_strengths)
+    synergy_score /= (np.sum(needs) + 1e-6)
 
-    # Normalize so heroes with many weaknesses don't inflate scores
-    score /= (np.sum(needs) + 1e-6)
+    # ----------------------------------
+    # 2. Tempo pairing bonus
+    # ----------------------------------
+    tempo_A = stats_A[TEMPO_INDEX]
+    tempo_B = stats_B[TEMPO_INDEX]
 
-    scores[hero_B] = score
+    tempo_mismatch = abs(tempo_A - tempo_B)
+    tempo_bonus = TEMPO_PAIR_BONUS * tempo_mismatch
+
+    synergy_score += tempo_bonus
+
+    # ----------------------------------
+    # 3. Power-based disincentive
+    # ----------------------------------
+    power_B = general_scores[hero_B]
+
+    if power_A >= STRONG_HERO_THRESHOLD and power_B >= STRONG_HERO_THRESHOLD:
+        synergy_score *= POWER_DISINCENTIVE
+
+    scores[hero_B] = synergy_score
 
 # ----------------------------------------
 # Sort scores
@@ -80,7 +136,7 @@ for hero_B, stats_B in heroes.items():
 sorted_scores = dict(sorted(scores.items(), key=lambda kv: kv[1]))
 
 # ----------------------------------------
-# Tier thresholds (dynamic)
+# Tier thresholds
 # ----------------------------------------
 vals = np.array(list(scores.values()))
 mean, std = vals.mean(), vals.std()
@@ -94,20 +150,15 @@ tiers = {"S": [], "A": [], "B": [], "C": [], "D": []}
 
 for hero, sc in scores.items():
     if sc >= thr_S:
-        tiers["S"].append((hero, sc))
+        tiers["S"].append(hero)
     elif sc >= thr_A:
-        tiers["A"].append((hero, sc))
+        tiers["A"].append(hero)
     elif sc >= thr_B:
-        tiers["B"].append((hero, sc))
+        tiers["B"].append(hero)
     elif sc >= thr_C:
-        tiers["C"].append((hero, sc))
+        tiers["C"].append(hero)
     else:
-        tiers["D"].append((hero, sc))
-
-for tier in tiers:
-    tiers[tier].sort(key=lambda x: x[1], reverse=True)
-
-hero_to_tier = {h: t for t, lst in tiers.items() for h, _ in lst}
+        tiers["D"].append(hero)
 
 # ----------------------------------------
 # Display tiered hero grid
@@ -121,7 +172,6 @@ tier_colors = {
 }
 
 num_cols = 5
-
 st.header(f"Best Partners for {hero_A}")
 
 for tier in ["S", "A", "B", "C", "D"]:
@@ -137,44 +187,21 @@ for tier in ["S", "A", "B", "C", "D"]:
     rows = [members[i:i + num_cols] for i in range(0, len(members), num_cols)]
     for row in rows:
         cols = st.columns(num_cols)
-        for idx, (hero, score) in enumerate(row):
+        for idx, hero in enumerate(row):
             with cols[idx]:
                 img = hero_image_urls.get(hero)
                 if img:
                     st.image(img, use_container_width=True)
-                #st.markdown(f"**Synergy Score:** {score:.2f}")
 
 # ----------------------------------------
-# Bar chart of synergy scores
+# Background image (same as home page)
 # ----------------------------------------
-# st.header("Synergy Scores")
+background_image_url = (
+    "https://github.com/alechoward-lab/"
+    "Marvel-Champions-Hero-Tier-List/blob/main/"
+    "images/background/marvel_champions_background_image_v4.jpg?raw=true"
+)
 
-# names = list(sorted_scores.keys())
-# vals = list(sorted_scores.values())
-# colors = [tier_colors[hero_to_tier[h]] for h in names]
-
-# fig, ax = plt.subplots(figsize=(14, 7), dpi=200)
-# ax.bar(names, vals, color=colors)
-# ax.set_ylabel("Synergy Score")
-# ax.set_title(
-#     f"Hero Pairing Synergy with {hero_A}",
-#     fontsize=18,
-#     fontweight="bold"
-# )
-# plt.xticks(rotation=45, ha="right")
-
-# for lbl in ax.get_xticklabels():
-#     lbl.set_color(tier_colors[hero_to_tier[lbl.get_text()]])
-
-# handles = [Patch(color=c, label=f"Tier {t}") for t, c in tier_colors.items()]
-
-
-
-#background_image_path = "images/background/marvel_champions_background_image_v2.jpg" # use the path instead for future proofing.
-# ----------------------------------------
-# Add background image with custom CSS
-# ----------------------------------------
-background_image_url = "https://github.com/alechoward-lab/Marvel-Champions-Hero-Tier-List/blob/main/images/background/marvel_champions_background_image_v4.jpg?raw=true"
 st.markdown(
     f"""
     <style>
