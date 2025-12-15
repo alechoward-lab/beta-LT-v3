@@ -20,7 +20,7 @@ from preset_options import preset_options
 # ----------------------------------------
 # Page header
 # ----------------------------------------
-st.title("Hero Pairings For 2 Player Success and Fun")
+st.title("Hero Pairings")
 
 st.markdown("""
 **Pairings are influenced by:**
