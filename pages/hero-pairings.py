@@ -1,27 +1,26 @@
 """
 Hero Pairings – 2 Player Synergy
-Focuses on complementary roles, tempo balance, and survivability coverage.
+Pairings are based on baseline stats only (indices 0–9).
+Boons and conditional bonuses are excluded from synergy calculations.
 """
 
 # ----------------------------------------
 # Tuning Variables
 # ----------------------------------------
 TARGET = 2                      # anything below this is a weakness
+BASE_STAT_COUNT = 8            # indices 0–7 are baseline stats
 #              e, t, cv,s, d, th,re,mi,c, s, br,lg,si,sc,mu
-TEMPO_INDEX = 1
-THWART_INDEX = 5
-SURVIVABILITY_INDEX = 3
-SUPPORT_INDEX = 9
+TEMPO_INDEX = 1                 # Tempo stat index
+THWART_INDEX = 5                # Thwart stat index
+SURVIVABILITY_INDEX = 3         # Survivability stat index
+SUPPORT_INDEX = 9               # Support stat index
 
+TEMPO_PAIR_BONUS = 0.25         # high-tempo <-> low-tempo pairing
+LATE_GAME_THWART_BONUS = 0.20   # late-game + high thwart bonus
+BLOCKING_SUPPORT_BONUS = 0.25   # low survivability + support/survivability partner
 
-TARGET = 2                      # stats < 2 are considered weaknesses
-
-TEMPO_PAIR_BONUS = 0.25         # rewards early ↔ late game balance
-LATE_GAME_THWART_BONUS = 0.20   # helps slow heroes survive threat spikes
-BLOCKING_SUPPORT_BONUS = 0.25   # simulates bodyguards & blockers
-
-POWER_DISINCENTIVE = 0.65       # discourages strong + strong
-WEAK_PAIR_DISINCENTIVE = 0.75   # discourages weak + weak
+POWER_DISINCENTIVE = 0.65       # strong + strong penalty
+WEAK_PAIR_DISINCENTIVE = 0.75   # weak + weak penalty
 
 # ----------------------------------------
 # Imports
@@ -47,7 +46,7 @@ with col1:
     - Fixing each other’s weaknesses
     - Pairing strong heroes with weaker heroes
     - Avoiding weak + weak pairings
-    - Late game heroes with high-thwart partners
+    - Late-game heroes with high-thwart partners
     - Low survivability heroes with blockers / support heroes
     - Tempo balance (early ↔ late game)
     """)
@@ -55,7 +54,8 @@ with col1:
 with col2:
     st.markdown("""
     **Strengths and Shortcomings of This List:**
-    - Helps find balanced and fun 2-player pairings
+    - Helps find balanced and comfortable 2-player pairings
+    - Encourages role diversity instead of raw power
     - Does not model card-level synergies or traits
     - Aspect-agnostic by design
     - Inherits assumptions from the General Power tier list
@@ -69,6 +69,7 @@ hero_names = list(heroes.keys())
 
 # ----------------------------------------
 # Compute GENERAL POWER (2 Player preset)
+# NOTE: Power intentionally includes boons
 # ----------------------------------------
 general_weights = np.array(preset_options["General Power: 2 Player"])
 general_scores = {
@@ -88,12 +89,13 @@ WEAK_HERO_THRESHOLD = gp_mean - 0.5 * gp_std
 # ----------------------------------------
 hero_A = st.selectbox("Select a hero to view pairings:", hero_names)
 stats_A = heroes[hero_A]
+base_stats_A = stats_A[:BASE_STAT_COUNT]
 power_A = general_scores[hero_A]
 
 # ----------------------------------------
-# Compute Hero A weaknesses
+# Compute Hero A weaknesses (baseline only)
 # ----------------------------------------
-needs = np.maximum(0, TARGET - stats_A)
+needs = np.maximum(0, TARGET - base_stats_A)
 
 # ----------------------------------------
 # Score partner heroes
@@ -104,13 +106,14 @@ for hero_B, stats_B in heroes.items():
     if hero_B == hero_A:
         continue
 
+    base_stats_B = stats_B[:BASE_STAT_COUNT]
     power_B = general_scores[hero_B]
 
     # ----------------------------------
     # 1. Weakness coverage (core synergy)
     # ----------------------------------
     usable_strengths = np.minimum(
-        np.maximum(0, stats_B),
+        np.maximum(0, base_stats_B),
         needs
     )
 
@@ -120,8 +123,8 @@ for hero_B, stats_B in heroes.items():
     # ----------------------------------
     # 2. Tempo pairing (early ↔ late)
     # ----------------------------------
-    tempo_A = stats_A[TEMPO_INDEX]
-    tempo_B = stats_B[TEMPO_INDEX]
+    tempo_A = base_stats_A[TEMPO_INDEX]
+    tempo_B = base_stats_B[TEMPO_INDEX]
 
     tempo_mismatch = abs(tempo_A - tempo_B)
     synergy_score += TEMPO_PAIR_BONUS * tempo_mismatch
@@ -129,16 +132,16 @@ for hero_B, stats_B in heroes.items():
     # ----------------------------------
     # 3. Late-game hero + high thwart bonus
     # ----------------------------------
-    if tempo_A < TARGET and stats_B[THWART_INDEX] > TARGET:
-        synergy_score += LATE_GAME_THWART_BONUS * stats_B[THWART_INDEX]
+    if tempo_A < TARGET and base_stats_B[THWART_INDEX] > TARGET:
+        synergy_score += LATE_GAME_THWART_BONUS * base_stats_B[THWART_INDEX]
 
     # ----------------------------------
     # 4. Low survivability + blocker/support bonus
     # ----------------------------------
-    if stats_A[SURVIVABILITY_INDEX] < TARGET:
+    if base_stats_A[SURVIVABILITY_INDEX] < TARGET:
         blocking_value = (
-            max(0, stats_B[SURVIVABILITY_INDEX]) +
-            max(0, stats_B[SUPPORT_INDEX])
+            max(0, base_stats_B[SURVIVABILITY_INDEX]) +
+            max(0, base_stats_B[SUPPORT_INDEX])
         )
         synergy_score += BLOCKING_SUPPORT_BONUS * blocking_value
 
