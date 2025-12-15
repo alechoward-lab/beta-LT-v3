@@ -7,18 +7,21 @@ Focuses on complementary roles, tempo balance, and survivability coverage.
 # Tuning Variables
 # ----------------------------------------
 TARGET = 2                      # anything below this is a weakness
+#              e, t, cv,s, d, th,re,mi,c, s, br,lg,si,sc,mu
+TEMPO_INDEX = 1
+THWART_INDEX = 5
+SURVIVABILITY_INDEX = 3
+SUPPORT_INDEX = 9
 
-TEMPO_INDEX = 1                 # Tempo stat index
-THWART_INDEX = 1               # Thwart stat index
-SURVIVABILITY_INDEX = 1         # Survivability stat index
-SUPPORT_INDEX = 2              # Support stat index
 
-TEMPO_PAIR_BONUS = 0.5          # high-tempo <-> low-tempo pairing
-POWER_DISINCENTIVE = 0.7        # strong + strong penalty
-WEAK_PAIR_DISINCENTIVE = 1    # weak + weak penalty
+TARGET = 2                      # stats < 2 are considered weaknesses
 
-LATE_GAME_THWART_BONUS = 0.4   # late-game + high thwart bonus
-BLOCKING_SUPPORT_BONUS = 0.3    # low survivability + support/survivability partner
+TEMPO_PAIR_BONUS = 0.25         # rewards early ↔ late game balance
+LATE_GAME_THWART_BONUS = 0.20   # helps slow heroes survive threat spikes
+BLOCKING_SUPPORT_BONUS = 0.25   # simulates bodyguards & blockers
+
+POWER_DISINCENTIVE = 0.65       # discourages strong + strong
+WEAK_PAIR_DISINCENTIVE = 0.75   # discourages weak + weak
 
 # ----------------------------------------
 # Imports
