@@ -162,12 +162,12 @@ for lbl in ax.get_xticklabels():
 handles = [Patch(color=c, label=f"Tier {t}") for t, c in tier_colors.items()]
 
 
-background_image_url = "images/background/marvel_champions_background_image_v2.jpg"
+background_image_path = "images/background/marvel_champions_background_image_v2.jpg"
 st.markdown(
     f"""
     <style>
     .stApp {{
-        background: url({background_image_url}) no-repeat center center fixed;
+        background: path({background_image_url}) no-repeat center center fixed;
         background-size: cover;
     }}
     </style>
