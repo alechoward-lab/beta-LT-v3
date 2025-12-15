@@ -30,7 +30,6 @@ with col1:
     - Fixing each other’s weaknesses
     - Pairing strong heroes with weaker heroes
     - Late game heroes with support and high tempo heroes
-    - Creating a balanced experience
     """)
 
 with col2:
