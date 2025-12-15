@@ -33,8 +33,6 @@ st.markdown("""
 **Pairings are influenced by:**
 - Fixing each other’s weaknesses
 - Pairing strong heroes with weaker heroes
-- Pairing low-tempo heroes with high-tempo heroes
-- Avoiding redundant high-power combinations
 """)
 
 # ----------------------------------------
