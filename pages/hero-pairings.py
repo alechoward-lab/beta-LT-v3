@@ -162,7 +162,7 @@ for lbl in ax.get_xticklabels():
 handles = [Patch(color=c, label=f"Tier {t}") for t, c in tier_colors.items()]
 
 
-background_image_url = "https://github.com/alechoward-lab/Marvel-Champions-Hero-Tier-List/blob/main/images/background/marvel_champions_background_image_v4.jpg?raw=true"
+background_image_url = "images/background/marvel_champions_background_image_v2.jpg"
 st.markdown(
     f"""
     <style>
