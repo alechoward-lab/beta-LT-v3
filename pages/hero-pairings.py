@@ -9,9 +9,9 @@ Focuses on complementary roles, tempo balance, and survivability coverage.
 TARGET = 2                      # anything below this is a weakness
 
 TEMPO_INDEX = 1                 # Tempo stat index
-THWART_INDEX = 2                # Thwart stat index
-SURVIVABILITY_INDEX = 3         # Survivability stat index
-SUPPORT_INDEX = 4               # Support stat index
+THWART_INDEX = 1               # Thwart stat index
+SURVIVABILITY_INDEX = 1         # Survivability stat index
+SUPPORT_INDEX = 1              # Support stat index
 
 TEMPO_PAIR_BONUS = 0.2          # high-tempo <-> low-tempo pairing
 POWER_DISINCENTIVE = 0.5        # strong + strong penalty
