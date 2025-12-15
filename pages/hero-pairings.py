@@ -1,7 +1,3 @@
-"""
-Hero Pairings For 2 Player Success and Fun
-"""
-
 # ----------------------------------------
 # Tuning Variables
 # ----------------------------------------
@@ -24,11 +20,9 @@ from preset_options import preset_options
 # ----------------------------------------
 # Page header
 # ----------------------------------------
-st.title("Hero Pairings (2-Player Synergy)")
+st.title("Hero Pairings For 2 Player Success and Fun")
 
 st.markdown("""
-**This tool evaluates hero pairings based on complementary strengths, not raw power.**
-
 **Pairings are influenced by:**
 - Fixing each other’s weaknesses
 - Pairing strong heroes with weaker heroes
