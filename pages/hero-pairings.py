@@ -47,13 +47,9 @@ st.markdown("""
 - Good for getting ideas of heroes to try together
 - Does not account for specific synergies such as traits and card interactions
 - Does not account for aspects -- But that also means good pairings are aspect agnostic
-""")
 
-st.text_area(
-    "Assumptions, Shortcomings, and Intended Use",
-    key="pairing_notes",
-    height=160
-)
+- Comes with all the same assumptions of the general tier list
+""")
 
 # ----------------------------------------
 # Load hero data
