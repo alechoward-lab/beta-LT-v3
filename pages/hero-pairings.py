@@ -22,25 +22,25 @@ from preset_options import preset_options
 # ----------------------------------------
 st.title("Hero Pairings")
 
-st.markdown("""
-**Pairings are influenced by:**
-- Fixing each other’s weaknesses
-- Pairing strong heroes with weaker heroes
-""")
+col1, col2 = st.columns(2)
 
-# ----------------------------------------
-# Assumptions / explanation section
-# ----------------------------------------
+with col1:
+    st.markdown("""
+    **Pairings are influenced by:**
+    - Fixing each other’s weaknesses
+    - Pairing strong heroes with weaker heroes
+    """)
 
-st.markdown("""
-**Strengths and Shortcomings of The List:**
-- Good for matching heroes to have a balanced experience
-- Good for getting ideas of heroes to try together
-- Does not account for specific synergies such as traits and card interactions
-- Does not account for aspects -- But that also means good pairings are aspect agnostic
+with col2:
+    st.markdown("""
+    **Strengths and Shortcomings of The List:**
+    - Good for matching heroes to have a balanced experience
+    - Good for getting ideas of heroes to try together
+    - Does not account for specific synergies such as traits and card interactions
+    - Does not account for aspects — but that also means good pairings are aspect agnostic
+    - Comes with all the same assumptions of the general tier list
+    """)
 
-- Comes with all the same assumptions of the general tier list
-""")
 
 # ----------------------------------------
 # Load hero data
