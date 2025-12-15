@@ -1,5 +1,7 @@
 """
 Need to add extra wweight to high tempo being paired with low tempo characters.
+
+Need to add the  background from the home page.
 """
 import streamlit as st
 import numpy as np
@@ -158,6 +160,20 @@ for lbl in ax.get_xticklabels():
     lbl.set_color(tier_colors[hero_to_tier[lbl.get_text()]])
 
 handles = [Patch(color=c, label=f"Tier {t}") for t, c in tier_colors.items()]
+
+
+background_image_url = "https://github.com/alechoward-lab/Marvel-Champions-Hero-Tier-List/blob/main/images/background/marvel_champions_background_image_v4.jpg?raw=true"
+st.markdown(
+    f"""
+    <style>
+    .stApp {{
+        background: url({background_image_url}) no-repeat center center fixed;
+        background-size: cover;
+    }}
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 ax.legend(handles=handles, title="Tiers", loc="upper left")
 
 st.pyplot(fig)
