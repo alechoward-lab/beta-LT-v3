@@ -14,7 +14,7 @@ SURVIVABILITY_INDEX = 2         # Survivability stat index
 SUPPORT_INDEX = 2              # Support stat index
 
 TEMPO_PAIR_BONUS = 0.2          # high-tempo <-> low-tempo pairing
-POWER_DISINCENTIVE = 0.5        # strong + strong penalty
+POWER_DISINCENTIVE = 0.7        # strong + strong penalty
 WEAK_PAIR_DISINCENTIVE = 0.5    # weak + weak penalty
 
 LATE_GAME_THWART_BONUS = 0.2   # late-game + high thwart bonus
