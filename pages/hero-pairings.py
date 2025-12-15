@@ -8,17 +8,17 @@ Focuses on complementary roles, tempo balance, and survivability coverage.
 # ----------------------------------------
 TARGET = 2                      # anything below this is a weakness
 
-TEMPO_INDEX = 1                 # Tempo stat index
-THWART_INDEX = 1               # Thwart stat index
-SURVIVABILITY_INDEX = 1         # Survivability stat index
-SUPPORT_INDEX = 1              # Support stat index
+TEMPO_INDEX = 2                 # Tempo stat index
+THWART_INDEX = 2               # Thwart stat index
+SURVIVABILITY_INDEX = 2         # Survivability stat index
+SUPPORT_INDEX = 2              # Support stat index
 
 TEMPO_PAIR_BONUS = 0.2          # high-tempo <-> low-tempo pairing
 POWER_DISINCENTIVE = 0.5        # strong + strong penalty
-WEAK_PAIR_DISINCENTIVE = 0.6    # weak + weak penalty
+WEAK_PAIR_DISINCENTIVE = 0.5    # weak + weak penalty
 
-LATE_GAME_THWART_BONUS = 0.25   # late-game + high thwart bonus
-BLOCKING_SUPPORT_BONUS = 0.3    # low survivability + support/survivability partner
+LATE_GAME_THWART_BONUS = 0.2   # late-game + high thwart bonus
+BLOCKING_SUPPORT_BONUS = 0.2    # low survivability + support/survivability partner
 
 # ----------------------------------------
 # Imports
