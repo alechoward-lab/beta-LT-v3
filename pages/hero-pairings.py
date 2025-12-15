@@ -1,13 +1,24 @@
 """
-Need to also add a dicencentive to pair wweak heroes wwith other weak heroes. 
+Hero Pairings – 2 Player Synergy
+Focuses on complementary roles, tempo balance, and survivability coverage.
 """
+
 # ----------------------------------------
 # Tuning Variables
 # ----------------------------------------
-TARGET = 2                  # anything below this is a weakness
-TEMPO_INDEX = 1              # index of Tempo in hero stat arrays
-TEMPO_PAIR_BONUS = 0.2     # weight for high-tempo <-> low-tempo pairing
-POWER_DISINCENTIVE = 0.5     # penalty for strong+strong pairings
+TARGET = 2                      # anything below this is a weakness
+
+TEMPO_INDEX = 1                 # Tempo stat index
+THWART_INDEX = 2                # Thwart stat index
+SURVIVABILITY_INDEX = 3         # Survivability stat index
+SUPPORT_INDEX = 4               # Support stat index
+
+TEMPO_PAIR_BONUS = 0.2          # high-tempo <-> low-tempo pairing
+POWER_DISINCENTIVE = 0.5        # strong + strong penalty
+WEAK_PAIR_DISINCENTIVE = 0.6    # weak + weak penalty
+
+LATE_GAME_THWART_BONUS = 0.25   # late-game + high thwart bonus
+BLOCKING_SUPPORT_BONUS = 0.3    # low survivability + support/survivability partner
 
 # ----------------------------------------
 # Imports
@@ -32,19 +43,21 @@ with col1:
     **Pairings are influenced by:**
     - Fixing each other’s weaknesses
     - Pairing strong heroes with weaker heroes
-    - Late game heroes with support and high tempo heroes
+    - Avoiding weak + weak pairings
+    - Late game heroes with high-thwart partners
+    - Low survivability heroes with blockers / support heroes
+    - Tempo balance (early ↔ late game)
     """)
 
 with col2:
     st.markdown("""
-    **Strengths and Shortcomings of The List:**
-    - Good for matching heroes to have a balanced experience
-    - Good for getting ideas of heroes to try together
-    - Does not account for specific synergies such as traits and card interactions
-    - Does not account for aspects — but that also means good pairings are aspect agnostic
-    - Comes with all the same assumptions of the general tier list
+    **Strengths and Shortcomings of This List:**
+    - Helps find balanced and comfortable 2-player pairings
+    - Encourages role diversity instead of raw power
+    - Does not model card-level synergies or traits
+    - Aspect-agnostic by design
+    - Inherits assumptions from the General Power tier list
     """)
-
 
 # ----------------------------------------
 # Load hero data
@@ -65,13 +78,13 @@ gp_values = np.array(list(general_scores.values()))
 gp_mean = gp_values.mean()
 gp_std = gp_values.std()
 
-# Define "strong hero" cutoff (A tier and above)
 STRONG_HERO_THRESHOLD = gp_mean + 0.5 * gp_std
+WEAK_HERO_THRESHOLD = gp_mean - 0.5 * gp_std
 
 # ----------------------------------------
 # Select primary hero
 # ----------------------------------------
-hero_A = st.selectbox("Select a hero to view pairings: ", hero_names)
+hero_A = st.selectbox("Select a hero to view pairings:", hero_names)
 stats_A = heroes[hero_A]
 power_A = general_scores[hero_A]
 
@@ -81,7 +94,7 @@ power_A = general_scores[hero_A]
 needs = np.maximum(0, TARGET - stats_A)
 
 # ----------------------------------------
-# Score partner heroes (SYNERGY, NOT POWER)
+# Score partner heroes
 # ----------------------------------------
 scores = {}
 
@@ -89,8 +102,10 @@ for hero_B, stats_B in heroes.items():
     if hero_B == hero_A:
         continue
 
+    power_B = general_scores[hero_B]
+
     # ----------------------------------
-    # 1. Weakness coverage
+    # 1. Weakness coverage (core synergy)
     # ----------------------------------
     usable_strengths = np.minimum(
         np.maximum(0, stats_B),
@@ -101,106 +116,15 @@ for hero_B, stats_B in heroes.items():
     synergy_score /= (np.sum(needs) + 1e-6)
 
     # ----------------------------------
-    # 2. Tempo pairing bonus
+    # 2. Tempo pairing (early ↔ late)
     # ----------------------------------
     tempo_A = stats_A[TEMPO_INDEX]
     tempo_B = stats_B[TEMPO_INDEX]
 
     tempo_mismatch = abs(tempo_A - tempo_B)
-    tempo_bonus = TEMPO_PAIR_BONUS * tempo_mismatch
-
-    synergy_score += tempo_bonus
+    synergy_score += TEMPO_PAIR_BONUS * tempo_mismatch
 
     # ----------------------------------
-    # 3. Power-based disincentive
+    # 3. Late-game hero + high thwart bonus
     # ----------------------------------
-    power_B = general_scores[hero_B]
-
-    if power_A >= STRONG_HERO_THRESHOLD and power_B >= STRONG_HERO_THRESHOLD:
-        synergy_score *= POWER_DISINCENTIVE
-
-    scores[hero_B] = synergy_score
-
-# ----------------------------------------
-# Sort scores
-# ----------------------------------------
-sorted_scores = dict(sorted(scores.items(), key=lambda kv: kv[1]))
-
-# ----------------------------------------
-# Tier thresholds
-# ----------------------------------------
-vals = np.array(list(scores.values()))
-mean, std = vals.mean(), vals.std()
-
-thr_S = mean + 1.5 * std
-thr_A = mean + 0.5 * std
-thr_B = mean - 0.5 * std
-thr_C = mean - 1.5 * std
-
-tiers = {"S": [], "A": [], "B": [], "C": [], "D": []}
-
-for hero, sc in scores.items():
-    if sc >= thr_S:
-        tiers["S"].append(hero)
-    elif sc >= thr_A:
-        tiers["A"].append(hero)
-    elif sc >= thr_B:
-        tiers["B"].append(hero)
-    elif sc >= thr_C:
-        tiers["C"].append(hero)
-    else:
-        tiers["D"].append(hero)
-
-# ----------------------------------------
-# Display tiered hero grid
-# ----------------------------------------
-tier_colors = {
-    "S": "#FF69B4",
-    "A": "purple",
-    "B": "#3CB371",
-    "C": "#FF8C00",
-    "D": "red",
-}
-
-num_cols = 5
-st.header(f"Best Partners for {hero_A}")
-
-for tier in ["S", "A", "B", "C", "D"]:
-    members = tiers[tier]
-    if not members:
-        continue
-
-    st.markdown(
-        f"<h2 style='color:{tier_colors[tier]};'>{tier} Tier</h2>",
-        unsafe_allow_html=True,
-    )
-
-    rows = [members[i:i + num_cols] for i in range(0, len(members), num_cols)]
-    for row in rows:
-        cols = st.columns(num_cols)
-        for idx, hero in enumerate(row):
-            with cols[idx]:
-                img = hero_image_urls.get(hero)
-                if img:
-                    st.image(img, use_container_width=True)
-
-# ----------------------------------------
-# Background image (same as home page)
-# ----------------------------------------
-background_image_url = (
-    "https://github.com/alechoward-lab/"
-    "Marvel-Champions-Hero-Tier-List/blob/main/"
-    "images/background/marvel_champions_background_image_v4.jpg?raw=true"
-)
-
-st.markdown(
-    f"""
-    <style>
-    .stApp {{
-        background: url({background_image_url}) no-repeat center center fixed;
-        background-size: cover;
-    }}
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+    if tempo_A < TARGET and stats_B[THWART_INDEX] > TARGET:
