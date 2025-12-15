@@ -40,14 +40,14 @@ st.markdown("""
 # ----------------------------------------
 # Assumptions / explanation section
 # ----------------------------------------
-if "pairing_notes" not in st.session_state:
-    st.session_state.pairing_notes = (
-        "This list assumes generic multiplayer scenarios.\n\n"
-        "It does not currently account for specific card synergies, "
-        "aspect choices, or scenario-specific requirements.\n\n"
-        "The model works best for general 2-player play where tempo, "
-        "threat management, and role coverage matter more than raw damage."
-    )
+
+st.markdown("""
+**Strengths and Shortcomings of The List:**
+- Good for matching heroes to have a balanced experience
+- Good for getting ideas of heroes to try together
+- Does not account for specific synergies such as traits and card interactions
+- Does not account for aspects -- But that also means good pairings are aspect agnostic
+""")
 
 st.text_area(
     "Assumptions, Shortcomings, and Intended Use",
