@@ -163,17 +163,21 @@ handles = [Patch(color=c, label=f"Tier {t}") for t, c in tier_colors.items()]
 
 
 background_image_path = "images/background/marvel_champions_background_image_v2.jpg"
+
 st.markdown(
     f"""
     <style>
     .stApp {{
-        background: path({background_image_url}) no-repeat center center fixed;
+        background-image: url("{background_image_path}");
+        background-repeat: no-repeat;
+        background-position: center;
+        background-attachment: fixed;
         background-size: cover;
     }}
     </style>
     """,
     unsafe_allow_html=True
 )
-ax.legend(handles=handles, title="Tiers", loc="upper left")
 
+ax.legend(handles=handles, title="Tiers", loc="upper left")
 st.pyplot(fig)
