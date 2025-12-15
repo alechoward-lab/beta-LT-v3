@@ -147,26 +147,26 @@ for tier in ["S", "A", "B", "C", "D"]:
 # ----------------------------------------
 # Bar chart of synergy scores
 # ----------------------------------------
-st.header("Synergy Scores")
+# st.header("Synergy Scores")
 
-names = list(sorted_scores.keys())
-vals = list(sorted_scores.values())
-colors = [tier_colors[hero_to_tier[h]] for h in names]
+# names = list(sorted_scores.keys())
+# vals = list(sorted_scores.values())
+# colors = [tier_colors[hero_to_tier[h]] for h in names]
 
-fig, ax = plt.subplots(figsize=(14, 7), dpi=200)
-ax.bar(names, vals, color=colors)
-ax.set_ylabel("Synergy Score")
-ax.set_title(
-    f"Hero Pairing Synergy with {hero_A}",
-    fontsize=18,
-    fontweight="bold"
-)
-plt.xticks(rotation=45, ha="right")
+# fig, ax = plt.subplots(figsize=(14, 7), dpi=200)
+# ax.bar(names, vals, color=colors)
+# ax.set_ylabel("Synergy Score")
+# ax.set_title(
+#     f"Hero Pairing Synergy with {hero_A}",
+#     fontsize=18,
+#     fontweight="bold"
+# )
+# plt.xticks(rotation=45, ha="right")
 
-for lbl in ax.get_xticklabels():
-    lbl.set_color(tier_colors[hero_to_tier[lbl.get_text()]])
+# for lbl in ax.get_xticklabels():
+#     lbl.set_color(tier_colors[hero_to_tier[lbl.get_text()]])
 
-handles = [Patch(color=c, label=f"Tier {t}") for t, c in tier_colors.items()]
+# handles = [Patch(color=c, label=f"Tier {t}") for t, c in tier_colors.items()]
 
 
 
