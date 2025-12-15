@@ -169,42 +169,21 @@ for lbl in ax.get_xticklabels():
 handles = [Patch(color=c, label=f"Tier {t}") for t, c in tier_colors.items()]
 
 
+
+#background_image_path = "images/background/marvel_champions_background_image_v2.jpg" # use the path instead for future proofing.
 # ----------------------------------------
-# Background image (embedded as base64)
+# Add background image with custom CSS
 # ----------------------------------------
-background_image_path = "images/background/marvel_champions_background_image_v2.jpg"
-
-def set_background_image(path: str):
-    """
-    Embed the image at `path` as a base64 data URI and inject CSS.
-    If file not found, show a warning so you can debug deployments where
-    repo-relative static paths aren't accessible.
-    """
-    if not os.path.exists(path):
-        st.warning(f"Background image not found at: {path}")
-        return
-
-    mime_type = mimetypes.guess_type(path)[0] or "image/jpeg"
-    with open(path, "rb") as f:
-        data = f.read()
-    b64 = base64.b64encode(data).decode()
-
-    css = f"""
+background_image_url = "https://github.com/alechoward-lab/Marvel-Champions-Hero-Tier-List/blob/main/images/background/marvel_champions_background_image_v4.jpg?raw=true"
+st.markdown(
+    f"""
     <style>
-    /* Apply to the app container and body so different Streamlit versions are covered */
-    html, body, [data-testid="stAppViewContainer"], [data-testid="stAppViewContainer"] > .main {{
-        background-image: url("data:{mime_type};base64,{b64}");
+    .stApp {{
+        background: url({background_image_url}) no-repeat center center fixed;
         background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-    }}
-    /* Make sure main content background is transparent so image shows through */
-    [data-testid="stAppViewContainer"] .main {{
-        background-color: transparent;
     }}
     </style>
-    """
-    st.markdown(css, unsafe_allow_html=True)
-
+    """,
+    unsafe_allow_html=True
+)
 set_background_image(background_image_path)
