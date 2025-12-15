@@ -74,7 +74,7 @@ STRONG_HERO_THRESHOLD = gp_mean + 0.5 * gp_std
 # ----------------------------------------
 # Select primary hero
 # ----------------------------------------
-hero_A = st.selectbox("Select Primary Hero", hero_names)
+hero_A = st.selectbox("Select a hero to view pairings: ", hero_names)
 stats_A = heroes[hero_A]
 power_A = general_scores[hero_A]
 
