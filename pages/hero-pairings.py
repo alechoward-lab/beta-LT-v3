@@ -1,7 +1,11 @@
 """
+Hi ChatGPT, here are the changes I wawnt you to make to the code.
+
 Need to add extra wweight to high tempo being paired with low tempo characters.
 
 Need to add the  background from the home page.
+
+Fix the formatting of the st.subheader to be a bulleted list explaining the criteria.
 """
 import streamlit as st
 import numpy as np
@@ -17,7 +21,10 @@ from hero_image_urls import hero_image_urls
 # ----------------------------------------
 st.title("Hero Pairings (2-Player Synergy)")
 st.subheader(
-    "Select a hero to see which other heroes best cover their weaknesses in multiplayer."
+    "Select a hero to view good pairings in multiplayer. The pairings are determined based on these criteria:
+    1. They fix each others weaknesses
+    2. Strong heroes are paired with weaker heroes
+    3. Low tempo late game heroes are paired with high tempo early game heroes."
 )
 
 st.markdown(
@@ -162,19 +169,42 @@ for lbl in ax.get_xticklabels():
 handles = [Patch(color=c, label=f"Tier {t}") for t, c in tier_colors.items()]
 
 
+# ----------------------------------------
+# Background image (embedded as base64)
+# ----------------------------------------
 background_image_path = "images/background/marvel_champions_background_image_v2.jpg"
 
-st.markdown(
-    f"""
+def set_background_image(path: str):
+    """
+    Embed the image at `path` as a base64 data URI and inject CSS.
+    If file not found, show a warning so you can debug deployments where
+    repo-relative static paths aren't accessible.
+    """
+    if not os.path.exists(path):
+        st.warning(f"Background image not found at: {path}")
+        return
+
+    mime_type = mimetypes.guess_type(path)[0] or "image/jpeg"
+    with open(path, "rb") as f:
+        data = f.read()
+    b64 = base64.b64encode(data).decode()
+
+    css = f"""
     <style>
-    html, body, [data-testid="stAppViewContainer"] {{
-        background-image: url("{background_image_path}");
+    /* Apply to the app container and body so different Streamlit versions are covered */
+    html, body, [data-testid="stAppViewContainer"], [data-testid="stAppViewContainer"] > .main {{
+        background-image: url("data:{mime_type};base64,{b64}");
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
         background-attachment: fixed;
     }}
+    /* Make sure main content background is transparent so image shows through */
+    [data-testid="stAppViewContainer"] .main {{
+        background-color: transparent;
+    }}
     </style>
-    """,
-    unsafe_allow_html=True
-)
+    """
+    st.markdown(css, unsafe_allow_html=True)
+
+set_background_image(background_image_path)
