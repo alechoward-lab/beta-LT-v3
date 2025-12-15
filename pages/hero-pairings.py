@@ -1,6 +1,5 @@
 """
-Hero Pairings – 2 Player Synergy
-This page focuses on complementary strength, not raw power.
+Hero Pairings For 2 Player Success and Fun
 """
 
 # ----------------------------------------
