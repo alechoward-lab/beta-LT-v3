@@ -186,4 +186,3 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-set_background_image(background_image_path)
