@@ -1,3 +1,6 @@
+"""
+Need to also add a dicencentive to pair wweak heroes wwith other weak heroes. 
+"""
 # ----------------------------------------
 # Tuning Variables
 # ----------------------------------------
