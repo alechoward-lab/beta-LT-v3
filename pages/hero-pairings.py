@@ -8,8 +8,8 @@ This page focuses on complementary strength, not raw power.
 # ----------------------------------------
 TARGET = 2                  # anything below this is a weakness
 TEMPO_INDEX = 1              # index of Tempo in hero stat arrays
-TEMPO_PAIR_BONUS = 0.35      # weight for high-tempo <-> low-tempo pairing
-POWER_DISINCENTIVE = 0.6     # penalty for strong+strong pairings
+TEMPO_PAIR_BONUS = 0.2     # weight for high-tempo <-> low-tempo pairing
+POWER_DISINCENTIVE = 0.5     # penalty for strong+strong pairings
 
 # ----------------------------------------
 # Imports
