@@ -20,12 +20,12 @@ from hero_image_urls import hero_image_urls
 # Page header
 # ----------------------------------------
 st.title("Hero Pairings (2-Player Synergy)")
-st.subheader(
-    "Select a hero to view good pairings in multiplayer. The pairings are determined based on these criteria:
-    1. They fix each others weaknesses
-    2. Strong heroes are paired with weaker heroes
-    3. Low tempo late game heroes are paired with high tempo early game heroes."
-)
+# st.subheader(
+#     "Select a hero to view good pairings in multiplayer. The pairings are determined based on these criteria:
+#     1. They fix each others weaknesses
+#     2. Strong heroes are paired with weaker heroes
+#     3. Low tempo late game heroes are paired with high tempo early game heroes."
+# )
 
 st.markdown(
     "This is a **beta build**. These pairings are not to be taken as good at this point. Also, it doesn't currently account for specific syergies. "
