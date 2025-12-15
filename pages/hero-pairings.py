@@ -12,8 +12,8 @@ TARGET = 2                       # anything below this is a weakness
 BASE_STAT_COUNT = 8              # indices 0–7 are baseline stats
 
 # Stat indices (global stat array)
-# [0] e, [1] t, [2] cv, [3] s, [4] d, [5] th, [6] re, [7] mi,
-# [8] c, [9] support, [10] br, [11] lg, [12] si, [13] sc, [14] mu
+# [0] economy, [1] tempo, [2] card value, [3] survivability, [4] villain damage, [5] threat removal, [6] reliabilty, [7] minion control,
+# [8] control boon, [9] support boon, [10] broken builds boon, [11] late game boon, [12] simplicity, [13] status cards, [14] multiplayer conistency boon
 
 TEMPO_INDEX = 1
 SURVIVABILITY_INDEX = 3
