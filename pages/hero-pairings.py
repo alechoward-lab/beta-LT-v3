@@ -13,12 +13,12 @@ THWART_INDEX = 2               # Thwart stat index
 SURVIVABILITY_INDEX = 2         # Survivability stat index
 SUPPORT_INDEX = 2              # Support stat index
 
-TEMPO_PAIR_BONUS = 0.2          # high-tempo <-> low-tempo pairing
+TEMPO_PAIR_BONUS = 0.5          # high-tempo <-> low-tempo pairing
 POWER_DISINCENTIVE = 0.7        # strong + strong penalty
 WEAK_PAIR_DISINCENTIVE = 0.5    # weak + weak penalty
 
-LATE_GAME_THWART_BONUS = 0.2   # late-game + high thwart bonus
-BLOCKING_SUPPORT_BONUS = 0.2    # low survivability + support/survivability partner
+LATE_GAME_THWART_BONUS = 0.4   # late-game + high thwart bonus
+BLOCKING_SUPPORT_BONUS = 0.3    # low survivability + support/survivability partner
 
 # ----------------------------------------
 # Imports
