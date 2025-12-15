@@ -167,17 +167,14 @@ background_image_path = "images/background/marvel_champions_background_image_v2.
 st.markdown(
     f"""
     <style>
-    .stApp {{
+    html, body, [data-testid="stAppViewContainer"] {{
         background-image: url("{background_image_path}");
-        background-repeat: no-repeat;
-        background-position: center;
-        background-attachment: fixed;
         background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
     }}
     </style>
     """,
     unsafe_allow_html=True
 )
-
-ax.legend(handles=handles, title="Tiers", loc="upper left")
-st.pyplot(fig)
