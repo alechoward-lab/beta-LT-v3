@@ -1,26 +1,33 @@
 """
 Hero Pairings – 2 Player Synergy
-Pairings are based on baseline stats only (indices 0–9).
-Boons and conditional bonuses are excluded from synergy calculations.
+
+Pairings are primarily based on baseline stats (indices 0–7).
+Boons and conditional bonuses may be referenced ONLY in explicit rules.
 """
 
 # ----------------------------------------
 # Tuning Variables
 # ----------------------------------------
-TARGET = 2                      # anything below this is a weakness
-BASE_STAT_COUNT = 8            # indices 0–7 are baseline stats
-#              e, t, cv,s, d, th,re,mi,c, s, br,lg,si,sc,mu
-TEMPO_INDEX = 1                 # Tempo stat index
-THWART_INDEX = 5                # Thwart stat index
-SURVIVABILITY_INDEX = 3         # Survivability stat index
-SUPPORT_INDEX = 9               # Support stat index
+TARGET = 2                       # anything below this is a weakness
+BASE_STAT_COUNT = 8              # indices 0–7 are baseline stats
 
-TEMPO_PAIR_BONUS = 0.25         # high-tempo <-> low-tempo pairing
-LATE_GAME_THWART_BONUS = 0.20   # late-game + high thwart bonus
-BLOCKING_SUPPORT_BONUS = 0.25   # low survivability + support/survivability partner
+# Stat indices (global stat array)
+# [0] e, [1] t, [2] cv, [3] s, [4] d, [5] th, [6] re, [7] mi,
+# [8] c, [9] support, [10] br, [11] lg, [12] si, [13] sc, [14] mu
 
-POWER_DISINCENTIVE = 0.65       # strong + strong penalty
-WEAK_PAIR_DISINCENTIVE = 0.75   # weak + weak penalty
+TEMPO_INDEX = 1
+SURVIVABILITY_INDEX = 3
+THWART_INDEX = 5
+SUPPORT_INDEX = 9                # ⚠️ boon, NOT baseline
+
+# Synergy weights
+TEMPO_PAIR_BONUS = 0.25
+LATE_GAME_THWART_BONUS = 0.20
+BLOCKING_SUPPORT_BONUS = 0.25
+
+POWER_DISINCENTIVE = 0.65
+WEAK_PAIR_DISINCENTIVE = 0.75
+
 
 # ----------------------------------------
 # Imports
@@ -32,6 +39,7 @@ from copy import deepcopy
 from default_heroes import default_heroes
 from hero_image_urls import hero_image_urls
 from preset_options import preset_options
+
 
 # ----------------------------------------
 # Page header
@@ -53,13 +61,13 @@ with col1:
 
 with col2:
     st.markdown("""
-    **Strengths and Shortcomings of This List:**
-    - Helps find balanced and comfortable 2-player pairings
-    - Encourages role diversity instead of raw power
-    - Does not model card-level synergies or traits
+    **Strengths and Limitations:**
+    - Encourages role diversity over raw power
     - Aspect-agnostic by design
-    - Inherits assumptions from the General Power tier list
+    - Ignores card-level and trait synergies
+    - Assumes baseline stats reflect play patterns
     """)
+
 
 # ----------------------------------------
 # Load hero data
@@ -67,11 +75,12 @@ with col2:
 heroes = deepcopy(default_heroes)
 hero_names = list(heroes.keys())
 
+
 # ----------------------------------------
-# Compute GENERAL POWER (2 Player preset)
-# NOTE: Power intentionally includes boons
+# Compute GENERAL POWER (boons INCLUDED)
 # ----------------------------------------
 general_weights = np.array(preset_options["General Power: 2 Player"])
+
 general_scores = {
     hero: float(np.dot(stats, general_weights))
     for hero, stats in heroes.items()
@@ -84,18 +93,22 @@ gp_std = gp_values.std()
 STRONG_HERO_THRESHOLD = gp_mean + 0.5 * gp_std
 WEAK_HERO_THRESHOLD = gp_mean - 0.5 * gp_std
 
+
 # ----------------------------------------
 # Select primary hero
 # ----------------------------------------
 hero_A = st.selectbox("Select a hero to view pairings:", hero_names)
+
 stats_A = heroes[hero_A]
 base_stats_A = stats_A[:BASE_STAT_COUNT]
 power_A = general_scores[hero_A]
 
+
 # ----------------------------------------
-# Compute Hero A weaknesses (baseline only)
+# Identify Hero A weaknesses (baseline only)
 # ----------------------------------------
 needs = np.maximum(0, TARGET - base_stats_A)
+
 
 # ----------------------------------------
 # Score partner heroes
@@ -109,6 +122,8 @@ for hero_B, stats_B in heroes.items():
     base_stats_B = stats_B[:BASE_STAT_COUNT]
     power_B = general_scores[hero_B]
 
+    synergy_score = 0.0
+
     # ----------------------------------
     # 1. Weakness coverage (core synergy)
     # ----------------------------------
@@ -117,47 +132,56 @@ for hero_B, stats_B in heroes.items():
         needs
     )
 
-    synergy_score = np.dot(needs, usable_strengths)
-    synergy_score /= (np.sum(needs) + 1e-6)
+    if np.sum(needs) > 0:
+        synergy_score += np.dot(needs, usable_strengths) / np.sum(needs)
 
     # ----------------------------------
     # 2. Tempo pairing (early ↔ late)
     # ----------------------------------
-    tempo_A = base_stats_A[TEMPO_INDEX]
-    tempo_B = base_stats_B[TEMPO_INDEX]
-
-    tempo_mismatch = abs(tempo_A - tempo_B)
+    tempo_mismatch = abs(
+        base_stats_A[TEMPO_INDEX] - base_stats_B[TEMPO_INDEX]
+    )
     synergy_score += TEMPO_PAIR_BONUS * tempo_mismatch
 
     # ----------------------------------
-    # 3. Late-game hero + high thwart bonus
+    # 3. Late-game hero + high thwart
     # ----------------------------------
-    if tempo_A < TARGET and base_stats_B[THWART_INDEX] > TARGET:
-        synergy_score += LATE_GAME_THWART_BONUS * base_stats_B[THWART_INDEX]
+    if base_stats_A[TEMPO_INDEX] < TARGET:
+        if base_stats_B[THWART_INDEX] > TARGET:
+            synergy_score += (
+                LATE_GAME_THWART_BONUS * base_stats_B[THWART_INDEX]
+            )
 
     # ----------------------------------
-    # 4. Low survivability + blocker/support bonus
+    # 4. Low survivability + blocker/support
     # ----------------------------------
     if base_stats_A[SURVIVABILITY_INDEX] < TARGET:
         blocking_value = (
             max(0, base_stats_B[SURVIVABILITY_INDEX]) +
-            max(0, base_stats_B[SUPPORT_INDEX])
+            max(0, stats_B[SUPPORT_INDEX])   # ⚠️ pulled from FULL stats
         )
         synergy_score += BLOCKING_SUPPORT_BONUS * blocking_value
 
     # ----------------------------------
     # 5. Strong + strong disincentive
     # ----------------------------------
-    if power_A >= STRONG_HERO_THRESHOLD and power_B >= STRONG_HERO_THRESHOLD:
+    if (
+        power_A >= STRONG_HERO_THRESHOLD
+        and power_B >= STRONG_HERO_THRESHOLD
+    ):
         synergy_score *= POWER_DISINCENTIVE
 
     # ----------------------------------
     # 6. Weak + weak disincentive
     # ----------------------------------
-    if power_A <= WEAK_HERO_THRESHOLD and power_B <= WEAK_HERO_THRESHOLD:
+    if (
+        power_A <= WEAK_HERO_THRESHOLD
+        and power_B <= WEAK_HERO_THRESHOLD
+    ):
         synergy_score *= WEAK_PAIR_DISINCENTIVE
 
     scores[hero_B] = synergy_score
+
 
 # ----------------------------------------
 # Tiering
@@ -183,6 +207,7 @@ for hero, sc in scores.items():
         tiers["C"].append(hero)
     else:
         tiers["D"].append(hero)
+
 
 # ----------------------------------------
 # Display tiered hero grid
@@ -215,7 +240,8 @@ for tier in ["S", "A", "B", "C", "D"]:
             with cols[idx]:
                 img = hero_image_urls.get(hero)
                 if img:
-                    st.image(img, use_container_width=True)
+                    st.image(img, width="stretch")
+
 
 # ----------------------------------------
 # Background image
