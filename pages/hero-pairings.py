@@ -1,8 +1,6 @@
 """
-Hero Pairings – 2 Player Synergy
-
-Pairings are primarily based on baseline stats (indices 0–7).
-Boons and conditional bonuses are referenced ONLY in explicit rules.
+economy shouldn't be considered in the pairings. 
+late game heroes shoudl be paired with heroes that have stun/confuse
 """
 
 # ----------------------------------------
@@ -43,8 +41,8 @@ TEMPO_PAIR_BONUS = 0.25
 LATE_GAME_THWART_BONUS = 0.20
 BLOCKING_SUPPORT_BONUS = 0.25
 
-POWER_DISINCENTIVE = 0.65
-WEAK_PAIR_DISINCENTIVE = 0.75
+POWER_DISINCENTIVE = 0.4
+WEAK_PAIR_DISINCENTIVE = 0.4
 
 
 # ----------------------------------------
