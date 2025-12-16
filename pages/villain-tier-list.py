@@ -1,3 +1,7 @@
+"""
+economy shouldn't be considered in the pairings. 
+late game heroes shoudl be paired with heroes that have stun/confuse
+"""
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
@@ -225,3 +229,4 @@ handles = [Patch(color=c, label=f"Tier {t}") for t, c in tier_colors.items()]
 ax.legend(handles=handles, title="Tiers", loc="upper left", fontsize=12, title_fontsize=12)
 
 st.pyplot(fig)
+
