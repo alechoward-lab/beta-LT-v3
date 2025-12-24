@@ -80,6 +80,9 @@ with col2:
     **Strengths and Limitations:**
     - Aspect-agnostic by design
     - Ignores card-level and trait synergies
+    - Good for creating balanced games
+    - Quickly choose a hero combinations
+    - Ideas to try new hero pairs
     """)
 
 
