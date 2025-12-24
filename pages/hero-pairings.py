@@ -70,7 +70,7 @@ with col1:
     - Fixing each other’s weaknesses
     - Pairing strong heroes with weaker heroes
     - Avoiding weak + weak pairings
-    - Late-game heroes with high-thwart partners
+    - Late-game heroes with high-thwart and support partners
     - Low survivability heroes with blockers / support heroes
     - Tempo balance (early ↔ late game)
     """)
@@ -78,10 +78,8 @@ with col1:
 with col2:
     st.markdown("""
     **Strengths and Limitations:**
-    - Encourages role diversity over raw power
     - Aspect-agnostic by design
     - Ignores card-level and trait synergies
-    - Assumes baseline stats reflect play patterns
     """)
 
 
