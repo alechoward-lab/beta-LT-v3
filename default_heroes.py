@@ -55,7 +55,7 @@ default_heroes = {
         "Deadpool":             np.array([ 1, 5, 5, 5, 5, 5,-3, 2, 1, 3, 1, 0,-1, 1, 0]),
         "Bishop":               np.array([ 5, 2, 4, 4, 5, 3, 3, 3, 0, 0, 1, 1,-3, 0, 0]),
         "Magik":                np.array([ 4, 2, 4, 3, 2, 4, 4, 3, 2, 0, 1, 1,-5, 5, 0]),
-        "Iceman":               np.array([ 3, 2, 3, 3, 2, 2,-2, 4, 3, 2, 0, 0, 0, 0, 1]),
+        "Iceman":               np.array([ 3, 2, 3, 3, 2, 2,-4, 4, 3, 2, 0, 0, 0, 0, 1]),
         "Jubilee":              np.array([ 3,-1, 4, 0, 2, 4, 3, 3, 4, 1, 0, 1,-1, 5, 1]),
         "Nightcrawler":         np.array([ 1, 2, 3, 4, 1, 3, 4, 4, 1, 2, 0, 0,-1, 1, 2]),
                             #              e, t, cv,s, d, th,re,mi,c, s, br,lg,si,sc,mu
