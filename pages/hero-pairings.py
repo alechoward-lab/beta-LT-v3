@@ -162,11 +162,14 @@ hero_A = st.selectbox("Select a hero to view pairings:", hero_names)
 
 
 # ----------------------------------------
-# Selected hero visual anchor
+# Selected hero visual + dynamic blurb
 # ----------------------------------------
 st.markdown("---")
 
 hero_cols = st.columns([1, 3])
+
+hero_power = general_scores[hero_A]
+hero_stats = heroes[hero_A][:BASE_STAT_COUNT]
 
 with hero_cols[0]:
     hero_img = hero_image_urls.get(hero_A)
@@ -175,15 +178,52 @@ with hero_cols[0]:
 
 with hero_cols[1]:
     st.markdown(
-        f"""
-        <h1 style="margin-bottom:0;">Best Partners for {hero_A}</h1>
-        <p style="opacity:0.85;">
-        These heroes pair well with <strong>{hero_A}</strong>,
-        either through mutual synergy or complementary strengths.
-        </p>
-        """,
+        f"<h1 style='margin-bottom:0;'>Best Partners for {hero_A}</h1>",
         unsafe_allow_html=True
     )
+
+    # --- Dynamic role description ---
+    weaknesses = [
+        name for name, val in zip(
+            ["Damage", "Tempo", "Control", "Survivability",
+             "Flex", "Thwart", "Setup", "Efficiency"],
+            hero_stats
+        )
+        if val < TARGET
+    ]
+
+    strengths = [
+        name for name, val in zip(
+            ["Damage", "Tempo", "Control", "Survivability",
+             "Flex", "Thwart", "Setup", "Efficiency"],
+            hero_stats
+        )
+        if val > TARGET
+    ]
+
+    if hero_power <= WEAK_HERO_THRESHOLD:
+        blurb = (
+            f"<p><strong>{hero_A}</strong> is a hero that benefits greatly "
+            f"from a <strong>strong, stabilizing partner</strong>. "
+            f"These pairings prioritize heroes that can cover weaknesses "
+            f"like <em>{', '.join(weaknesses[:2])}</em> and help carry the game.</p>"
+        )
+    elif hero_power >= STRONG_HERO_THRESHOLD:
+        blurb = (
+            f"<p><strong>{hero_A}</strong> is a powerful hero who can afford "
+            f"to <strong>support weaker or more specialized partners</strong>. "
+            f"These pairings highlight heroes that benefit from "
+            f"{hero_A}’s strengths in <em>{', '.join(strengths[:2])}</em>.</p>"
+        )
+    else:
+        blurb = (
+            f"<p><strong>{hero_A}</strong> is a flexible, well-rounded hero "
+            f"that doesn’t require any particular support. "
+            f"These pairings focus on <strong>balanced partnerships</strong> "
+            f"and complementary playstyles.</p>"
+        )
+
+    st.markdown(blurb, unsafe_allow_html=True)
 
 st.markdown("---")
 
@@ -212,9 +252,7 @@ for hero_B in hero_names:
         blended *= (1 + S_TIER_RECIPROCITY_BOOST)
 
     scores[hero_B] = blended
-    details[hero_B] = {
-        "type": pairing_type
-    }
+    details[hero_B] = {"type": pairing_type}
 
 
 # ----------------------------------------
