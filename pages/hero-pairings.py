@@ -1,12 +1,11 @@
 """
-Hero Pairings — Mutually Aware Version
+Hero Pairings — UX-Refined Mutually Aware Version
 
-Pairings are influenced by:
-- Fixing each other’s weaknesses
-- Tempo balance (early ↔ late)
-- Survivability and support
-- Late-game heroes with high-thwart partners
-- Avoiding strong + strong and weak + weak
+Design goals:
+- Fix each other’s weaknesses
+- Encourage balanced, mutual partnerships
+- Avoid misleading one-sided S-tier pairings
+- Remain explainable and intuitive
 """
 
 # ----------------------------------------
@@ -15,19 +14,21 @@ Pairings are influenced by:
 TARGET = 2
 BASE_STAT_COUNT = 8
 
-# Mutual-awareness blending
-PRIMARY_WEIGHT = 0.6        # weight for selected hero's perspective
-SECONDARY_WEIGHT = 0.4      # weight for partner's perspective
+# Mutual awareness
+PRIMARY_WEIGHT = 0.6
+SECONDARY_WEIGHT = 0.4
+
+# Reciprocity guardrails
+MIN_RECIPROCITY_RATIO = 0.35     # prevents one-sided S tiers
+S_TIER_RECIPROCITY_BOOST = 0.15  # rewards genuinely mutual pairings
 
 # Global stat indices
-ECONOMY_INDEX = 0
 TEMPO_INDEX = 1
 SURVIVABILITY_INDEX = 3
 THWART_INDEX = 5
 SUPPORT_INDEX = 9
 LATE_GAME_INDEX = 11
 
-# Boon thresholds
 LATE_GAME_TRIGGER = 1.0
 
 # Synergy weights
@@ -56,28 +57,12 @@ from preset_options import preset_options
 # ----------------------------------------
 st.title("Hero Pairings")
 
-col1, col2 = st.columns(2)
-
-with col1:
-    st.markdown("""
-    **Pairings are influenced by:**
-    - Fixing each other’s weaknesses
-    - Pairing strong heroes with weaker heroes
-    - Avoiding weak + weak pairings
-    - Late-game heroes with high-thwart and support partners
-    - Low survivability heroes with blockers / support heroes
-    - Tempo balance (early ↔ late game)
-    """)
-
-with col2:
-    st.markdown("""
-    **Strengths and Limitations:**
-    - Aspect-agnostic by design
-    - Ignores card-level and trait synergies
-    - Good for creating balanced games
-    - Quickly choose hero combinations
-    - Encourages fair, mutual pairings
-    """)
+st.markdown(
+    """
+    These pairings focus on **balanced, mutually beneficial partnerships**.
+    A strong pairing should help *both* heroes succeed — not just one.
+    """
+)
 
 
 # ----------------------------------------
@@ -88,7 +73,7 @@ hero_names = list(heroes.keys())
 
 
 # ----------------------------------------
-# Compute GENERAL POWER (boons INCLUDED)
+# Compute GENERAL POWER
 # ----------------------------------------
 general_weights = np.array(preset_options["General Power: 2 Player"])
 
@@ -106,7 +91,7 @@ WEAK_HERO_THRESHOLD = gp_mean - 0.5 * gp_std
 
 
 # ----------------------------------------
-# Directional synergy function
+# Directional synergy
 # ----------------------------------------
 def directional_synergy(hero_A, hero_B):
     stats_A = heroes[hero_A]
@@ -118,117 +103,96 @@ def directional_synergy(hero_A, hero_B):
     power_A = general_scores[hero_A]
     power_B = general_scores[hero_B]
 
-    synergy_score = 0.0
+    score = 0.0
 
-    # ----------------------------------
     # 1. Weakness coverage
-    # ----------------------------------
     needs = np.maximum(0, TARGET - base_A)
-
-    usable_strengths = np.minimum(
-        np.maximum(0, base_B),
-        needs
-    )
+    usable = np.minimum(np.maximum(0, base_B), needs)
 
     if np.sum(needs) > 0:
-        synergy_score += np.dot(needs, usable_strengths) / np.sum(needs)
+        score += np.dot(needs, usable) / np.sum(needs)
 
-    # ----------------------------------
-    # 2. Tempo pairing
-    # ----------------------------------
-    tempo_mismatch = abs(
+    # 2. Tempo contrast
+    score += TEMPO_PAIR_BONUS * abs(
         base_A[TEMPO_INDEX] - base_B[TEMPO_INDEX]
     )
-    synergy_score += TEMPO_PAIR_BONUS * tempo_mismatch
 
-    # ----------------------------------
-    # 3. Late-game hero + high thwart partner
-    # ----------------------------------
+    # 3. Late-game support
     if stats_A[LATE_GAME_INDEX] >= LATE_GAME_TRIGGER:
         if base_B[THWART_INDEX] > TARGET:
-            synergy_score += (
-                LATE_GAME_THWART_BONUS * base_B[THWART_INDEX]
-            )
+            score += LATE_GAME_THWART_BONUS * base_B[THWART_INDEX]
 
-    # ----------------------------------
-    # 4. Low survivability + blocker/support
-    # ----------------------------------
+    # 4. Fragile hero protection
     if base_A[SURVIVABILITY_INDEX] < TARGET:
-        blocking_value = (
+        blocking = (
             max(0, base_B[SURVIVABILITY_INDEX]) +
             max(0, stats_B[SUPPORT_INDEX])
         )
-        synergy_score += BLOCKING_SUPPORT_BONUS * blocking_value
+        score += BLOCKING_SUPPORT_BONUS * blocking
 
-    # ----------------------------------
-    # 5. Strong + strong disincentive
-    # ----------------------------------
-    if (
-        power_A >= STRONG_HERO_THRESHOLD
-        and power_B >= STRONG_HERO_THRESHOLD
-    ):
-        synergy_score *= POWER_DISINCENTIVE
+    # 5. Power disincentives
+    if power_A >= STRONG_HERO_THRESHOLD and power_B >= STRONG_HERO_THRESHOLD:
+        score *= POWER_DISINCENTIVE
 
-    # ----------------------------------
-    # 6. Weak + weak disincentive
-    # ----------------------------------
-    if (
-        power_A <= WEAK_HERO_THRESHOLD
-        and power_B <= WEAK_HERO_THRESHOLD
-    ):
-        synergy_score *= WEAK_PAIR_DISINCENTIVE
+    if power_A <= WEAK_HERO_THRESHOLD and power_B <= WEAK_HERO_THRESHOLD:
+        score *= WEAK_PAIR_DISINCENTIVE
 
-    return synergy_score
+    return score
 
 
 # ----------------------------------------
-# Select primary hero
+# Select hero
 # ----------------------------------------
-hero_A = st.selectbox("Select a hero to view pairings:", hero_names)
+hero_A = st.selectbox("Select a hero:", hero_names)
 
 
 # ----------------------------------------
-# Score partner heroes (mutually aware)
+# Score partners
 # ----------------------------------------
 scores = {}
+details = {}
 
 for hero_B in hero_names:
     if hero_B == hero_A:
         continue
 
-    score_A_to_B = directional_synergy(hero_A, hero_B)
-    score_B_to_A = directional_synergy(hero_B, hero_A)
+    a_to_b = directional_synergy(hero_A, hero_B)
+    b_to_a = directional_synergy(hero_B, hero_A)
 
-    final_score = (
-        PRIMARY_WEIGHT * score_A_to_B +
-        SECONDARY_WEIGHT * score_B_to_A
+    blended = (
+        PRIMARY_WEIGHT * a_to_b +
+        SECONDARY_WEIGHT * b_to_a
     )
 
-    scores[hero_B] = final_score
+    # Reciprocity logic
+    min_score = min(a_to_b, b_to_a)
+    max_score = max(a_to_b, b_to_a)
+
+    reciprocity_ratio = (
+        min_score / max_score if max_score > 0 else 0
+    )
+
+    if reciprocity_ratio >= MIN_RECIPROCITY_RATIO:
+        blended *= (1 + S_TIER_RECIPROCITY_BOOST)
+
+    scores[hero_B] = blended
+    details[hero_B] = {
+        "a_to_b": a_to_b,
+        "b_to_a": b_to_a,
+        "reciprocal": reciprocity_ratio >= MIN_RECIPROCITY_RATIO
+    }
 
 
 # ----------------------------------------
-# Safety: prevent zero-variance tiering
+# Tiering (slightly stabilized)
 # ----------------------------------------
 vals = np.array(list(scores.values()))
-
-if np.allclose(vals, 0):
-    st.warning(
-        "No meaningful synergy differences detected for this hero "
-        "(all partners score similarly)."
-    )
-    st.stop()
-
-
-# ----------------------------------------
-# Tiering
-# ----------------------------------------
 mean, std = vals.mean(), vals.std()
 
-thr_S = mean + 1.5 * std
-thr_A = mean + 0.5 * std
-thr_B = mean - 0.5 * std
-thr_C = mean - 1.5 * std
+thr_S = mean + 1.25 * std
+thr_A = mean + 0.4 * std
+thr_B = mean - 0.4 * std
+thr_C = mean - 1.25 * std
 
 tiers = {"S": [], "A": [], "B": [], "C": [], "D": []}
 
@@ -246,7 +210,7 @@ for hero, sc in scores.items():
 
 
 # ----------------------------------------
-# Display tiered hero grid
+# Display
 # ----------------------------------------
 tier_colors = {
     "S": "#FF69B4",
@@ -256,7 +220,6 @@ tier_colors = {
     "D": "red",
 }
 
-num_cols = 5
 st.header(f"Best Partners for {hero_A}")
 
 for tier in ["S", "A", "B", "C", "D"]:
@@ -266,21 +229,24 @@ for tier in ["S", "A", "B", "C", "D"]:
 
     st.markdown(
         f"<h2 style='color:{tier_colors[tier]};'>{tier} Tier</h2>",
-        unsafe_allow_html=True,
+        unsafe_allow_html=True
     )
 
-    rows = [members[i:i + num_cols] for i in range(0, len(members), num_cols)]
-    for row in rows:
-        cols = st.columns(num_cols)
-        for idx, hero in enumerate(row):
-            with cols[idx]:
-                img = hero_image_urls.get(hero)
-                if img:
-                    st.image(img, width="stretch")
+    cols = st.columns(5)
+    for i, hero in enumerate(members):
+        with cols[i % 5]:
+            img = hero_image_urls.get(hero)
+            if img:
+                st.image(img, use_container_width=True)
+
+            if details[hero]["reciprocal"]:
+                st.caption("🤝 Mutual synergy")
+            else:
+                st.caption("⚠️ One-sided pairing")
 
 
 # ----------------------------------------
-# Background image
+# Background
 # ----------------------------------------
 background_image_url = (
     "https://github.com/alechoward-lab/"
