@@ -15,25 +15,20 @@ Design goals:
 TARGET = 2
 BASE_STAT_COUNT = 8
 
-# Mutual awareness blending
 PRIMARY_WEIGHT = 0.6
 SECONDARY_WEIGHT = 0.4
 
-# Reciprocity guardrails
 MIN_RECIPROCITY_RATIO = 0.35
 S_TIER_RECIPROCITY_BOOST = 0.15
 
-# Global stat indices
 TEMPO_INDEX = 1
 SURVIVABILITY_INDEX = 3
 THWART_INDEX = 5
 SUPPORT_INDEX = 9
 LATE_GAME_INDEX = 11
 
-# Boon thresholds
 LATE_GAME_TRIGGER = 1.0
 
-# Synergy weights
 TEMPO_PAIR_BONUS = 0.25
 LATE_GAME_THWART_BONUS = 0.20
 BLOCKING_SUPPORT_BONUS = 0.25
@@ -76,7 +71,7 @@ hero_names = list(heroes.keys())
 
 
 # ----------------------------------------
-# Compute GENERAL POWER (boons included)
+# Compute GENERAL POWER
 # ----------------------------------------
 general_weights = np.array(preset_options["General Power: 2 Player"])
 
@@ -94,7 +89,7 @@ WEAK_HERO_THRESHOLD = gp_mean - 0.5 * gp_std
 
 
 # ----------------------------------------
-# Directional synergy function
+# Directional synergy
 # ----------------------------------------
 def directional_synergy(hero_A, hero_B):
     stats_A = heroes[hero_A]
@@ -108,27 +103,24 @@ def directional_synergy(hero_A, hero_B):
 
     score = 0.0
 
-    # 1. Weakness coverage
+    # Weakness coverage
     needs = np.maximum(0, TARGET - base_A)
-    usable_strengths = np.minimum(
-        np.maximum(0, base_B),
-        needs
-    )
+    usable_strengths = np.minimum(np.maximum(0, base_B), needs)
 
     if np.sum(needs) > 0:
         score += np.dot(needs, usable_strengths) / np.sum(needs)
 
-    # 2. Tempo contrast
+    # Tempo contrast
     score += TEMPO_PAIR_BONUS * abs(
         base_A[TEMPO_INDEX] - base_B[TEMPO_INDEX]
     )
 
-    # 3. Late-game hero + high thwart partner
+    # Late-game + thwart
     if stats_A[LATE_GAME_INDEX] >= LATE_GAME_TRIGGER:
         if base_B[THWART_INDEX] > TARGET:
             score += LATE_GAME_THWART_BONUS * base_B[THWART_INDEX]
 
-    # 4. Low survivability + blocker/support
+    # Survivability support
     if base_A[SURVIVABILITY_INDEX] < TARGET:
         blocking_value = (
             max(0, base_B[SURVIVABILITY_INDEX]) +
@@ -136,7 +128,7 @@ def directional_synergy(hero_A, hero_B):
         )
         score += BLOCKING_SUPPORT_BONUS * blocking_value
 
-    # 5. Power disincentives
+    # Power disincentives
     if power_A >= STRONG_HERO_THRESHOLD and power_B >= STRONG_HERO_THRESHOLD:
         score *= POWER_DISINCENTIVE
 
@@ -158,19 +150,46 @@ def classify_pairing(a_to_b, b_to_a):
     if ratio >= MIN_RECIPROCITY_RATIO:
         return "mutual"
     elif a_to_b > b_to_a:
-        return "b_helps_a"   # partner supports selected hero
+        return "b_helps_a"
     else:
-        return "a_helps_b"   # selected hero supports partner
+        return "a_helps_b"
 
 
 # ----------------------------------------
-# Select primary hero
+# Select hero
 # ----------------------------------------
 hero_A = st.selectbox("Select a hero to view pairings:", hero_names)
 
 
 # ----------------------------------------
-# Score partner heroes (mutually aware)
+# Selected hero visual anchor
+# ----------------------------------------
+st.markdown("---")
+
+hero_cols = st.columns([1, 3])
+
+with hero_cols[0]:
+    hero_img = hero_image_urls.get(hero_A)
+    if hero_img:
+        st.image(hero_img, use_container_width=True)
+
+with hero_cols[1]:
+    st.markdown(
+        f"""
+        <h1 style="margin-bottom:0;">Best Partners for {hero_A}</h1>
+        <p style="opacity:0.85;">
+        These heroes pair well with <strong>{hero_A}</strong>,
+        either through mutual synergy or complementary strengths.
+        </p>
+        """,
+        unsafe_allow_html=True
+    )
+
+st.markdown("---")
+
+
+# ----------------------------------------
+# Score partners
 # ----------------------------------------
 scores = {}
 details = {}
@@ -182,41 +201,26 @@ for hero_B in hero_names:
     a_to_b = directional_synergy(hero_A, hero_B)
     b_to_a = directional_synergy(hero_B, hero_A)
 
-    blended_score = (
+    blended = (
         PRIMARY_WEIGHT * a_to_b +
         SECONDARY_WEIGHT * b_to_a
     )
 
     pairing_type = classify_pairing(a_to_b, b_to_a)
 
-    # Slight reward for genuine mutuality
     if pairing_type == "mutual":
-        blended_score *= (1 + S_TIER_RECIPROCITY_BOOST)
+        blended *= (1 + S_TIER_RECIPROCITY_BOOST)
 
-    scores[hero_B] = blended_score
+    scores[hero_B] = blended
     details[hero_B] = {
-        "a_to_b": a_to_b,
-        "b_to_a": b_to_a,
         "type": pairing_type
     }
 
 
 # ----------------------------------------
-# Safety: prevent zero-variance tiering
+# Tiering
 # ----------------------------------------
 vals = np.array(list(scores.values()))
-
-if np.allclose(vals, 0):
-    st.warning(
-        "No meaningful synergy differences detected for this hero "
-        "(all partners score similarly)."
-    )
-    st.stop()
-
-
-# ----------------------------------------
-# Tiering (stabilized)
-# ----------------------------------------
 mean, std = vals.mean(), vals.std()
 
 thr_S = mean + 1.25 * std
@@ -240,7 +244,7 @@ for hero, sc in scores.items():
 
 
 # ----------------------------------------
-# Display tiered hero grid
+# Display tiers
 # ----------------------------------------
 tier_colors = {
     "S": "#FF69B4",
@@ -251,7 +255,6 @@ tier_colors = {
 }
 
 num_cols = 5
-st.header(f"Best Partners for {hero_A}")
 
 for tier in ["S", "A", "B", "C", "D"]:
     members = tiers[tier]
@@ -272,20 +275,19 @@ for tier in ["S", "A", "B", "C", "D"]:
                 if img:
                     st.image(img, use_container_width=True)
 
-                pairing_type = details[hero]["type"]
-
-                if pairing_type == "mutual":
+                t = details[hero]["type"]
+                if t == "mutual":
                     st.caption("🤝 Mutual synergy")
-                elif pairing_type == "b_helps_a":
+                elif t == "b_helps_a":
                     st.caption("⬆️ Supports you")
-                elif pairing_type == "a_helps_b":
+                elif t == "a_helps_b":
                     st.caption("⬇️ You support them")
                 else:
                     st.caption("—")
 
 
 # ----------------------------------------
-# Background image
+# Background
 # ----------------------------------------
 background_image_url = (
     "https://github.com/alechoward-lab/"
