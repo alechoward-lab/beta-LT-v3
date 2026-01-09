@@ -1,39 +1,33 @@
 """
-economy shouldn't be considered in the pairings. 
-late game heroes shoudl be paired with heroes that have stun/confuse
+Hero Pairings — Mutually Aware Version
+
+Pairings are influenced by:
+- Fixing each other’s weaknesses
+- Tempo balance (early ↔ late)
+- Survivability and support
+- Late-game heroes with high-thwart partners
+- Avoiding strong + strong and weak + weak
 """
 
 # ----------------------------------------
 # Tuning Variables
 # ----------------------------------------
-TARGET = 2                       # baseline weakness threshold
-BASE_STAT_COUNT = 8              # indices 0–7 are baseline stats
+TARGET = 2
+BASE_STAT_COUNT = 8
+
+# Mutual-awareness blending
+PRIMARY_WEIGHT = 0.6        # weight for selected hero's perspective
+SECONDARY_WEIGHT = 0.4      # weight for partner's perspective
 
 # Global stat indices
-# [0] economy
-# [1] tempo
-# [2] card value
-# [3] survivability
-# [4] villain damage
-# [5] threat removal (thwart)
-# [6] reliability
-# [7] minion control
-# [8] control boon
-# [9] support boon
-# [10] broken builds boon
-# [11] late game boon
-# [12] simplicity
-# [13] status cards
-# [14] multiplayer consistency boon
-
 ECONOMY_INDEX = 0
 TEMPO_INDEX = 1
 SURVIVABILITY_INDEX = 3
 THWART_INDEX = 5
-SUPPORT_INDEX = 9                # ⚠️ boon
-LATE_GAME_INDEX = 11             # ⚠️ boon
+SUPPORT_INDEX = 9
+LATE_GAME_INDEX = 11
 
-# Boon thresholds (boons are NOT on baseline scale)
+# Boon thresholds
 LATE_GAME_TRIGGER = 1.0
 
 # Synergy weights
@@ -81,8 +75,8 @@ with col2:
     - Aspect-agnostic by design
     - Ignores card-level and trait synergies
     - Good for creating balanced games
-    - Quickly choose a hero combinations
-    - Ideas to try new hero pairs
+    - Quickly choose hero combinations
+    - Encourages fair, mutual pairings
     """)
 
 
@@ -112,40 +106,27 @@ WEAK_HERO_THRESHOLD = gp_mean - 0.5 * gp_std
 
 
 # ----------------------------------------
-# Select primary hero
+# Directional synergy function
 # ----------------------------------------
-hero_A = st.selectbox("Select a hero to view pairings:", hero_names)
+def directional_synergy(hero_A, hero_B):
+    stats_A = heroes[hero_A]
+    stats_B = heroes[hero_B]
 
-stats_A = heroes[hero_A]
-base_stats_A = stats_A[:BASE_STAT_COUNT]
-power_A = general_scores[hero_A]
+    base_A = stats_A[:BASE_STAT_COUNT]
+    base_B = stats_B[:BASE_STAT_COUNT]
 
-
-# ----------------------------------------
-# Identify Hero A weaknesses (baseline only)
-# ----------------------------------------
-needs = np.maximum(0, TARGET - base_stats_A)
-
-
-# ----------------------------------------
-# Score partner heroes
-# ----------------------------------------
-scores = {}
-
-for hero_B, stats_B in heroes.items():
-    if hero_B == hero_A:
-        continue
-
-    base_stats_B = stats_B[:BASE_STAT_COUNT]
+    power_A = general_scores[hero_A]
     power_B = general_scores[hero_B]
 
     synergy_score = 0.0
 
     # ----------------------------------
-    # 1. Weakness coverage (core synergy)
+    # 1. Weakness coverage
     # ----------------------------------
+    needs = np.maximum(0, TARGET - base_A)
+
     usable_strengths = np.minimum(
-        np.maximum(0, base_stats_B),
+        np.maximum(0, base_B),
         needs
     )
 
@@ -153,10 +134,10 @@ for hero_B, stats_B in heroes.items():
         synergy_score += np.dot(needs, usable_strengths) / np.sum(needs)
 
     # ----------------------------------
-    # 2. Tempo pairing (early ↔ late)
+    # 2. Tempo pairing
     # ----------------------------------
     tempo_mismatch = abs(
-        base_stats_A[TEMPO_INDEX] - base_stats_B[TEMPO_INDEX]
+        base_A[TEMPO_INDEX] - base_B[TEMPO_INDEX]
     )
     synergy_score += TEMPO_PAIR_BONUS * tempo_mismatch
 
@@ -164,18 +145,18 @@ for hero_B, stats_B in heroes.items():
     # 3. Late-game hero + high thwart partner
     # ----------------------------------
     if stats_A[LATE_GAME_INDEX] >= LATE_GAME_TRIGGER:
-        if base_stats_B[THWART_INDEX] > TARGET:
+        if base_B[THWART_INDEX] > TARGET:
             synergy_score += (
-                LATE_GAME_THWART_BONUS * base_stats_B[THWART_INDEX]
+                LATE_GAME_THWART_BONUS * base_B[THWART_INDEX]
             )
 
     # ----------------------------------
     # 4. Low survivability + blocker/support
     # ----------------------------------
-    if base_stats_A[SURVIVABILITY_INDEX] < TARGET:
+    if base_A[SURVIVABILITY_INDEX] < TARGET:
         blocking_value = (
-            max(0, base_stats_B[SURVIVABILITY_INDEX]) +
-            max(0, stats_B[SUPPORT_INDEX])   # support boon
+            max(0, base_B[SURVIVABILITY_INDEX]) +
+            max(0, stats_B[SUPPORT_INDEX])
         )
         synergy_score += BLOCKING_SUPPORT_BONUS * blocking_value
 
@@ -197,7 +178,33 @@ for hero_B, stats_B in heroes.items():
     ):
         synergy_score *= WEAK_PAIR_DISINCENTIVE
 
-    scores[hero_B] = synergy_score
+    return synergy_score
+
+
+# ----------------------------------------
+# Select primary hero
+# ----------------------------------------
+hero_A = st.selectbox("Select a hero to view pairings:", hero_names)
+
+
+# ----------------------------------------
+# Score partner heroes (mutually aware)
+# ----------------------------------------
+scores = {}
+
+for hero_B in hero_names:
+    if hero_B == hero_A:
+        continue
+
+    score_A_to_B = directional_synergy(hero_A, hero_B)
+    score_B_to_A = directional_synergy(hero_B, hero_A)
+
+    final_score = (
+        PRIMARY_WEIGHT * score_A_to_B +
+        SECONDARY_WEIGHT * score_B_to_A
+    )
+
+    scores[hero_B] = final_score
 
 
 # ----------------------------------------
