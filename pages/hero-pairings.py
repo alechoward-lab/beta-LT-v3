@@ -1,12 +1,5 @@
 """
 Hero Pairings — Mutually Aware, Direction-Aware UX Version
-
-Design goals:
-- Fix each other’s weaknesses
-- Encourage balanced, mutually beneficial partnerships
-- Clearly distinguish who is helping whom
-- Avoid misleading one-sided S-tier pairings
-- Remain explainable, heuristic, and aspect-agnostic
 """
 
 # ----------------------------------------
@@ -149,11 +142,9 @@ hero_A = st.selectbox("Select a hero:", hero_names)
 
 
 # ----------------------------------------
-# Selected hero display + analysis
+# Selected hero full-width card
 # ----------------------------------------
 st.markdown("---")
-
-hero_cols = st.columns([1, 3])
 
 hero_stats = heroes[hero_A][:BASE_STAT_COUNT]
 hero_power = general_scores[hero_A]
@@ -163,72 +154,50 @@ STAT_NAMES = [
     "Flex", "Thwart", "Setup", "Efficiency"
 ]
 
-weaknesses = [
-    name for name, val in zip(STAT_NAMES, hero_stats)
-    if val < TARGET
-]
-
-strengths = [
-    name for name, val in zip(STAT_NAMES, hero_stats)
-    if val > TARGET
-]
+weaknesses = [n for n, v in zip(STAT_NAMES, hero_stats) if v < TARGET]
+strengths = [n for n, v in zip(STAT_NAMES, hero_stats) if v > TARGET]
 
 role_tags = []
-
 if hero_power <= WEAK_HERO_THRESHOLD:
     role_tags.append("Needs Strong Partner")
-
 if hero_power >= STRONG_HERO_THRESHOLD:
     role_tags.append("Strong Carry")
-
 if len(weaknesses) <= 2:
     role_tags.append("Generalist")
 
-with hero_cols[0]:
+card_cols = st.columns([1.2, 4.8])
+
+with card_cols[0]:
     img = hero_image_urls.get(hero_A)
     if img:
         st.image(img, use_container_width=True)
 
-with hero_cols[1]:
+with card_cols[1]:
     st.markdown(
-        f"<h1 style='margin-bottom:0;'>Best Partners for {hero_A}</h1>",
+        f"""
+        <h1 style="margin-bottom:4px;">Best Partners for {hero_A}</h1>
+        <div style="font-weight:600; margin-bottom:8px;">
+            {' • '.join(role_tags)}
+        </div>
+
+        <div style="display:flex; gap:48px;">
+            <div>
+                <div style="color:#ff4d4d; font-weight:600;">Weaknesses</div>
+                <ul style="margin:4px 0 0 16px; padding:0; line-height:1.3;">
+                    {''.join(f"<li>{w}</li>" for w in weaknesses) or "<li>—</li>"}
+                </ul>
+            </div>
+
+            <div>
+                <div style="color:#2ecc71; font-weight:600;">Strengths</div>
+                <ul style="margin:4px 0 0 16px; padding:0; line-height:1.3;">
+                    {''.join(f"<li>{s}</li>" for s in strengths) or "<li>—</li>"}
+                </ul>
+            </div>
+        </div>
+        """,
         unsafe_allow_html=True
     )
-
-    st.markdown(
-        f"<p><strong>Role:</strong> {' • '.join(role_tags)}</p>",
-        unsafe_allow_html=True
-    )
-
-    cols = st.columns(2)
-
-    with cols[0]:
-        st.markdown(
-            "<strong style='color:#ff4d4d;'>Weaknesses</strong>",
-            unsafe_allow_html=True
-        )
-        if weaknesses:
-            for w in weaknesses:
-                st.markdown(
-                    f"<li style='color:#ff4d4d;'>{w}</li>",
-                    unsafe_allow_html=True
-                )
-        else:
-            st.markdown("<li>—</li>", unsafe_allow_html=True)
-
-    with cols[1]:
-        st.markdown(
-            "<strong style='color:#2ecc71;'>Strengths</strong>",
-            unsafe_allow_html=True
-        )
-        if strengths:
-            for s in strengths:
-                st.markdown(
-                    f"<li style='color:#2ecc71;'>{s}</li>",
-                    unsafe_allow_html=True
-                )
-        else:
-            st.markdown("<li>—</li>", unsafe_allow_html=True)
 
 st.markdown("---")
 
@@ -246,11 +215,7 @@ for hero_B in hero_names:
     a_to_b = directional_synergy(hero_A, hero_B)
     b_to_a = directional_synergy(hero_B, hero_A)
 
-    blended = (
-        PRIMARY_WEIGHT * a_to_b +
-        SECONDARY_WEIGHT * b_to_a
-    )
-
+    blended = PRIMARY_WEIGHT * a_to_b + SECONDARY_WEIGHT * b_to_a
     pairing_type = classify_pairing(a_to_b, b_to_a)
 
     if pairing_type == "mutual":
@@ -327,3 +292,25 @@ for tier in ["S", "A", "B", "C", "D"]:
                     st.caption("⬇️ You support them")
                 else:
                     st.caption("—")
+
+
+# ----------------------------------------
+# Background restore
+# ----------------------------------------
+background_image_url = (
+    "https://github.com/alechoward-lab/"
+    "Marvel-Champions-Hero-Tier-List/blob/main/"
+    "images/background/marvel_champions_background_image_v4.jpg?raw=true"
+)
+
+st.markdown(
+    f"""
+    <style>
+    .stApp {{
+        background: url({background_image_url}) no-repeat center center fixed;
+        background-size: cover;
+    }}
+    </style>
+    """,
+    unsafe_allow_html=True
+)
