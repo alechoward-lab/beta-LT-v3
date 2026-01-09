@@ -54,6 +54,14 @@ from preset_options import preset_options
 # ----------------------------------------
 st.title("Hero Pairings")
 
+st.markdown(
+    """
+    These pairings focus on **balanced, mutually beneficial partnerships**.
+    Some heroes *support you*, some are *supported by you*, and the best
+    partnerships benefit **both heroes**.
+    """
+)
+
 
 # ----------------------------------------
 # Load hero data
@@ -95,20 +103,24 @@ def directional_synergy(hero_A, hero_B):
 
     score = 0.0
 
+    # Weakness coverage
     needs = np.maximum(0, TARGET - base_A)
     usable_strengths = np.minimum(np.maximum(0, base_B), needs)
 
     if np.sum(needs) > 0:
         score += np.dot(needs, usable_strengths) / np.sum(needs)
 
+    # Tempo contrast
     score += TEMPO_PAIR_BONUS * abs(
         base_A[TEMPO_INDEX] - base_B[TEMPO_INDEX]
     )
 
+    # Late-game + thwart
     if stats_A[LATE_GAME_INDEX] >= LATE_GAME_TRIGGER:
         if base_B[THWART_INDEX] > TARGET:
             score += LATE_GAME_THWART_BONUS * base_B[THWART_INDEX]
 
+    # Survivability support
     if base_A[SURVIVABILITY_INDEX] < TARGET:
         blocking_value = (
             max(0, base_B[SURVIVABILITY_INDEX]) +
@@ -116,6 +128,7 @@ def directional_synergy(hero_A, hero_B):
         )
         score += BLOCKING_SUPPORT_BONUS * blocking_value
 
+    # Power disincentives
     if power_A >= STRONG_HERO_THRESHOLD and power_B >= STRONG_HERO_THRESHOLD:
         score *= POWER_DISINCENTIVE
 
@@ -145,49 +158,23 @@ def classify_pairing(a_to_b, b_to_a):
 # ----------------------------------------
 # Select hero
 # ----------------------------------------
-hero_A = st.selectbox("Select a hero:", hero_names)
+hero_A = st.selectbox("Select a hero to view pairings:", hero_names)
 
 
 # ----------------------------------------
-# Selected hero display + analysis
+# Selected hero visual + dynamic blurb
 # ----------------------------------------
 st.markdown("---")
 
 hero_cols = st.columns([1, 3])
 
-hero_stats = heroes[hero_A][:BASE_STAT_COUNT]
 hero_power = general_scores[hero_A]
-
-STAT_NAMES = [
-    "Damage", "Tempo", "Control", "Survivability",
-    "Flex", "Thwart", "Setup", "Efficiency"
-]
-
-weaknesses = [
-    name for name, val in zip(STAT_NAMES, hero_stats)
-    if val < TARGET
-]
-
-strengths = [
-    name for name, val in zip(STAT_NAMES, hero_stats)
-    if val > TARGET
-]
-
-role_tags = []
-
-if hero_power <= WEAK_HERO_THRESHOLD:
-    role_tags.append("Needs Strong Partner")
-
-if hero_power >= STRONG_HERO_THRESHOLD:
-    role_tags.append("Strong Carry")
-
-if len(weaknesses) <= 2:
-    role_tags.append("Generalist")
+hero_stats = heroes[hero_A][:BASE_STAT_COUNT]
 
 with hero_cols[0]:
-    img = hero_image_urls.get(hero_A)
-    if img:
-        st.image(img, use_container_width=True)
+    hero_img = hero_image_urls.get(hero_A)
+    if hero_img:
+        st.image(hero_img, use_container_width=True)
 
 with hero_cols[1]:
     st.markdown(
@@ -195,40 +182,48 @@ with hero_cols[1]:
         unsafe_allow_html=True
     )
 
-    st.markdown(
-        f"<p><strong>Role:</strong> {' • '.join(role_tags)}</p>",
-        unsafe_allow_html=True
-    )
-
-    cols = st.columns(2)
-
-    with cols[0]:
-        st.markdown(
-            "<strong style='color:#ff4d4d;'>Weaknesses</strong>",
-            unsafe_allow_html=True
+    # --- Dynamic role description ---
+    weaknesses = [
+        name for name, val in zip(
+            ["Damage", "Tempo", "Control", "Survivability",
+             "Flex", "Thwart", "Setup", "Efficiency"],
+            hero_stats
         )
-        if weaknesses:
-            for w in weaknesses:
-                st.markdown(
-                    f"<li style='color:#ff4d4d;'>{w}</li>",
-                    unsafe_allow_html=True
-                )
-        else:
-            st.markdown("<li>—</li>", unsafe_allow_html=True)
+        if val < TARGET
+    ]
 
-    with cols[1]:
-        st.markdown(
-            "<strong style='color:#2ecc71;'>Strengths</strong>",
-            unsafe_allow_html=True
+    strengths = [
+        name for name, val in zip(
+            ["Damage", "Tempo", "Control", "Survivability",
+             "Flex", "Thwart", "Setup", "Efficiency"],
+            hero_stats
         )
-        if strengths:
-            for s in strengths:
-                st.markdown(
-                    f"<li style='color:#2ecc71;'>{s}</li>",
-                    unsafe_allow_html=True
-                )
-        else:
-            st.markdown("<li>—</li>", unsafe_allow_html=True)
+        if val > TARGET
+    ]
+
+    if hero_power <= WEAK_HERO_THRESHOLD:
+        blurb = (
+            f"<p><strong>{hero_A}</strong> is a hero that benefits greatly "
+            f"from a <strong>strong, stabilizing partner</strong>. "
+            f"These pairings prioritize heroes that can cover weaknesses "
+            f"like <em>{', '.join(weaknesses[:2])}</em> and help carry the game.</p>"
+        )
+    elif hero_power >= STRONG_HERO_THRESHOLD:
+        blurb = (
+            f"<p><strong>{hero_A}</strong> is a powerful hero who can afford "
+            f"to <strong>support weaker or more specialized partners</strong>. "
+            f"These pairings highlight heroes that benefit from "
+            f"{hero_A}’s strengths in <em>{', '.join(strengths[:2])}</em>.</p>"
+        )
+    else:
+        blurb = (
+            f"<p><strong>{hero_A}</strong> is a flexible, well-rounded hero "
+            f"that doesn’t require any particular support. "
+            f"These pairings focus on <strong>balanced partnerships</strong> "
+            f"and complementary playstyles.</p>"
+        )
+
+    st.markdown(blurb, unsafe_allow_html=True)
 
 st.markdown("---")
 
@@ -327,3 +322,25 @@ for tier in ["S", "A", "B", "C", "D"]:
                     st.caption("⬇️ You support them")
                 else:
                     st.caption("—")
+
+
+# ----------------------------------------
+# Background
+# ----------------------------------------
+background_image_url = (
+    "https://github.com/alechoward-lab/"
+    "Marvel-Champions-Hero-Tier-List/blob/main/"
+    "images/background/marvel_champions_background_image_v4.jpg?raw=true"
+)
+
+st.markdown(
+    f"""
+    <style>
+    .stApp {{
+        background: url({background_image_url}) no-repeat center center fixed;
+        background-size: cover;
+    }}
+    </style>
+    """,
+    unsafe_allow_html=True
+)
