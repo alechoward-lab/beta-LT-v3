@@ -195,16 +195,17 @@ hero_power = general_scores[hero_A]
 hero_stats = heroes[hero_A][:BASE_STAT_COUNT]
 support_stat = heroes[hero_A][SUPPORT_INDEX]
 
-BASELINE_LABELS = [
-    "Economy",
-    "Tempo",
-    "Card Value",
-    "Survivability",
-    "Villain Damage",
-    "Threat Removal",
-    "Reliability",
-    "Minion Control",
+# Only stats that another hero can meaningfully cover
+BLURB_LABELS = [
+    ("Tempo", TEMPO_INDEX),
+    ("Villain Damage", VILLAIN_DAMAGE_INDEX),
+    ("Threat Removal", THWART_INDEX),
+    ("Reliability", RELIABILITY_INDEX),
+    ("Minion Control", MINION_CONTROL_INDEX),
 ]
+
+WEAK_TEXT_THRESHOLD = 2
+STRONG_TEXT_THRESHOLD = 3
 
 with hero_cols[0]:
     hero_img = hero_image_urls.get(hero_A)
@@ -217,16 +218,22 @@ with hero_cols[1]:
         unsafe_allow_html=True
     )
 
+    # ------------------------------------
+    # Extract meaningful weaknesses/strengths
+    # ------------------------------------
     weaknesses = [
-        name for name, val in zip(BASELINE_LABELS, hero_stats)
-        if val < WEAK_TEXT_THRESHOLD
+        name for name, idx in BLURB_LABELS
+        if hero_stats[idx] < WEAK_TEXT_THRESHOLD
     ]
 
     strengths = [
-        name for name, val in zip(BASELINE_LABELS, hero_stats)
-        if val > STRONG_TEXT_THRESHOLD
+        name for name, idx in BLURB_LABELS
+        if hero_stats[idx] > STRONG_TEXT_THRESHOLD
     ]
 
+    # ------------------------------------
+    # Dynamic blurb logic
+    # ------------------------------------
     if support_stat < 0:
         blurb = (
             f"<p><strong>{hero_A}</strong> needs "
@@ -239,26 +246,29 @@ with hero_cols[1]:
         blurb = (
             f"<p><strong>{hero_A}</strong> benefits greatly from a "
             f"<strong>strong, stabilizing partner</strong>. "
-            f"These pairings focus on covering weaknesses "
-            f"in <em>{', '.join(weaknesses[:2]) if weaknesses else 'key areas'}</em>.</p>"
+            f"These pairings focus on covering weaknesses in "
+            f"<em>{', '.join(weaknesses[:2]) if weaknesses else 'key gameplay areas'}</em>.</p>"
         )
 
     elif hero_power >= STRONG_HERO_THRESHOLD:
         blurb = (
             f"<p><strong>{hero_A}</strong> is a powerful hero who can "
             f"<strong>support weaker or more specialized partners</strong>, "
-            f"especially in <em>{', '.join(strengths[:2]) if strengths else 'multiple areas'}</em>.</p>"
+            f"especially through strengths in "
+            f"<em>{', '.join(strengths[:2]) if strengths else 'multiple roles'}</em>.</p>"
         )
 
     else:
         blurb = (
             f"<p><strong>{hero_A}</strong> is a flexible, well-rounded hero. "
-            f"These pairings emphasize <strong>balanced, mutually beneficial partnerships</strong>.</p>"
+            f"These pairings emphasize <strong>balanced, mutually beneficial partnerships</strong> "
+            f"rather than fixing major weaknesses.</p>"
         )
 
     st.markdown(blurb, unsafe_allow_html=True)
 
 st.markdown("---")
+
 
 
 # ----------------------------------------
