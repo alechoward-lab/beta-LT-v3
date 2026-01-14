@@ -1,12 +1,5 @@
 """
 Hero Pairings — Mutually Aware, Direction-Aware UX Version
-
-Design goals:
-- Fix each other’s weaknesses
-- Encourage balanced, mutually beneficial partnerships
-- Clearly distinguish who is helping whom
-- Avoid misleading one-sided S-tier pairings
-- Remain explainable, heuristic, and aspect-agnostic
 """
 
 # ----------------------------------------
@@ -21,7 +14,7 @@ SECONDARY_WEIGHT = 0.4
 MIN_RECIPROCITY_RATIO = 0.35
 S_TIER_RECIPROCITY_BOOST = 0.15
 
-# Baseline stat indices
+# Baseline indices
 ECONOMY_INDEX = 0
 TEMPO_INDEX = 1
 CARD_VALUE_INDEX = 2
@@ -45,7 +38,6 @@ BLOCKING_SUPPORT_BONUS = 0.25
 POWER_DISINCENTIVE = 0.3
 WEAK_PAIR_DISINCENTIVE = 0.5
 
-# UI-only text thresholds
 WEAK_TEXT_THRESHOLD = 2
 STRONG_TEXT_THRESHOLD = 3
 
@@ -55,6 +47,7 @@ STRONG_TEXT_THRESHOLD = 3
 # ----------------------------------------
 import streamlit as st
 import numpy as np
+import random
 from copy import deepcopy
 
 from default_heroes import default_heroes
@@ -63,28 +56,28 @@ from preset_options import preset_options
 
 
 # ----------------------------------------
-# Page header
+# Page Header
 # ----------------------------------------
 st.title("Hero Pairings")
 
 st.markdown(
     """
-    These pairings focus on **balanced, mutually beneficial partnerships**.
-    Some heroes *support you*, some are *supported by you*, and the best
-    partnerships benefit **both heroes**.
+    These pairings emphasize **balanced, mutually beneficial partnerships**.
+    Some heroes need support, some provide it, and the best pairings
+    help **both heroes succeed**.
     """
 )
 
 
 # ----------------------------------------
-# Load hero data
+# Load Data
 # ----------------------------------------
 heroes = deepcopy(default_heroes)
 hero_names = list(heroes.keys())
 
 
 # ----------------------------------------
-# Compute GENERAL POWER
+# Compute General Power
 # ----------------------------------------
 general_weights = np.array(preset_options["General Power: 2 Player"])
 
@@ -93,16 +86,16 @@ general_scores = {
     for hero, stats in heroes.items()
 }
 
-gp_values = np.array(list(general_scores.values()))
-gp_mean = gp_values.mean()
-gp_std = gp_values.std()
+gp_vals = np.array(list(general_scores.values()))
+gp_mean = gp_vals.mean()
+gp_std = gp_vals.std()
 
 STRONG_HERO_THRESHOLD = gp_mean + 0.5 * gp_std
 WEAK_HERO_THRESHOLD = gp_mean - 0.5 * gp_std
 
 
 # ----------------------------------------
-# Directional synergy
+# Directional Synergy
 # ----------------------------------------
 def directional_synergy(hero_A, hero_B):
     stats_A = heroes[hero_A]
@@ -116,42 +109,31 @@ def directional_synergy(hero_A, hero_B):
 
     score = 0.0
 
-    # ----------------------------------
-    # 1. Weakness coverage
-    # ----------------------------------
+    # Weakness coverage
     needs = np.maximum(0, TARGET - base_A)
-    usable_strengths = np.minimum(np.maximum(0, base_B), needs)
+    usable = np.minimum(np.maximum(0, base_B), needs)
 
     if np.sum(needs) > 0:
-        score += np.dot(needs, usable_strengths) / np.sum(needs)
+        score += np.dot(needs, usable) / np.sum(needs)
 
-    # ----------------------------------
-    # 2. Tempo contrast
-    # ----------------------------------
+    # Tempo contrast
     score += TEMPO_PAIR_BONUS * abs(
         base_A[TEMPO_INDEX] - base_B[TEMPO_INDEX]
     )
 
-    # ----------------------------------
-    # 3. Late-game hero + high thwart
-    # ----------------------------------
+    # Late game + thwart
     if stats_A[LATE_GAME_INDEX] >= LATE_GAME_TRIGGER:
         if base_B[THWART_INDEX] > TARGET:
             score += LATE_GAME_THWART_BONUS * base_B[THWART_INDEX]
 
-    # ----------------------------------
-    # 4. Low survivability + support
-    # ----------------------------------
+    # Survivability + support
     if base_A[SURVIVABILITY_INDEX] < TARGET:
-        blocking_value = (
+        score += BLOCKING_SUPPORT_BONUS * (
             max(0, base_B[SURVIVABILITY_INDEX]) +
             max(0, stats_B[SUPPORT_INDEX])
         )
-        score += BLOCKING_SUPPORT_BONUS * blocking_value
 
-    # ----------------------------------
-    # 5. Power disincentives
-    # ----------------------------------
+    # Power disincentives
     if power_A >= STRONG_HERO_THRESHOLD and power_B >= STRONG_HERO_THRESHOLD:
         score *= POWER_DISINCENTIVE
 
@@ -162,7 +144,7 @@ def directional_synergy(hero_A, hero_B):
 
 
 # ----------------------------------------
-# Pairing classification
+# Pairing Classification
 # ----------------------------------------
 def classify_pairing(a_to_b, b_to_a):
     if max(a_to_b, b_to_a) == 0:
@@ -179,100 +161,13 @@ def classify_pairing(a_to_b, b_to_a):
 
 
 # ----------------------------------------
-# Select hero
+# Select Hero
 # ----------------------------------------
 hero_A = st.selectbox("Select a hero to view pairings:", hero_names)
 
 
 # ----------------------------------------
-# Selected hero visual + dynamic blurb
-# ----------------------------------------
-st.markdown("---")
-
-hero_cols = st.columns([1, 3])
-
-hero_power = general_scores[hero_A]
-hero_stats = heroes[hero_A][:BASE_STAT_COUNT]
-support_stat = heroes[hero_A][SUPPORT_INDEX]
-
-# Only stats that another hero can meaningfully cover
-BLURB_LABELS = [
-    ("Tempo", TEMPO_INDEX),
-    ("Villain Damage", VILLAIN_DAMAGE_INDEX),
-    ("Threat Removal", THWART_INDEX),
-    ("Reliability", RELIABILITY_INDEX),
-    ("Minion Control", MINION_CONTROL_INDEX),
-]
-
-WEAK_TEXT_THRESHOLD = 2
-STRONG_TEXT_THRESHOLD = 3
-
-with hero_cols[0]:
-    hero_img = hero_image_urls.get(hero_A)
-    if hero_img:
-        st.image(hero_img, use_container_width=True)
-
-with hero_cols[1]:
-    st.markdown(
-        f"<h1 style='margin-bottom:0;'>Best Partners for {hero_A}</h1>",
-        unsafe_allow_html=True
-    )
-
-    # ------------------------------------
-    # Extract meaningful weaknesses/strengths
-    # ------------------------------------
-    weaknesses = [
-        name for name, idx in BLURB_LABELS
-        if hero_stats[idx] < WEAK_TEXT_THRESHOLD
-    ]
-
-    strengths = [
-        name for name, idx in BLURB_LABELS
-        if hero_stats[idx] > STRONG_TEXT_THRESHOLD
-    ]
-
-    # ------------------------------------
-    # Dynamic blurb logic
-    # ------------------------------------
-    if support_stat < 0:
-        blurb = (
-            f"<p><strong>{hero_A}</strong> needs "
-            f"<strong>significant help from their teammate</strong> "
-            f"to be reliably strong. Pair them with "
-            f"<strong>strong support heroes</strong>.</p>"
-        )
-
-    elif hero_power <= WEAK_HERO_THRESHOLD:
-        blurb = (
-            f"<p><strong>{hero_A}</strong> benefits greatly from a "
-            f"<strong>strong, stabilizing partner</strong>. "
-            f"These pairings focus on covering weaknesses in "
-            f"<em>{', '.join(weaknesses[:2]) if weaknesses else 'key gameplay areas'}</em>.</p>"
-        )
-
-    elif hero_power >= STRONG_HERO_THRESHOLD:
-        blurb = (
-            f"<p><strong>{hero_A}</strong> is a powerful hero who can "
-            f"<strong>support weaker or more specialized partners</strong>, "
-            f"especially through strengths in "
-            f"<em>{', '.join(strengths[:2]) if strengths else 'multiple roles'}</em>.</p>"
-        )
-
-    else:
-        blurb = (
-            f"<p><strong>{hero_A}</strong> is a flexible, well-rounded hero. "
-            f"These pairings emphasize <strong>balanced, mutually beneficial partnerships</strong> "
-            f"rather than fixing major weaknesses.</p>"
-        )
-
-    st.markdown(blurb, unsafe_allow_html=True)
-
-st.markdown("---")
-
-
-
-# ----------------------------------------
-# Score partners
+# Score Partners
 # ----------------------------------------
 scores = {}
 details = {}
@@ -285,7 +180,6 @@ for hero_B in hero_names:
     b_to_a = directional_synergy(hero_B, hero_A)
 
     blended = PRIMARY_WEIGHT * a_to_b + SECONDARY_WEIGHT * b_to_a
-
     pairing_type = classify_pairing(a_to_b, b_to_a)
 
     if pairing_type == "mutual":
@@ -322,7 +216,93 @@ for hero, sc in scores.items():
 
 
 # ----------------------------------------
-# Display tiers
+# Pick Random Recommended Partner (A/S)
+# ----------------------------------------
+top_partners = tiers["S"] + tiers["A"]
+recommended_partner = random.choice(top_partners) if top_partners else None
+
+
+# ----------------------------------------
+# Hero Display + Blurb + Recommendation
+# ----------------------------------------
+st.markdown("---")
+
+left, middle, right = st.columns([1, 2, 1])
+
+hero_stats = heroes[hero_A][:BASE_STAT_COUNT]
+support_stat = heroes[hero_A][SUPPORT_INDEX]
+hero_power = general_scores[hero_A]
+
+BLURB_STATS = [
+    ("Tempo", TEMPO_INDEX),
+    ("Villain Damage", VILLAIN_DAMAGE_INDEX),
+    ("Threat Removal", THWART_INDEX),
+    ("Reliability", RELIABILITY_INDEX),
+    ("Minion Control", MINION_CONTROL_INDEX),
+]
+
+with left:
+    img = hero_image_urls.get(hero_A)
+    if img:
+        st.image(img, use_container_width=True)
+
+with middle:
+    st.markdown(
+        f"<h2 style='margin-bottom:0;'>Best Partners for {hero_A}</h2>",
+        unsafe_allow_html=True
+    )
+
+    weaknesses = [
+        name for name, idx in BLURB_STATS
+        if hero_stats[idx] < WEAK_TEXT_THRESHOLD
+    ]
+
+    strengths = [
+        name for name, idx in BLURB_STATS
+        if hero_stats[idx] > STRONG_TEXT_THRESHOLD
+    ]
+
+    if support_stat < 0:
+        blurb = (
+            f"<p><strong>{hero_A}</strong> needs significant help from their "
+            f"teammate to be reliably strong. Pair them with "
+            f"<strong>strong support heroes</strong>.</p>"
+        )
+    elif hero_power <= WEAK_HERO_THRESHOLD:
+        blurb = (
+            f"<p><strong>{hero_A}</strong> benefits greatly from a strong, "
+            f"stabilizing partner that can help cover weaknesses in "
+            f"<em>{', '.join(weaknesses[:2]) if weaknesses else 'key areas'}</em>.</p>"
+        )
+    elif hero_power >= STRONG_HERO_THRESHOLD:
+        blurb = (
+            f"<p><strong>{hero_A}</strong> is a powerful hero who can support "
+            f"weaker or more specialized partners, especially through "
+            f"<em>{', '.join(strengths[:2]) if strengths else 'multiple roles'}</em>.</p>"
+        )
+    else:
+        blurb = (
+            f"<p><strong>{hero_A}</strong> is a flexible, well-rounded hero. "
+            f"These pairings emphasize balanced, mutually beneficial play.</p>"
+        )
+
+    if recommended_partner:
+        blurb += (
+            f"<p><strong>Try playing {hero_A} with "
+            f"{recommended_partner}!</strong></p>"
+        )
+
+    st.markdown(blurb, unsafe_allow_html=True)
+
+with right:
+    if recommended_partner:
+        img = hero_image_urls.get(recommended_partner)
+        if img:
+            st.image(img, use_container_width=True)
+
+
+# ----------------------------------------
+# Display Tiers
 # ----------------------------------------
 tier_colors = {
     "S": "#FF69B4",
