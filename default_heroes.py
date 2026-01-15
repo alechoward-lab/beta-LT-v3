@@ -17,7 +17,7 @@ default_heroes = {
                             #              e, t, cv,s, d, th,re,mi,c, s, br,lg,si,sc,mu
         "Ant-Man":              np.array([ 2, 0, 3, 3, 4, 1, 2, 4, 2, 0, 0, 2,-3, 1, 0]),
         "Wasp":                 np.array([ 1, 3, 0, 1, 4, 2, 3, 3, 0, 1, 1, 0,-5, 0, 0]),
-        "Quicksilver":          np.array([ 1,-3, 3,-1, 3, 4, 3, 3, 0,-1, 0, 3, 0, 0, 0]),
+        "Quicksilver":          np.array([ 1,-3, 3,-1, 3, 4, 1, 3, 0,-1, 0, 3, 0, 0, 0]),
         "Scarlet Witch":        np.array([ 2, 3, 5, 3, 3, 2, 3, 1, 3, 4, 1, 0,-3, 2, 0]),
         "Star-Lord":            np.array([ 5, 5, 3, 1, 6, 3, 2, 3,-3, 0, 1, 0,-5, 0, 0]),
         "Groot":                np.array([ 0,-3, 2, 4, 3, 2,-2, 2, 0, 2, 0, 1, 2, 0, 2]),
