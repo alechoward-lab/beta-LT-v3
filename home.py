@@ -360,16 +360,6 @@ with col2:
     
     # Use the shared hero stats editor
     render_hero_stats_editor(key_prefix="home")
-    
-    st.markdown("---")
-    
-    # Download button to save hero stats settings
-    hero_stats_to_save = {
-        "heroes": {hero: stats.tolist() for hero, stats in st.session_state.heroes.items()},
-        "default_heroes": {hero: stats.tolist() for hero, stats in st.session_state.default_heroes.items()}
-    }
-    hero_stats_json = json.dumps(hero_stats_to_save)
-    st.download_button("Download Hero Stats", hero_stats_json, "hero_stats.json")
 
 # ----------------------------------------
 # Continue with Tier List Calculations & Display
@@ -526,3 +516,13 @@ st.markdown(
 st.markdown("-Stay Zesty")
 st.markdown("<hr>", unsafe_allow_html=True)
 st.markdown("Most card images are from the Cerebro Discord bot developed by UnicornSnuggler. Thank you!")
+
+st.markdown("---")
+
+# Download button to save hero stats settings
+hero_stats_to_save = {
+    "heroes": {hero: stats.tolist() for hero, stats in st.session_state.heroes.items()},
+    "default_heroes": {hero: stats.tolist() for hero, stats in st.session_state.default_heroes.items()}
+}
+hero_stats_json = json.dumps(hero_stats_to_save)
+st.download_button("Download Hero Stats", hero_stats_json, "hero_stats.json")
