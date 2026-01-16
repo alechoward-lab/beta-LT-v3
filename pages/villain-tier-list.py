@@ -10,9 +10,17 @@ from villain_image_urls import villain_image_urls
 from default_heroes import default_heroes
 from hero_image_urls import hero_image_urls
 from villain_strategies import villain_strategies
+from hero_stats_manager import initialize_hero_stats, get_heroes, render_hero_stats_editor
+
+# Initialize hero stats in session state
+initialize_hero_stats()
 
 st.markdown("**Watch the video tutorial here:** [Video Tutorial](https://youtu.be/9eEMPnSwVLw)")
 st.markdown("**Join the Discord to ask questions or give feedback:** [Discord Invite](https://discord.gg/ReF5jDSHqV)")
+
+# Hero stats editor
+render_hero_stats_editor(key_prefix="villain_tier_list")
+st.markdown("---")
 
 # ----------------------------------------
 # Page header
@@ -116,7 +124,7 @@ weights = np.array([st.session_state[f"villain_{name}"] for name in factor_names
 # ----------------------------------------
 # Score heroes
 # ----------------------------------------
-heroes = deepcopy(default_heroes)
+heroes = get_heroes()
 scores = {name: float(np.dot(stats, weights)) for name, stats in heroes.items()}
 sorted_scores = dict(sorted(scores.items(), key=lambda kv: kv[1]))
 

@@ -15,6 +15,10 @@ from hero_image_urls import hero_image_urls
 from default_heroes import default_heroes
 from preset_options import preset_options
 from help_tips import help_tips
+from hero_stats_manager import initialize_hero_stats, get_heroes, render_hero_stats_editor
+
+# Initialize hero stats in session state
+initialize_hero_stats()
 
 socials_banner = st.markdown(
     """
@@ -354,63 +358,18 @@ with col2:
                 st.session_state.default_heroes = {hero: np.array(stats) for hero, stats in hero_stats_settings["default_heroes"].items()}
             st.success("Hero stats loaded successfully!")
     
-    with st.expander("Edit Hero Stats (click to expand)"):
-        st.markdown(
-        "I limited myself to -5 to 5 when choosing hero stats, but I left you the option to go from -10 to 10. This was to allow you to make the difference between heroes more extreme if you wanted."
-    )
-        # Initialize hero stats if not set
-        if "heroes" not in st.session_state:
-            st.session_state.heroes = copy.deepcopy(default_heroes)
-            st.session_state.default_heroes = copy.deepcopy(default_heroes)
-        
-        # List of stat names that match our help_tips keys
-        stat_names = ["Economy", "Tempo", "Card Value", "Survivability", "Villain Damage",
-                      "Threat Removal", "Reliability", "Minion Control", "Control Boon", "Support Boon",
-                      "Unique Broken Builds Boon", "Late Game Power Boon", "Simplicity", "Stun/Confuse Boon",
-                      "Multiplayer Consistency Boon"]
-        
-        # Select a hero to modify (searchable dropdown)
-        hero_to_modify = st.selectbox("Select a Hero to Modify", list(st.session_state.heroes.keys()), key="hero_choice")
-        
-        # Callback to update the current hero's stats automatically
-        def update_current_hero_stats():
-            new_stats = []
-            for stat in stat_names:
-                new_stats.append(st.session_state.get(f"{hero_to_modify}_{stat}", 0))
-            st.session_state.heroes[hero_to_modify] = np.array(new_stats)
-        
-        # Display number inputs with help tips for each stat
-        current_stats = st.session_state.heroes[hero_to_modify]
-        for i, stat in enumerate(stat_names):
-            st.number_input(
-                f"{hero_to_modify} - {stat}",
-                value=int(current_stats[i]),
-                min_value=-10,
-                max_value=10,
-                key=f"{hero_to_modify}_{stat}",
-                on_change=update_current_hero_stats,
-                help=help_tips.get(stat, "")
-            )
-        
-        # Button to update all heroes to match the selected hero's stats
-        if st.button("Update All Heroes to These Stats"):
-            new_stats = st.session_state.heroes[hero_to_modify]
-            for hero in st.session_state.heroes.keys():
-                st.session_state.heroes[hero] = np.array(new_stats)
-            st.success("All hero stats updated to match the current hero.")
-        
-        # Button to reset all heroes to default
-        if st.button("Reset All Heroes to Default"):
-            st.session_state.heroes = copy.deepcopy(st.session_state.default_heroes)
-            st.success("All heroes have been reset to their default stats.")
-        
-        # Download button to save hero stats settings
-        hero_stats_to_save = {
-            "heroes": {hero: stats.tolist() for hero, stats in st.session_state.heroes.items()},
-            "default_heroes": {hero: stats.tolist() for hero, stats in st.session_state.default_heroes.items()}
-        }
-        hero_stats_json = json.dumps(hero_stats_to_save)
-        st.download_button("Download Hero Stats", hero_stats_json, "hero_stats.json")
+    # Use the shared hero stats editor
+    render_hero_stats_editor(key_prefix="home")
+    
+    st.markdown("---")
+    
+    # Download button to save hero stats settings
+    hero_stats_to_save = {
+        "heroes": {hero: stats.tolist() for hero, stats in st.session_state.heroes.items()},
+        "default_heroes": {hero: stats.tolist() for hero, stats in st.session_state.default_heroes.items()}
+    }
+    hero_stats_json = json.dumps(hero_stats_to_save)
+    st.download_button("Download Hero Stats", hero_stats_json, "hero_stats.json")
 
 # ----------------------------------------
 # Continue with Tier List Calculations & Display

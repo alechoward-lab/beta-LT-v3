@@ -53,6 +53,10 @@ from copy import deepcopy
 from default_heroes import default_heroes
 from hero_image_urls import hero_image_urls
 from preset_options import preset_options
+from hero_stats_manager import initialize_hero_stats, get_heroes, render_hero_stats_editor
+
+# Initialize hero stats in session state
+initialize_hero_stats()
 
 
 # ----------------------------------------
@@ -68,11 +72,14 @@ st.markdown(
     """
 )
 
+# Hero stats editor
+render_hero_stats_editor(key_prefix="hero_pairings")
+st.markdown("---")
 
 # ----------------------------------------
 # Load Data
 # ----------------------------------------
-heroes = deepcopy(default_heroes)
+heroes = get_heroes()
 hero_names = list(heroes.keys())
 
 
