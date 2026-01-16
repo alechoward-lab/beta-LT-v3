@@ -26,7 +26,8 @@ st.markdown("---")
 
 # Get heroes
 heroes = get_heroes()
-hero_names = sorted(list(heroes.keys()))
+from default_heroes import default_heroes
+hero_names = list(default_heroes.keys())
 
 # Settings section
 st.subheader("⚙️ Settings")
