@@ -161,20 +161,10 @@ if st.button("🎲 Generate Random Team", use_container_width=True, key="generat
         st.error(f"❌ No {tier_choice} tier teams found with those constraints! Try a different tier or fewer locked heroes.")
         st.stop()
     
-    # Pick random team from tier (avoid picking the same team again if regenerating)
-    previous_team = st.session_state.get("generated_team", None)
+    # Pick random team from tier
+    random_team = random.choice(tier_teams)
     
-    if len(tier_teams) > 1 and previous_team is not None:
-        # Try to pick a different team
-        available_teams = [t for t in tier_teams if t != previous_team]
-        if available_teams:
-            random_team = random.choice(available_teams)
-        else:
-            random_team = random.choice(tier_teams)
-    else:
-        random_team = random.choice(tier_teams)
-    
-    st.session_state.generated_team = list(random_team)  # Store as list for comparison
+    st.session_state.generated_team = list(random_team)
     st.success(f"✅ Generated {tier_choice} tier team! ({len(tier_teams)} total teams in this tier)")
 
 # Display generated team if one exists
