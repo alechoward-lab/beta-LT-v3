@@ -561,7 +561,6 @@ for tier in ["S", "A", "B", "C", "D"]:
             with cols[idx]:
                 if hero in hero_image_urls:
                     st.image(hero_image_urls[hero], use_container_width=True)
-                st.caption(f"{hero} - Score: {score:.1f}")
 
 # ----------------------------------------
 # Plotting
