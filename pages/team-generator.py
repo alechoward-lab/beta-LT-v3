@@ -6,6 +6,7 @@ import streamlit as st
 import numpy as np
 from itertools import combinations
 import random
+import matplotlib.pyplot as plt
 
 from hero_image_urls import hero_image_urls
 from villain_image_urls import villain_image_urls
@@ -200,3 +201,23 @@ if "generated_team" in st.session_state:
         st.metric("Team Score", f"{team_score:.1f}")
     with col3:
         st.metric("Tier", tier_choice)
+    
+    st.markdown("---")
+    
+    # Create bar chart for team member scores
+    st.subheader("📊 Individual Hero Scores")
+    hero_scores = []
+    for hero in team:
+        score = float(np.dot(heroes[hero], weighting))
+        hero_scores.append((hero, score))
+    
+    fig, ax = plt.subplots(figsize=(18, 8), dpi=300)
+    hero_names_list = [item[0] for item in hero_scores]
+    hero_scores_list = [item[1] for item in hero_scores]
+    ax.bar(hero_names_list, hero_scores_list, color='steelblue')
+    ax.set_ylabel("Score", fontsize="x-large")
+    ax.set_title("Individual Hero Scores", fontweight='bold', fontsize=18)
+    plt.xticks(rotation=90, ha='right', fontsize='small')
+    plt.tight_layout()
+    ax.grid(axis='y', linestyle='--', alpha=0.7)
+    st.pyplot(fig)

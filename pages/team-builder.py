@@ -6,6 +6,7 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 from itertools import combinations
+import matplotlib.pyplot as plt
 from hero_image_urls import hero_image_urls
 from villain_image_urls import villain_image_urls
 from hero_stats_manager import initialize_hero_stats, get_heroes, render_hero_stats_editor
@@ -252,6 +253,18 @@ for hero in st.session_state.team:
 
 df_scores = pd.DataFrame(hero_scores)
 st.dataframe(df_scores, use_container_width=True, hide_index=True)
+
+# Create bar chart for individual hero scores
+fig, ax = plt.subplots(figsize=(18, 8), dpi=300)
+hero_names_list = [item["Hero"] for item in hero_scores]
+hero_scores_list = [float(item["Score"]) for item in hero_scores]
+ax.bar(hero_names_list, hero_scores_list, color='steelblue')
+ax.set_ylabel("Score", fontsize="x-large")
+ax.set_title("Individual Hero Scores", fontweight='bold', fontsize=18)
+plt.xticks(rotation=90, ha='right', fontsize='small')
+plt.tight_layout()
+ax.grid(axis='y', linestyle='--', alpha=0.7)
+st.pyplot(fig)
 
 st.markdown("---")
 
