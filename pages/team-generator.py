@@ -200,7 +200,3 @@ if "generated_team" in st.session_state:
         st.metric("Team Score", f"{team_score:.1f}")
     with col3:
         st.metric("Tier", tier_choice)
-    
-    # Regenerate button
-    if st.button("🔄 Regenerate", use_container_width=True, key="regenerate_button"):
-        st.rerun()
