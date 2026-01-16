@@ -7,9 +7,12 @@ import numpy as np
 import pandas as pd
 from itertools import combinations
 from hero_image_urls import hero_image_urls
+from villain_image_urls import villain_image_urls
 from hero_stats_manager import initialize_hero_stats, get_heroes, render_hero_stats_editor
 from preset_options import preset_options
 from help_tips import help_tips
+from villain_weights import villain_weights
+from villain_strategies import villain_strategies
 
 # Initialize hero stats in session state
 initialize_hero_stats()
@@ -29,8 +32,31 @@ hero_names = sorted(list(heroes.keys()))
 if "team" not in st.session_state:
     st.session_state.team = []
 
-# Use default equal weighting for tier ranking
-weighting = np.ones(15)
+# Villain selection (optional)
+st.subheader("🦹 Villain Selection (Optional)")
+st.markdown("Select a villain to rank teams specifically against their challenges:")
+
+villain_names = sorted(list(villain_weights.keys()))
+villain_choice = st.selectbox(
+    "Choose a villain",
+    ["No villain selected"] + villain_names,
+    key="team_villain_choice"
+)
+
+if villain_choice != "No villain selected":
+    weighting = np.array(villain_weights[villain_choice])
+    
+    # Display villain image and strategy
+    col1, col2 = st.columns([1, 2])
+    with col1:
+        if villain_choice in villain_image_urls:
+            st.image(villain_image_urls[villain_choice], use_container_width=True)
+    with col2:
+        st.info(f"🎯 Team strength is being evaluated against {villain_choice}")
+        st.markdown("### Strategy Tips")
+        st.markdown(villain_strategies.get(villain_choice, "No strategy tips written yet."))
+else:
+    weighting = np.ones(15)
 
 st.markdown("---")
 
