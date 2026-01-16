@@ -11,6 +11,7 @@ import copy
 import os
 from PIL import Image
 import json
+import io
 from hero_image_urls import hero_image_urls
 from default_heroes import default_heroes
 from preset_options import preset_options
@@ -85,23 +86,30 @@ socials_banner = st.markdown(
 # ----------------------------------------
 def update_preset():
     preset = st.session_state.preset_choice
-    if preset != "Custom":
+    
+    # Check if it's a custom preset
+    if "custom_presets" in st.session_state and preset in st.session_state.custom_presets:
+        preset_vals = st.session_state.custom_presets[preset]
+    elif preset != "Custom" and preset in preset_options:
         preset_vals = preset_options[preset]
-        st.session_state["Economy"] = int(preset_vals[0])
-        st.session_state["Tempo"] = int(preset_vals[1])
-        st.session_state["Card Value"] = int(preset_vals[2])
-        st.session_state["Survivability"] = int(preset_vals[3])
-        st.session_state["Villain Damage"] = int(preset_vals[4])
-        st.session_state["Threat Removal"] = int(preset_vals[5])
-        st.session_state["Reliability"] = int(preset_vals[6])
-        st.session_state["Minion Control"] = int(preset_vals[7])
-        st.session_state["Control Boon"] = int(preset_vals[8])
-        st.session_state["Support Boon"] = int(preset_vals[9])
-        st.session_state["Unique Broken Builds Boon"] = int(preset_vals[10])
-        st.session_state["Late Game Power Boon"] = int(preset_vals[11])
-        st.session_state["Simplicity"] = int(preset_vals[12])
-        st.session_state["Stun/Confuse Boon"] = int(preset_vals[13])
-        st.session_state["Multiplayer Consistency Boon"] = int(preset_vals[14])
+    else:
+        return
+    
+    st.session_state["Economy"] = int(preset_vals[0])
+    st.session_state["Tempo"] = int(preset_vals[1])
+    st.session_state["Card Value"] = int(preset_vals[2])
+    st.session_state["Survivability"] = int(preset_vals[3])
+    st.session_state["Villain Damage"] = int(preset_vals[4])
+    st.session_state["Threat Removal"] = int(preset_vals[5])
+    st.session_state["Reliability"] = int(preset_vals[6])
+    st.session_state["Minion Control"] = int(preset_vals[7])
+    st.session_state["Control Boon"] = int(preset_vals[8])
+    st.session_state["Support Boon"] = int(preset_vals[9])
+    st.session_state["Unique Broken Builds Boon"] = int(preset_vals[10])
+    st.session_state["Late Game Power Boon"] = int(preset_vals[11])
+    st.session_state["Simplicity"] = int(preset_vals[12])
+    st.session_state["Stun/Confuse Boon"] = int(preset_vals[13])
+    st.session_state["Multiplayer Consistency Boon"] = int(preset_vals[14])
 
 # ----------------------------------------
 # Main App Content Header
@@ -167,12 +175,19 @@ with col1:
         st.markdown(
         "If you don't want a category to affect the list, set it to 0. If you set something negative, the heroes with negative stats will go up, and the heroes with positive stats will go down."
     )
+        # Build preset options list including custom presets
+        preset_options_list = list(preset_options.keys()) + ["Custom"]
+        if "custom_presets" in st.session_state:
+            preset_options_list.extend(list(st.session_state.custom_presets.keys()))
+        
         # Select weighting preset and sliders
+        st.subheader("👆 Click here to choose what you value")
         preset_choice = st.selectbox(
-            "Select Weighting Option", 
-            list(preset_options.keys()) + ["Custom"],
+            "Weighting Preset", 
+            preset_options_list,
             key="preset_choice",
-            on_change=update_preset
+            on_change=update_preset,
+            help="Choose a preset or customize below"
         )
         
         Economy = st.slider(
@@ -343,6 +358,32 @@ with col1:
         }
         weighting_json = json.dumps(weighting_settings)
         st.download_button("Download Weighting Settings", weighting_json, "weighting_settings.json")
+        
+        # Save custom preset
+        st.markdown("---")
+        st.subheader("💾 Save as Custom Preset")
+        preset_name = st.text_input("Enter a name for this preset (e.g., 'My Aggro Build')")
+        if st.button("Save Custom Preset"):
+            if preset_name:
+                if "custom_presets" not in st.session_state:
+                    st.session_state.custom_presets = {}
+                st.session_state.custom_presets[preset_name] = weighting.tolist()
+                st.success(f"Preset '{preset_name}' saved! It will appear in the weighting option dropdown.")
+                st.rerun()
+            else:
+                st.warning("Please enter a preset name.")
+        
+        # Display saved custom presets
+        if "custom_presets" in st.session_state and st.session_state.custom_presets:
+            st.markdown("**Your Custom Presets:**")
+            for custom_preset_name in st.session_state.custom_presets:
+                col1, col2 = st.columns([3, 1])
+                with col1:
+                    st.text(custom_preset_name)
+                with col2:
+                    if st.button("Delete", key=f"delete_{custom_preset_name}"):
+                        del st.session_state.custom_presets[custom_preset_name]
+                        st.rerun()
 
 # ----------------------------------------
 # Column 2: Hero Stats with separate upload expander
@@ -360,6 +401,41 @@ with col2:
     
     # Use the shared hero stats editor
     render_hero_stats_editor(key_prefix="home")
+    
+    # Batch hero stat adjustments
+    with st.expander("⚡ Batch Adjust Hero Stats"):
+        st.markdown("Quickly adjust all heroes by the same amount")
+        col1, col2 = st.columns(2)
+        with col1:
+            adjustment_amount = st.slider(
+                "Adjustment Amount",
+                min_value=-5,
+                max_value=5,
+                value=0,
+                step=1,
+                key="batch_adjustment_amount"
+            )
+        with col2:
+            stat_to_adjust = st.selectbox(
+                "Which Stat",
+                ["Economy", "Tempo", "Card Value", "Survivability", "Villain Damage",
+                 "Threat Removal", "Reliability", "Minion Control", "Control Boon", "Support Boon",
+                 "Unique Broken Builds Boon", "Late Game Power Boon", "Simplicity", "Stun/Confuse Boon",
+                 "Multiplayer Consistency Boon"],
+                key="batch_stat_choice"
+            )
+        
+        if st.button("Apply Adjustment to All Heroes", key="apply_batch_adjustment"):
+            stat_idx = ["Economy", "Tempo", "Card Value", "Survivability", "Villain Damage",
+                       "Threat Removal", "Reliability", "Minion Control", "Control Boon", "Support Boon",
+                       "Unique Broken Builds Boon", "Late Game Power Boon", "Simplicity", "Stun/Confuse Boon",
+                       "Multiplayer Consistency Boon"].index(stat_to_adjust)
+            for hero in st.session_state.heroes:
+                current_stats = st.session_state.heroes[hero].copy()
+                current_stats[stat_idx] = np.clip(current_stats[stat_idx] + adjustment_amount, -10, 10)
+                st.session_state.heroes[hero] = current_stats
+            st.success(f"Adjusted {stat_to_adjust} by {adjustment_amount:+d} for all heroes!")
+            st.rerun()
 
 # ----------------------------------------
 # Continue with Tier List Calculations & Display
@@ -467,6 +543,9 @@ st.markdown(
 # ----------------------------------------
 st.header(f"{plot_title}")
 
+# Search/Filter for heroes
+search_query = st.text_input("🔍 Search for a hero", "", help="Type a hero name to filter the tier list")
+
 tier_colors = {"S": "red", "A": "orange", "B": "green", "C": "blue", "D": "purple"}
 for tier in ["S", "A", "B", "C", "D"]:
     st.markdown(f"<h2>{tier}</h2>", unsafe_allow_html=True)
@@ -475,9 +554,14 @@ for tier in ["S", "A", "B", "C", "D"]:
     for row in rows:
         cols = st.columns(num_cols)
         for idx, (hero, score) in enumerate(row):
+            # Filter based on search query
+            if search_query.lower() and search_query.lower() not in hero.lower():
+                continue
+                
             with cols[idx]:
                 if hero in hero_image_urls:
                     st.image(hero_image_urls[hero], use_container_width=True)
+                st.caption(f"{hero} - Score: {score:.1f}")
 
 # ----------------------------------------
 # Plotting
@@ -503,6 +587,18 @@ ax.legend(handles=legend_handles, title="Tier Colors", loc="upper left", fontsiz
 plt.tight_layout()
 ax.grid(axis='y', linestyle='--', alpha=0.7)
 st.pyplot(fig)
+
+# Export chart as image
+img_buffer = io.BytesIO()
+fig.savefig(img_buffer, format='png', dpi=150, bbox_inches='tight')
+img_buffer.seek(0)
+st.download_button(
+    label="📥 Download Tier List Chart as PNG",
+    data=img_buffer,
+    file_name=f"tier_list_{plot_title.replace(' ', '_')}.png",
+    mime="image/png"
+)
+
 st.markdown("<hr>", unsafe_allow_html=True)
 
 st.markdown(

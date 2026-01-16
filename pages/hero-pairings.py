@@ -349,3 +349,37 @@ for tier in ["S", "A", "B", "C", "D"]:
                     st.caption("⬇️ You support them")
                 else:
                     st.caption("—")
+
+st.markdown("---")
+
+# Search/Filter for partners
+st.subheader("🔍 Search Pairings")
+search_query = st.text_input("Search for a hero", "", help="Type a hero name to filter pairings")
+
+if search_query:
+    st.subheader(f"Search Results for '{search_query}'")
+    filtered_tiers = {"S": [], "A": [], "B": [], "C": [], "D": []}
+    for tier in tiers:
+        filtered_tiers[tier] = [h for h in tiers[tier] if search_query.lower() in h.lower()]
+    
+    num_cols = 5
+    for tier in ["S", "A", "B", "C", "D"]:
+        if filtered_tiers[tier]:
+            st.markdown(f"<h3 style='color:{tier_colors[tier]};'>{tier} Tier</h3>", unsafe_allow_html=True)
+            rows = [filtered_tiers[tier][i:i + num_cols] for i in range(0, len(filtered_tiers[tier]), num_cols)]
+            for row in rows:
+                cols = st.columns(num_cols)
+                for idx, hero in enumerate(row):
+                    with cols[idx]:
+                        img = hero_image_urls.get(hero)
+                        if img:
+                            st.image(img, use_container_width=True)
+                        t = details[hero]["type"]
+                        if t == "mutual":
+                            st.caption("🤝 Mutual")
+                        elif t == "b_helps_a":
+                            st.caption("⬆️ Supports")
+                        elif t == "a_helps_b":
+                            st.caption("⬇️ You help")
+                        else:
+                            st.caption("—")

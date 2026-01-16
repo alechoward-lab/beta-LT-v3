@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
 from copy import deepcopy
+import io
 
 from villain_weights import villain_weights
 from villain_image_urls import villain_image_urls
@@ -234,5 +235,41 @@ handles = [Patch(color=c, label=f"Tier {t}") for t, c in tier_colors.items()]
 ax.legend(handles=handles, title="Tiers", loc="upper left", fontsize=12, title_fontsize=12)
 
 st.pyplot(fig)
+
+# Export chart as image
+img_buffer = io.BytesIO()
+fig.savefig(img_buffer, format='png', dpi=150, bbox_inches='tight')
+img_buffer.seek(0)
+st.download_button(
+    label="📥 Download Tier Chart as PNG",
+    data=img_buffer,
+    file_name=f"villain_tier_list_{villain.replace(' ', '_')}.png",
+    mime="image/png"
+)
+
+st.markdown("---")
+
+# Search/Filter heroes
+search_query = st.text_input("🔍 Search for a hero", "", help="Type a hero name to filter results")
+
+if search_query:
+    st.subheader(f"Search Results for '{search_query}'")
+    filtered_tiers = {"S": [], "A": [], "B": [], "C": [], "D": []}
+    for tier in tiers:
+        filtered_tiers[tier] = [(h, sc) for h, sc in tiers[tier] if search_query.lower() in h.lower()]
+    
+    num_cols = 5
+    for tier in ["S", "A", "B", "C", "D"]:
+        if filtered_tiers[tier]:
+            st.markdown(f"<h3 style='color:{tier_colors[tier]};'>{tier} Tier</h3>", unsafe_allow_html=True)
+            rows = [filtered_tiers[tier][i:i + num_cols] for i in range(0, len(filtered_tiers[tier]), num_cols)]
+            for row in rows:
+                cols = st.columns(num_cols)
+                for idx, (hero, score) in enumerate(row):
+                    with cols[idx]:
+                        img_url = hero_image_urls.get(hero)
+                        if img_url:
+                            st.image(img_url, use_container_width=True)
+                        st.markdown(f"Score: {int(score)}", unsafe_allow_html=True)
 
 
