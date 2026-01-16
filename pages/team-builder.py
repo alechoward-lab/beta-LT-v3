@@ -247,10 +247,9 @@ st.markdown("---")
 st.subheader("🎯 Team Stat Profile")
 
 factor_names = [
-    "Economy", "Tempo", "Card Value", "Survivability", "Villain Damage",
-    "Threat Removal", "Reliability", "Minion Control", "Control Boon", "Support Boon",
-    "Unique Broken Builds Boon", "Late Game Power Boon", "Simplicity", "Stun/Confuse Boon",
-    "Multiplayer Consistency Boon"
+    "Economy", "Tempo", "Survivability", "Villain Damage",
+    "Threat Removal", "Reliability", "Minion Control", "Support Boon",
+    "Late Game Power Boon"
 ]
 
 fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(projection='polar'), facecolor='none')
