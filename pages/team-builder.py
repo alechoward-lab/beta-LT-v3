@@ -100,9 +100,6 @@ with col1:
 with col2:
     st.write("")
     st.write("")
-    if st.session_state.team and st.button("🗑️ Clear Team", key="clear_team_button", use_container_width=True):
-        st.session_state.team = []
-        st.rerun()
 
 st.markdown("---")
 
@@ -132,6 +129,11 @@ for idx, hero in enumerate(st.session_state.team):
         if st.button("❌ Remove", key=f"remove_{hero}_{idx}"):
             st.session_state.team.remove(hero)
             st.rerun()
+
+# Clear team button in its own row
+if st.session_state.team and st.button("🗑️ Clear Team", key="clear_team_button", use_container_width=True):
+    st.session_state.team = []
+    st.rerun()
 
 st.markdown("---")
 
@@ -273,8 +275,8 @@ combined_stats_list = combined_stats[:len(factor_names)].tolist()
 angles += angles[:1]
 combined_stats_list += combined_stats_list[:1]
 
-ax.plot(angles, combined_stats_list, 'o-', linewidth=2, color='#4ECDC4')
-ax.fill(angles, combined_stats_list, alpha=0.25, color='#4ECDC4')
+ax.plot(angles, combined_stats_list, 'o-', linewidth=2, color=tier_color)
+ax.fill(angles, combined_stats_list, alpha=0.25, color=tier_color)
 
 ax.set_xticks(angles[:-1])
 ax.set_xticklabels(factor_names, size=9)

@@ -207,6 +207,10 @@ if "generated_team" in st.session_state:
     # Create radar chart for team stats
     st.subheader("🎯 Team Stat Profile")
     
+    # Map tier to color
+    tier_colors = {"S": "red", "A": "orange", "B": "green", "C": "blue", "D": "purple"}
+    tier_color = tier_colors[tier_choice]
+    
     factor_names = [
         "Economy", "Tempo", "Card Value", "Survivability", "Villain Damage",
         "Threat Removal", "Reliability", "Minion Control", "Control Boon", "Support Boon",
@@ -222,8 +226,8 @@ if "generated_team" in st.session_state:
     angles += angles[:1]
     combined_stats_list += combined_stats_list[:1]
     
-    ax.plot(angles, combined_stats_list, 'o-', linewidth=2, color='#4ECDC4')
-    ax.fill(angles, combined_stats_list, alpha=0.25, color='#4ECDC4')
+    ax.plot(angles, combined_stats_list, 'o-', linewidth=2, color=tier_color)
+    ax.fill(angles, combined_stats_list, alpha=0.25, color=tier_color)
     
     ax.set_xticks(angles[:-1])
     ax.set_xticklabels(factor_names, size=9)
