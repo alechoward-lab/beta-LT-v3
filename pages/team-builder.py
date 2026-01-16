@@ -110,18 +110,11 @@ if len(st.session_state.team) == 0:
 # Display team
 st.subheader("📋 Your Team")
 
-# Dynamic columns based on team size
-if len(st.session_state.team) == 1:
-    cols = st.columns(1)
-elif len(st.session_state.team) == 2:
-    cols = st.columns(2)
-elif len(st.session_state.team) == 3:
-    cols = st.columns(3)
-else:  # 4 or more
-    cols = st.columns(min(4, len(st.session_state.team)))
+# Dynamic columns - always use 4 columns for consistent width across different team sizes
+cols = st.columns(4)
 
 for idx, hero in enumerate(st.session_state.team):
-    with cols[idx % len(cols)]:
+    with cols[idx % 4]:
         if hero in hero_image_urls:
             st.image(hero_image_urls[hero], use_container_width=True)
         st.markdown(f"**{hero}**")
@@ -275,6 +268,13 @@ combined_stats_list = combined_stats[:len(factor_names)].tolist()
 angles += angles[:1]
 combined_stats_list += combined_stats_list[:1]
 
+# Add colored background regions for strength levels
+angles_fill = np.linspace(0, 2 * np.pi, 100)
+ax.fill_between(angles_fill, -10, 0, alpha=0.15, color='red', label='Weak [-10 to 0]')
+ax.fill_between(angles_fill, 0, 1, alpha=0.15, color='yellow', label='Below Avg [0 to 1]')
+ax.fill_between(angles_fill, 1, 3, alpha=0.15, color='blue', label='Good [1 to 3]')
+ax.fill_between(angles_fill, 3, 6, alpha=0.15, color='green', label='Strong [3+]')
+
 ax.plot(angles, combined_stats_list, 'o-', linewidth=2, color=tier_color)
 ax.fill(angles, combined_stats_list, alpha=0.25, color=tier_color)
 
@@ -284,6 +284,7 @@ ax.set_ylim(-6, 6)
 ax.set_yticks([-5, 0, 5])
 ax.grid(True)
 ax.set_title("Team Stat Profile", size=14, weight='bold', pad=20)
+ax.legend(loc='upper left', bbox_to_anchor=(1.2, 1.1), fontsize='small')
 
 st.pyplot(fig)
 
