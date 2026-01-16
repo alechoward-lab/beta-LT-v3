@@ -204,20 +204,32 @@ if "generated_team" in st.session_state:
     
     st.markdown("---")
     
-    # Create bar chart for team member scores
-    st.subheader("📊 Individual Hero Scores")
-    hero_scores = []
-    for hero in team:
-        score = float(np.dot(heroes[hero], weighting))
-        hero_scores.append((hero, score))
+    # Create radar chart for team stats
+    st.subheader("🎯 Team Stat Profile")
     
-    fig, ax = plt.subplots(figsize=(18, 8), dpi=300)
-    hero_names_list = [item[0] for item in hero_scores]
-    hero_scores_list = [item[1] for item in hero_scores]
-    ax.bar(hero_names_list, hero_scores_list, color='steelblue')
-    ax.set_ylabel("Score", fontsize="x-large")
-    ax.set_title("Individual Hero Scores", fontweight='bold', fontsize=18)
-    plt.xticks(rotation=90, ha='right', fontsize='small')
-    plt.tight_layout()
-    ax.grid(axis='y', linestyle='--', alpha=0.7)
+    factor_names = [
+        "Economy", "Tempo", "Card Value", "Survivability", "Villain Damage",
+        "Threat Removal", "Reliability", "Minion Control", "Control Boon", "Support Boon",
+        "Unique Broken Builds Boon", "Late Game Power Boon", "Simplicity", "Stun/Confuse Boon",
+        "Multiplayer Consistency Boon"
+    ]
+    
+    fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(projection='polar'))
+    
+    angles = np.linspace(0, 2 * np.pi, len(factor_names), endpoint=False).tolist()
+    combined_stats_list = combined_stats[:len(factor_names)].tolist()
+    
+    angles += angles[:1]
+    combined_stats_list += combined_stats_list[:1]
+    
+    ax.plot(angles, combined_stats_list, 'o-', linewidth=2, color='#4ECDC4')
+    ax.fill(angles, combined_stats_list, alpha=0.25, color='#4ECDC4')
+    
+    ax.set_xticks(angles[:-1])
+    ax.set_xticklabels(factor_names, size=9)
+    ax.set_ylim(-6, 6)
+    ax.set_yticks([-5, 0, 5])
+    ax.grid(True)
+    ax.set_title("Team Stat Profile", size=14, weight='bold', pad=20)
+    
     st.pyplot(fig)
