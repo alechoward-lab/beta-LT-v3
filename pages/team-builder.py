@@ -263,10 +263,10 @@ combined_stats_list += combined_stats_list[:1]
 
 # Add colored background regions for strength levels
 angles_fill = np.linspace(0, 2 * np.pi, 100)
-ax.fill_between(angles_fill, -10, 0, alpha=0.08, color='#FF6B6B')
-ax.fill_between(angles_fill, 0, 1, alpha=0.08, color='#FFD93D')
-ax.fill_between(angles_fill, 1, 3, alpha=0.08, color='#6BCB77')
-ax.fill_between(angles_fill, 3, 6, alpha=0.08, color='#4D96FF')
+ax.fill_between(angles_fill, -10, 0, alpha=0.12, color='#FF1744')
+ax.fill_between(angles_fill, 0, 1, alpha=0.12, color='#FFB300')
+ax.fill_between(angles_fill, 1, 3, alpha=0.12, color='#00D4FF')
+ax.fill_between(angles_fill, 3, 6, alpha=0.12, color='#39FF14')
 
 ax.plot(angles, combined_stats_list, 'o-', linewidth=2.5, color=tier_color)
 ax.fill(angles, combined_stats_list, alpha=0.2, color=tier_color)
