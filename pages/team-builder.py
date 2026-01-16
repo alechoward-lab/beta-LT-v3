@@ -65,41 +65,34 @@ st.markdown("---")
 st.subheader("🛠️ Build Your Team")
 st.markdown(f"Current team size: {len(st.session_state.team)}/4")
 
-col1, col2 = st.columns([3, 1])
+st.markdown("**Click a hero card to add to team:**")
+available_heroes = [h for h in hero_names if h not in st.session_state.team]
 
-with col1:
-    st.markdown("**Click a hero card to add to team:**")
-    available_heroes = [h for h in hero_names if h not in st.session_state.team]
+# Display heroes in rows of 5 images
+cols_per_row = 5
+for row_start in range(0, len(available_heroes), cols_per_row):
+    row_end = min(row_start + cols_per_row, len(available_heroes))
+    hero_row = available_heroes[row_start:row_end]
+    cols = st.columns(cols_per_row)  # Always 5 columns
     
-    # Display heroes in rows of 5 images
-    cols_per_row = 5
-    for row_start in range(0, len(available_heroes), cols_per_row):
-        row_end = min(row_start + cols_per_row, len(available_heroes))
-        hero_row = available_heroes[row_start:row_end]
-        cols = st.columns(cols_per_row)  # Always 5 columns
-        
-        for idx, hero in enumerate(hero_row):
-            with cols[idx]:
-                if hero in hero_image_urls:
-                    st.image(hero_image_urls[hero], use_container_width=True)
-                    if st.button("➕", key=f"add_{hero}", use_container_width=True):
-                        if len(st.session_state.team) < 4:
-                            st.session_state.team.append(hero)
-                            st.rerun()
-                        else:
-                            st.error("Team is full! Maximum 4 heroes.")
-                else:
-                    st.write(f"**{hero}**")
-                    if st.button("➕", key=f"add_{hero}", use_container_width=True):
-                        if len(st.session_state.team) < 4:
-                            st.session_state.team.append(hero)
-                            st.rerun()
-                        else:
-                            st.error("Team is full! Maximum 4 heroes.")
-
-with col2:
-    st.write("")
-    st.write("")
+    for idx, hero in enumerate(hero_row):
+        with cols[idx]:
+            if hero in hero_image_urls:
+                st.image(hero_image_urls[hero], use_container_width=True)
+                if st.button("➕", key=f"add_{hero}", use_container_width=True):
+                    if len(st.session_state.team) < 4:
+                        st.session_state.team.append(hero)
+                        st.rerun()
+                    else:
+                        st.error("Team is full! Maximum 4 heroes.")
+            else:
+                st.write(f"**{hero}**")
+                if st.button("➕", key=f"add_{hero}", use_container_width=True):
+                    if len(st.session_state.team) < 4:
+                        st.session_state.team.append(hero)
+                        st.rerun()
+                    else:
+                        st.error("Team is full! Maximum 4 heroes.")
 
 st.markdown("---")
 
