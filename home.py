@@ -570,11 +570,11 @@ sorted_hero_names = list(sorted_scores.keys())
 sorted_hero_scores = list(sorted_scores.values())
 bar_colors = [tier_colors[hero_to_tier[hero]] for hero in sorted_hero_names]
 
-fig, ax = plt.subplots(figsize=(14, 7), dpi=300)
+fig, ax = plt.subplots(figsize=(18, 8), dpi=300)
 bars = ax.bar(sorted_hero_names, sorted_hero_scores, color=bar_colors)
 ax.set_ylabel("Scores", fontsize="x-large")
 ax.set_title(plot_title, fontweight='bold', fontsize=18)
-plt.xticks(rotation=45, ha='right')
+plt.xticks(rotation=90, ha='right', fontsize='small')
 
 for label in ax.get_xticklabels():
     hero = label.get_text()
