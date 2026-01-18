@@ -18,6 +18,71 @@ from villain_strategies import villain_strategies
 # Initialize hero stats in session state
 initialize_hero_stats()
 
+def get_preset_for_team_size(team_size):
+    """Get the appropriate preset based on team size."""
+    if team_size == 1:
+        return np.array(preset_options["Solo (No Rush)"])
+    elif team_size == 2:
+        return np.array(preset_options["General Power: 2 Player"])
+    elif team_size == 3:
+        return np.array(preset_options["Multiplayer: 3 Player"])
+    else:  # 4 player
+        return np.array(preset_options["Multiplayer: 4 Player"])
+
+def calculate_team_synergy(team_heroes, heroes_dict, team_size):
+    """
+    Calculate team synergy bonus (0-40% multiplier).
+    Synergy is based on how well heroes complement each other's strengths and weaknesses.
+    
+    Returns: synergy_multiplier (0.0 to 0.4)
+    """
+    if len(team_heroes) == 1:
+        return 0.0  # No synergy for solo teams
+    
+    team_stats = np.array([heroes_dict[hero] for hero in team_heroes])
+    
+    # 1. Support synergy: Support heroes pair well with late game heroes
+    # Support heroes enable other heroes to scale into late game
+    support_boon_idx = 9  # Support Boon index
+    late_game_idx = 11  # Late Game Power Boon index
+    
+    support_levels = team_stats[:, support_boon_idx]
+    late_game_levels = team_stats[:, late_game_idx]
+    
+    avg_support = np.mean(support_levels)
+    avg_late_game = np.mean(late_game_levels)
+    
+    # Synergy bonus if team has both support AND late game power
+    support_synergy = min((avg_support + avg_late_game) / 100 * 0.12, 0.12)  # Cap at 12%
+    
+    # 2. Reliability synergy: Consistent heroes boost team stability
+    reliability_idx = 6
+    reliability = team_stats[:, reliability_idx]
+    avg_reliability = np.mean(reliability)
+    reliability_synergy = (avg_reliability / 6.0) * 0.08  # Up to 8%
+    
+    # 3. Multiplayer consistency synergy: Bonus for teams designed for multi-player
+    multiplayer_idx = 14
+    multiplayer_stats = team_stats[:, multiplayer_idx]
+    
+    if team_size >= 3:
+        multiplayer_synergy = np.mean(multiplayer_stats) * 0.01  # 1% per multiplayer point
+        multiplayer_synergy = min(multiplayer_synergy, 0.12)  # Cap at 12%
+    else:
+        multiplayer_synergy = 0.0
+    
+    # 4. Balance synergy: Diverse stat profiles work better together
+    stat_variance = np.std(team_stats[:, :8])  # Variance across core stats
+    balance_synergy = min((stat_variance / 3.0) * 0.08, 0.08)  # Up to 8%
+    
+    # Combine all synergies (cap at 40%)
+    total_synergy = min(
+        support_synergy + reliability_synergy + multiplayer_synergy + balance_synergy,
+        0.40
+    )
+    
+    return total_synergy
+
 st.title("👥 Team Builder")
 st.markdown("Build a team of 1-4 heroes and analyze their combined strengths and weaknesses!")
 
@@ -58,7 +123,7 @@ if villain_choice != "No villain selected":
         st.markdown("### Strategy Tips")
         st.markdown(villain_strategies.get(villain_choice, "No strategy tips written yet."))
 else:
-    weighting = np.ones(15)
+    weighting = None  # Will be set based on team size
 
 st.markdown("---")
 
@@ -160,13 +225,22 @@ st.markdown("---")
 # Team tier ranking
 st.subheader("🏆 Team Tier Ranking")
 
+# Apply appropriate preset based on team size if no villain selected
+if weighting is None:
+    weighting = get_preset_for_team_size(len(st.session_state.team))
+    st.info(f"📊 Using **{len(st.session_state.team)}-player** weighting preset")
+
 # Calculate team stats for scoring
 team_stats = []
 for hero in st.session_state.team:
     team_stats.append(heroes[hero])
 
 combined_stats = np.mean(team_stats, axis=0)
-team_score = float(np.dot(combined_stats, weighting))
+base_team_score = float(np.dot(combined_stats, weighting))
+
+# Calculate synergy bonus
+synergy_multiplier = calculate_team_synergy(st.session_state.team, heroes, len(st.session_state.team))
+team_score = base_team_score * (1.0 + synergy_multiplier)
 
 # Calculate all possible team combinations and their scores
 all_combinations = []
@@ -175,7 +249,11 @@ same_size_combinations = []
 for team_size in range(1, 5):
     for combo in combinations(hero_names, team_size):
         combo_stats = np.mean([heroes[hero] for hero in combo], axis=0)
-        combo_score = float(np.dot(combo_stats, weighting))
+        # Use preset weighting for this team size
+        combo_weighting = get_preset_for_team_size(team_size)
+        combo_base_score = float(np.dot(combo_stats, combo_weighting))
+        combo_synergy = calculate_team_synergy(list(combo), heroes, team_size)
+        combo_score = combo_base_score * (1.0 + combo_synergy)
         all_combinations.append(combo_score)
         
         # Also track combinations of the same size for comparison
@@ -227,7 +305,9 @@ with col1:
 with col2:
     st.write("")
     st.write(tier_text)
-    st.write(f"Score: {team_score:.1f}")
+    st.write(f"Base Score: {base_team_score:.1f}")
+    st.write(f"Synergy Bonus: +{synergy_multiplier*100:.1f}%")
+    st.write(f"**Final Score: {team_score:.1f}**")
     st.write(f"Rank: {team_rank}/{total_teams} {len(st.session_state.team)}-player teams")
 
 st.markdown("---")
