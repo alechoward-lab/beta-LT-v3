@@ -189,39 +189,6 @@ if st.session_state.team and st.button("🗑️ Clear Team", key="clear_team_but
 
 st.markdown("---")
 
-# Balanced team analysis
-st.subheader("⚖️ Team Balance Check")
-
-balance_factors = {
-    0: "Economy",
-    1: "Tempo", 
-    3: "Survivability",
-    4: "Villain Damage",
-    5: "Threat Removal",
-    6: "Reliability",
-    7: "Minion Control"
-}
-
-balance_stats = {}
-for idx, name in balance_factors.items():
-    avg_stat = np.mean([heroes[hero][idx] for hero in st.session_state.team])
-    balance_stats[name] = avg_stat
-
-# Display balance analysis
-col1, col2, col3, col4 = st.columns(4)
-columns = [col1, col2, col3, col4]
-
-for idx, (name, avg_stat) in enumerate(balance_stats.items()):
-    with columns[idx % 4]:
-        if avg_stat > 2:
-            st.success(f"{name}\n✅ {avg_stat:.1f} (Strong)")
-        elif avg_stat >= 1:
-            st.info(f"{name}\n🟢 {avg_stat:.1f} (Balanced)")
-        else:
-            st.error(f"{name}\n❌ {avg_stat:.1f} (Weak)")
-
-st.markdown("---")
-
 # Tier ranking button
 if "show_tier" not in st.session_state:
     st.session_state.show_tier = False
@@ -230,6 +197,39 @@ if st.button("🏆 What tier is my team?", use_container_width=True, key="tier_b
     st.session_state.show_tier = True
 
 if st.session_state.show_tier:
+    # Balanced team analysis
+    st.subheader("⚖️ Team Balance Check")
+
+    balance_factors = {
+        0: "Economy",
+        1: "Tempo", 
+        3: "Survivability",
+        4: "Villain Damage",
+        5: "Threat Removal",
+        6: "Reliability",
+        7: "Minion Control"
+    }
+
+    balance_stats = {}
+    for idx, name in balance_factors.items():
+        avg_stat = np.mean([heroes[hero][idx] for hero in st.session_state.team])
+        balance_stats[name] = avg_stat
+
+    # Display balance analysis
+    col1, col2, col3, col4 = st.columns(4)
+    columns = [col1, col2, col3, col4]
+
+    for idx, (name, avg_stat) in enumerate(balance_stats.items()):
+        with columns[idx % 4]:
+            if avg_stat > 2:
+                st.success(f"{name}\n✅ {avg_stat:.1f} (Strong)")
+            elif avg_stat >= 1:
+                st.info(f"{name}\n🟢 {avg_stat:.1f} (Balanced)")
+            else:
+                st.error(f"{name}\n❌ {avg_stat:.1f} (Weak)")
+
+    st.markdown("---")
+
     # Team tier ranking
     st.subheader("🏆 Team Tier Ranking")
 
