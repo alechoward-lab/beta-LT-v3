@@ -189,6 +189,25 @@ if st.session_state.team and st.button("🗑️ Clear Team", key="clear_team_but
 
 st.markdown("---")
 
+# Initialize analysis state
+if "analyze_team" not in st.session_state:
+    st.session_state.analyze_team = False
+
+# Button to analyze team
+col1, col2 = st.columns([1, 3])
+with col1:
+    if st.button("🔍 Analyze Team", use_container_width=True, key="analyze_button"):
+        st.session_state.analyze_team = True
+
+with col2:
+    st.info(f"Team: {', '.join(st.session_state.team) if st.session_state.team else 'Empty'}")
+
+# Only run calculations if button was clicked
+if not st.session_state.analyze_team:
+    st.stop()
+
+st.markdown("---")
+
 # Balanced team analysis
 st.subheader("⚖️ Team Balance Check")
 
