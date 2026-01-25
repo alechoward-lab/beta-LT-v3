@@ -1,4 +1,6 @@
 streamlit
 matplotlib
 pandas  
-numpy  
+numpy
+pillow
+yt-dlp

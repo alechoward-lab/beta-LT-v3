@@ -116,10 +116,27 @@ st.markdown("---")
 
 # Generate button
 if st.button("🎲 Generate Random Team", use_container_width=True, key="generate_button"):
-    # Calculate all possible team combinations
-    available_heroes = [h for h in hero_names if h not in locked_heroes]
+    # Calculate all possible team combinations (including ALL heroes, not just available)
+    # This ensures tier boundaries are consistent regardless of locked heroes
+    all_possible_teams = []
     
-    # Determine how many more heroes we need
+    for combo in combinations(hero_names, team_size):
+        team = list(combo)
+        
+        # Calculate team score
+        team_stats = [heroes[hero] for hero in team]
+        combined_stats = np.mean(team_stats, axis=0)
+        team_score = float(np.dot(combined_stats, weighting))
+        
+        all_possible_teams.append((team, team_score))
+    
+    # Calculate mean and std for tier determination (from ALL possible teams)
+    all_scores = [score for _, score in all_possible_teams]
+    mean_score = np.mean(all_scores)
+    std_score = np.std(all_scores)
+    
+    # Now filter for teams that include locked heroes
+    available_heroes = [h for h in hero_names if h not in locked_heroes]
     remaining_slots = team_size - len(locked_heroes)
     
     # Generate all combinations of remaining slots
@@ -134,11 +151,6 @@ if st.button("🎲 Generate Random Team", use_container_width=True, key="generat
         team_score = float(np.dot(combined_stats, weighting))
         
         valid_teams.append((team, team_score))
-    
-    # Calculate mean and std for tier determination
-    all_scores = [score for _, score in valid_teams]
-    mean_score = np.mean(all_scores)
-    std_score = np.std(all_scores)
     
     # Filter teams by tier
     tier_teams = []
