@@ -61,7 +61,7 @@ default_heroes = {
                             #              e, t, cv,s, d, th,re,mi,c, s, br,lg,si,sc,mu
         "Magneto":              np.array([ 3, 3, 3, 4, 3, 4, 5, 4, 2, 0, 0, 1, 3, 0, 1]),
         "Maria Hill":           np.array([ 2, 1, 6, 2, 3, 5, 5, 2, 2, 2, 2, 6,-3, 1, 2]),
-        "Nick Fury":            np.array([ 1, 2, 3, 4, 2, 4, 4, 5, 2, 0, 0, 0,-3, 0, 1]),
+        "Nick Fury":            np.array([ 2, 2, 3, 5, 3, 4, 4, 5, 2, 0, 0, 0,-3, 0, 1]),
         "Shuri":                np.array([ 3, 1, 4, 3, 4, 4, 4, 5, 1, 0, 1, 0, 0, 3, 0]),
         "Silk":                 np.array([ 3,-1, 5, 4, 4, 5, 2, 4, 4, 1, 2, 2,-5, 0, 1]),
         "Falcon":               np.array([ 2, 3, 3, 3, 2, 3, 3, 3, 3, 3, 1, 0,-3, 1, 2]),
