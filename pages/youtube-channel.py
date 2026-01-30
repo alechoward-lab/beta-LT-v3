@@ -52,7 +52,7 @@ def get_channel_videos():
                 'quiet': True,
                 'no_warnings': True,
                 'extract_flat': 'in_playlist',
-                'playlist_items': '1:50',  # Get first 50 videos
+                'playlist_items': '1:100',  # Get first 100 videos
             }
             
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
