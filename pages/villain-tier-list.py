@@ -3,24 +3,21 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
 from copy import deepcopy
-import io
 
 from villain_weights import villain_weights
 from villain_image_urls import villain_image_urls
 from default_heroes import default_heroes
 from hero_image_urls import hero_image_urls
 from villain_strategies import villain_strategies
-from hero_stats_manager import initialize_hero_stats, get_heroes, render_hero_stats_editor
+from weighting_utils import initialize_weighting_stats, get_weighting_array, render_weighting_sliders
 
-# Initialize hero stats in session state
-initialize_hero_stats()
+# ----------------------------------------
+# Initialize Weighting Stats
+# ----------------------------------------
+initialize_weighting_stats()
 
 st.markdown("**Watch the video tutorial here:** [Video Tutorial](https://youtu.be/9eEMPnSwVLw)")
 st.markdown("**Join the Discord to ask questions or give feedback:** [Discord Invite](https://discord.gg/ReF5jDSHqV)")
-
-# Hero stats editor
-render_hero_stats_editor(key_prefix="villain_tier_list")
-st.markdown("---")
 
 # ----------------------------------------
 # Page header
@@ -49,15 +46,6 @@ factor_names = [
     "Stun/Confuse Boon",
     "Multiplayer Consistency Boon",
 ]
-
-# ----------------------------------------
-# Initialize villain session_state keys safely
-# ----------------------------------------
-rhino_preset = villain_weights.get("Rhino", [0] * len(factor_names))
-for idx, name in enumerate(factor_names):
-    key = f"villain_{name}"
-    if key not in st.session_state:
-        st.session_state[key] = int(rhino_preset[idx])
 
 # ----------------------------------------
 # Villain selector
@@ -98,20 +86,32 @@ with col_img:
         st.write("No image available for this villain.")
 
 with col_content:
-    with st.expander("Edit Weighting Factors"):
-        st.markdown(
-            "Use these sliders to adjust how much you value each factor. "
-            "Defaults come from this villain’s preset."
-        )
-
-        for name in factor_names:
-            st.slider(
-                label=name,
-                min_value=-10,
-                max_value=10,
-                value=st.session_state[f"villain_{name}"],
-                key=f"villain_{name}",
+    st.markdown("### Use Shared Weighting")
+    use_shared_weighting = st.checkbox(
+        "Use my personal weighting from the home page (changes will persist across all pages)",
+        value=False,
+        key="use_shared_for_villain"
+    )
+    
+    if use_shared_weighting:
+        st.info("Using your personal weighting factors. Change them here to update across all pages:")
+        render_weighting_sliders(show_help=st.session_state.get("show_help", True))
+    else:
+        st.markdown("### Use Villain-Specific Weighting")
+        with st.expander("Edit Weighting Factors"):
+            st.markdown(
+                "Use these sliders to adjust how much you value each factor. "
+                "Defaults come from this villain's preset."
             )
+
+            for name in factor_names:
+                st.slider(
+                    label=name,
+                    min_value=-10,
+                    max_value=10,
+                    value=st.session_state.get(f"villain_{name}", 0),
+                    key=f"villain_{name}",
+                )
 
     st.markdown("### Strategy Tips")
     st.markdown(villain_strategies.get(villain, "No strategy tips written yet."))
@@ -119,12 +119,15 @@ with col_content:
 # ----------------------------------------
 # Gather villain weights
 # ----------------------------------------
-weights = np.array([st.session_state[f"villain_{name}"] for name in factor_names])
+if st.session_state.get("use_shared_for_villain", False):
+    weights = get_weighting_array()
+else:
+    weights = np.array([st.session_state.get(f"villain_{name}", 0) for name in factor_names])
 
 # ----------------------------------------
 # Score heroes
 # ----------------------------------------
-heroes = get_heroes()
+heroes = deepcopy(default_heroes)
 scores = {name: float(np.dot(stats, weights)) for name, stats in heroes.items()}
 sorted_scores = dict(sorted(scores.items(), key=lambda kv: kv[1]))
 
@@ -234,41 +237,5 @@ handles = [Patch(color=c, label=f"Tier {t}") for t, c in tier_colors.items()]
 ax.legend(handles=handles, title="Tiers", loc="upper left", fontsize=12, title_fontsize=12)
 
 st.pyplot(fig)
-
-# Export chart as image
-img_buffer = io.BytesIO()
-fig.savefig(img_buffer, format='png', dpi=150, bbox_inches='tight')
-img_buffer.seek(0)
-st.download_button(
-    label="📥 Download Tier Chart as PNG",
-    data=img_buffer,
-    file_name=f"villain_tier_list_{villain.replace(' ', '_')}.png",
-    mime="image/png"
-)
-
-st.markdown("---")
-
-# Search/Filter heroes
-search_query = st.text_input("🔍 Search for a hero", "", help="Type a hero name to filter results")
-
-if search_query:
-    st.subheader(f"Search Results for '{search_query}'")
-    filtered_tiers = {"S": [], "A": [], "B": [], "C": [], "D": []}
-    for tier in tiers:
-        filtered_tiers[tier] = [(h, sc) for h, sc in tiers[tier] if search_query.lower() in h.lower()]
-    
-    num_cols = 5
-    for tier in ["S", "A", "B", "C", "D"]:
-        if filtered_tiers[tier]:
-            st.markdown(f"<h3 style='color:{tier_colors[tier]};'>{tier} Tier</h3>", unsafe_allow_html=True)
-            rows = [filtered_tiers[tier][i:i + num_cols] for i in range(0, len(filtered_tiers[tier]), num_cols)]
-            for row in rows:
-                cols = st.columns(num_cols)
-                for idx, (hero, score) in enumerate(row):
-                    with cols[idx]:
-                        img_url = hero_image_urls.get(hero)
-                        if img_url:
-                            st.image(img_url, use_container_width=True)
-                        st.markdown(f"Score: {int(score)}", unsafe_allow_html=True)
 
 

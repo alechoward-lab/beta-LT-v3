@@ -52,12 +52,13 @@ from copy import deepcopy
 
 from default_heroes import default_heroes
 from hero_image_urls import hero_image_urls
-from preset_options import preset_options
-from hero_stats_manager import initialize_hero_stats, get_heroes, render_hero_stats_editor
+from weighting_utils import initialize_weighting_stats, get_weighting_array, render_weighting_sliders
 
-# Initialize hero stats in session state
-initialize_hero_stats()
 
+# ----------------------------------------
+# Initialize Weighting Stats
+# ----------------------------------------
+initialize_weighting_stats()
 
 # ----------------------------------------
 # Page Header
@@ -72,21 +73,23 @@ st.markdown(
     """
 )
 
-# Hero stats editor
-render_hero_stats_editor(key_prefix="hero_pairings")
-st.markdown("---")
+# ----------------------------------------
+# Weighting Controls
+# ----------------------------------------
+with st.expander("Adjust Weighting Factors (click to expand)", expanded=False):
+    render_weighting_sliders(show_help=st.session_state.get("show_help", True))
 
 # ----------------------------------------
 # Load Data
 # ----------------------------------------
-heroes = get_heroes()
+heroes = deepcopy(default_heroes)
 hero_names = list(heroes.keys())
 
 
 # ----------------------------------------
 # Compute General Power
 # ----------------------------------------
-general_weights = np.array(preset_options["General Power: 2 Player"])
+general_weights = get_weighting_array()
 
 general_scores = {
     hero: float(np.dot(stats, general_weights))
@@ -349,37 +352,3 @@ for tier in ["S", "A", "B", "C", "D"]:
                     st.caption("⬇️ You support them")
                 else:
                     st.caption("—")
-
-st.markdown("---")
-
-# Search/Filter for partners
-st.subheader("🔍 Search Pairings")
-search_query = st.text_input("Search for a hero", "", help="Type a hero name to filter pairings")
-
-if search_query:
-    st.subheader(f"Search Results for '{search_query}'")
-    filtered_tiers = {"S": [], "A": [], "B": [], "C": [], "D": []}
-    for tier in tiers:
-        filtered_tiers[tier] = [h for h in tiers[tier] if search_query.lower() in h.lower()]
-    
-    num_cols = 5
-    for tier in ["S", "A", "B", "C", "D"]:
-        if filtered_tiers[tier]:
-            st.markdown(f"<h3 style='color:{tier_colors[tier]};'>{tier} Tier</h3>", unsafe_allow_html=True)
-            rows = [filtered_tiers[tier][i:i + num_cols] for i in range(0, len(filtered_tiers[tier]), num_cols)]
-            for row in rows:
-                cols = st.columns(num_cols)
-                for idx, hero in enumerate(row):
-                    with cols[idx]:
-                        img = hero_image_urls.get(hero)
-                        if img:
-                            st.image(img, use_container_width=True)
-                        t = details[hero]["type"]
-                        if t == "mutual":
-                            st.caption("🤝 Mutual")
-                        elif t == "b_helps_a":
-                            st.caption("⬆️ Supports")
-                        elif t == "a_helps_b":
-                            st.caption("⬇️ You help")
-                        else:
-                            st.caption("—")
