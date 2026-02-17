@@ -52,8 +52,13 @@ from copy import deepcopy
 
 from default_heroes import default_heroes
 from hero_image_urls import hero_image_urls
-from preset_options import preset_options
+from weighting_utils import initialize_weighting_stats, get_weighting_array, render_weighting_sliders
 
+
+# ----------------------------------------
+# Initialize Weighting Stats
+# ----------------------------------------
+initialize_weighting_stats()
 
 # ----------------------------------------
 # Page Header
@@ -68,6 +73,11 @@ st.markdown(
     """
 )
 
+# ----------------------------------------
+# Weighting Controls
+# ----------------------------------------
+with st.expander("Adjust Weighting Factors (click to expand)", expanded=False):
+    render_weighting_sliders(show_help=st.session_state.get("show_help", True))
 
 # ----------------------------------------
 # Load Data
@@ -79,7 +89,7 @@ hero_names = list(heroes.keys())
 # ----------------------------------------
 # Compute General Power
 # ----------------------------------------
-general_weights = np.array(preset_options["General Power: 2 Player"])
+general_weights = get_weighting_array()
 
 general_scores = {
     hero: float(np.dot(stats, general_weights))

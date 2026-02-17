@@ -116,6 +116,15 @@ st.markdown(
     "If you enjoy this tool, please consider subscribing to support more Marvel Champions content."
 )
 
+# Quick actions and global help toggle
+st.write("")
+col_top_left, col_top_right = st.columns([3,1])
+with col_top_left:
+    if st.button("Start / Update Tier List"):
+        st.session_state["view_results"] = True
+with col_top_right:
+    st.checkbox("Show help", value=st.session_state.get("show_help", True), key="show_help")
+
 # ----------------------------------------
 # Layout: Two columns side by side
 # ----------------------------------------
@@ -177,7 +186,7 @@ with col1:
             max_value=10,
             value=st.session_state.get("Economy", 4),
             key="Economy",
-            help=help_tips["Economy"]
+            help=help_tips["Economy"] if st.session_state.get("show_help", True) else None
         )
         Tempo = st.slider(
             "Tempo",
@@ -185,7 +194,7 @@ with col1:
             max_value=10,
             value=st.session_state.get("Tempo", 2),
             key="Tempo",
-            help=help_tips["Tempo"]
+            help=help_tips["Tempo"] if st.session_state.get("show_help", True) else None
         )
         Card_Value = st.slider(
             "Card Value",
@@ -193,7 +202,7 @@ with col1:
             max_value=10,
             value=st.session_state.get("Card Value", 2),
             key="Card Value",
-            help=help_tips["Card Value"]
+            help=help_tips["Card Value"] if st.session_state.get("show_help", True) else None
         )
         Survivability = st.slider(
             "Survivability",
@@ -201,7 +210,7 @@ with col1:
             max_value=10,
             value=st.session_state.get("Survivability", 2),
             key="Survivability",
-            help=help_tips["Survivability"]
+            help=help_tips["Survivability"] if st.session_state.get("show_help", True) else None
         )
         Villain_Damage = st.slider(
             "Villain Damage",
@@ -209,7 +218,7 @@ with col1:
             max_value=10,
             value=st.session_state.get("Villain Damage", 1),
             key="Villain Damage",
-            help=help_tips["Villain Damage"]
+            help=help_tips["Villain Damage"] if st.session_state.get("show_help", True) else None
         )
         Threat_Removal = st.slider(
             "Threat Removal",
@@ -217,7 +226,7 @@ with col1:
             max_value=10,
             value=st.session_state.get("Threat Removal", 2),
             key="Threat Removal",
-            help=help_tips["Threat Removal"]
+            help=help_tips["Threat Removal"] if st.session_state.get("show_help", True) else None
         )
         Reliability = st.slider(
             "Reliability",
@@ -225,7 +234,7 @@ with col1:
             max_value=10,
             value=st.session_state.get("Reliability", 3),
             key="Reliability",
-            help=help_tips["Reliability"]
+            help=help_tips["Reliability"] if st.session_state.get("show_help", True) else None
         )
         Minion_Control = st.slider(
             "Minion Control",
@@ -233,7 +242,7 @@ with col1:
             max_value=10,
             value=st.session_state.get("Minion Control", 1),
             key="Minion Control",
-            help=help_tips["Minion Control"]
+            help=help_tips["Minion Control"] if st.session_state.get("show_help", True) else None
         )
         Control_Boon = st.slider(
             "Control Boon",
@@ -241,7 +250,7 @@ with col1:
             max_value=10,
             value=st.session_state.get("Control Boon", 2),
             key="Control Boon",
-            help=help_tips["Control Boon"]
+            help=help_tips["Control Boon"] if st.session_state.get("show_help", True) else None
         )
         Support_Boon = st.slider(
             "Support Boon",
@@ -249,7 +258,7 @@ with col1:
             max_value=10,
             value=st.session_state.get("Support Boon", 2),
             key="Support Boon",
-            help=help_tips["Support Boon"]
+            help=help_tips["Support Boon"] if st.session_state.get("show_help", True) else None
         )
         Unique_Broken_Builds_Boon = st.slider(
             "Unique Broken Builds Boon",
@@ -257,7 +266,7 @@ with col1:
             max_value=10,
             value=st.session_state.get("Unique Broken Builds Boon", 1),
             key="Unique Broken Builds Boon",
-            help=help_tips["Unique Broken Builds Boon"]
+            help=help_tips["Unique Broken Builds Boon"] if st.session_state.get("show_help", True) else None
         )
         Late_Game_Power_Boon = st.slider(
             "Late Game Power Boon",
@@ -265,7 +274,7 @@ with col1:
             max_value=10,
             value=st.session_state.get("Late Game Power Boon", 1),
             key="Late Game Power Boon",
-            help=help_tips["Late Game Power Boon"]
+            help=help_tips["Late Game Power Boon"] if st.session_state.get("show_help", True) else None
         )
         Simplicity = st.slider(
             "Simplicity",
@@ -273,7 +282,7 @@ with col1:
             max_value=10,
             value=st.session_state.get("Simplicity", 0),
             key="Simplicity",
-            help=help_tips["Simplicity"]
+            help=help_tips["Simplicity"] if st.session_state.get("show_help", True) else None
         )
         Stun_Confuse_Boon = st.slider(
             "Stun/Confuse Boon",
@@ -281,7 +290,7 @@ with col1:
             max_value=10,
             value=st.session_state.get("Stun/Confuse Boon", 0),
             key="Stun/Confuse Boon",
-            help=help_tips["Stun/Confuse Boon"]
+            help=help_tips["Stun/Confuse Boon"] if st.session_state.get("show_help", True) else None
         )
         Multiplayer_Consistency_Boon = st.slider(
             "Multiplayer Consistency Boon",
@@ -289,7 +298,7 @@ with col1:
             max_value=10,
             value=st.session_state.get("Multiplayer Consistency Boon", 0),
             key="Multiplayer Consistency Boon",
-            help=help_tips["Multiplayer Consistency Boon"]
+            help=help_tips["Multiplayer Consistency Boon"] if st.session_state.get("show_help", True) else None
         )
         
         # Create the weighting array from slider values
@@ -317,6 +326,32 @@ with col1:
         else:
             plot_title = "Custom Weighting"
         
+        # Preset controls: reset and save
+        defaults = {
+            "Economy": 4,
+            "Tempo": 2,
+            "Card Value": 2,
+            "Survivability": 2,
+            "Villain Damage": 1,
+            "Threat Removal": 2,
+            "Reliability": 3,
+            "Minion Control": 1,
+            "Control Boon": 2,
+            "Support Boon": 2,
+            "Unique Broken Builds Boon": 1,
+            "Late Game Power Boon": 1,
+            "Simplicity": 0,
+            "Stun/Confuse Boon": 0,
+            "Multiplayer Consistency Boon": 0
+        }
+        col_reset, col_name = st.columns([1,2])
+        with col_reset:
+            if st.button("Reset Weighting to Defaults"):
+                for k, v in defaults.items():
+                    st.session_state[k] = v
+                st.success("Weighting reset to defaults")
+        with col_name:
+            preset_name = st.text_input("Preset Name (for save)", value="")
         # Download button to save weighting settings
         weighting_settings = {
             "preset_choice": st.session_state.preset_choice,
@@ -339,6 +374,8 @@ with col1:
         }
         weighting_json = json.dumps(weighting_settings)
         st.download_button("Download Weighting Settings", weighting_json, "weighting_settings.json")
+        filename = f"{preset_name or 'preset'}_weighting.json"
+        st.download_button("Save Preset", weighting_json, filename)
 
 # ----------------------------------------
 # Column 2: Hero Stats with separate upload expander
@@ -389,7 +426,7 @@ with col2:
                 max_value=10,
                 key=f"{hero_to_modify}_{stat}",
                 on_change=update_current_hero_stats,
-                help=help_tips.get(stat, "")
+                help=help_tips.get(stat, "") if st.session_state.get("show_help", True) else None
             )
         
         # Button to update all heroes to match the selected hero's stats

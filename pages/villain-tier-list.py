@@ -1,4 +1,3 @@
-
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
@@ -10,6 +9,12 @@ from villain_image_urls import villain_image_urls
 from default_heroes import default_heroes
 from hero_image_urls import hero_image_urls
 from villain_strategies import villain_strategies
+from weighting_utils import initialize_weighting_stats, get_weighting_array, render_weighting_sliders
+
+# ----------------------------------------
+# Initialize Weighting Stats
+# ----------------------------------------
+initialize_weighting_stats()
 
 st.markdown("**Watch the video tutorial here:** [Video Tutorial](https://youtu.be/9eEMPnSwVLw)")
 st.markdown("**Join the Discord to ask questions or give feedback:** [Discord Invite](https://discord.gg/ReF5jDSHqV)")
@@ -41,15 +46,6 @@ factor_names = [
     "Stun/Confuse Boon",
     "Multiplayer Consistency Boon",
 ]
-
-# ----------------------------------------
-# Initialize villain session_state keys safely
-# ----------------------------------------
-rhino_preset = villain_weights.get("Rhino", [0] * len(factor_names))
-for idx, name in enumerate(factor_names):
-    key = f"villain_{name}"
-    if key not in st.session_state:
-        st.session_state[key] = int(rhino_preset[idx])
 
 # ----------------------------------------
 # Villain selector
@@ -90,20 +86,32 @@ with col_img:
         st.write("No image available for this villain.")
 
 with col_content:
-    with st.expander("Edit Weighting Factors"):
-        st.markdown(
-            "Use these sliders to adjust how much you value each factor. "
-            "Defaults come from this villain’s preset."
-        )
-
-        for name in factor_names:
-            st.slider(
-                label=name,
-                min_value=-10,
-                max_value=10,
-                value=st.session_state[f"villain_{name}"],
-                key=f"villain_{name}",
+    st.markdown("### Use Shared Weighting")
+    use_shared_weighting = st.checkbox(
+        "Use my personal weighting from the home page (changes will persist across all pages)",
+        value=False,
+        key="use_shared_for_villain"
+    )
+    
+    if use_shared_weighting:
+        st.info("Using your personal weighting factors. Change them here to update across all pages:")
+        render_weighting_sliders(show_help=st.session_state.get("show_help", True))
+    else:
+        st.markdown("### Use Villain-Specific Weighting")
+        with st.expander("Edit Weighting Factors"):
+            st.markdown(
+                "Use these sliders to adjust how much you value each factor. "
+                "Defaults come from this villain's preset."
             )
+
+            for name in factor_names:
+                st.slider(
+                    label=name,
+                    min_value=-10,
+                    max_value=10,
+                    value=st.session_state.get(f"villain_{name}", 0),
+                    key=f"villain_{name}",
+                )
 
     st.markdown("### Strategy Tips")
     st.markdown(villain_strategies.get(villain, "No strategy tips written yet."))
@@ -111,7 +119,10 @@ with col_content:
 # ----------------------------------------
 # Gather villain weights
 # ----------------------------------------
-weights = np.array([st.session_state[f"villain_{name}"] for name in factor_names])
+if st.session_state.get("use_shared_for_villain", False):
+    weights = get_weighting_array()
+else:
+    weights = np.array([st.session_state.get(f"villain_{name}", 0) for name in factor_names])
 
 # ----------------------------------------
 # Score heroes
