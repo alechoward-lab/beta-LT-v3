@@ -68,4 +68,6 @@ hero_image_urls = {
     "Winter Soldier": "images/heroes/61_Winter_Soldier.jpg",
     "Tigra": "images/heroes/62_Tigra.jpg",
     "Hulkling": "images/heroes/63_Hulkling.jpg",
+    "Hercules": "images/heroes/64_Hercules.jpg",
+    "Wonder Man": "images/heroes/65_Wonder_Man.jpg",
 }
