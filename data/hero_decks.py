@@ -9,12 +9,14 @@ api_type: "deck" for /api/public/deck/{id}, "decklist" for /api/public/decklist/
 hero_decks = {
     "Captain Marvel": [
         {"name": "Beast Recursion", "url": "https://marvelcdb.com/deck/view/1084856", "deck_id": "1084856", "api_type": "deck"},
+        {"name": "Beginner Deck Core Box Only", "url": "https://marvelcdb.com/deck/view/1161364", "deck_id": "1161364", "api_type": "deck"},
     ],
     "Iron Man": [
         {"name": "Repurpose", "url": "https://marvelcdb.com/deck/view/1084866", "deck_id": "1084866", "api_type": "deck"},
     ],
     "Spider-Man (Peter)": [
         {"name": "I'm A Web-Warrior Now", "url": "https://marvelcdb.com/deck/view/1093366", "deck_id": "1093366", "api_type": "deck"},
+        {"name": "Beginner Deck Core Box Only", "url": "https://marvelcdb.com/deck/view/1161362", "deck_id": "1161362", "api_type": "deck"},
     ],
     "Black Panther (T'challa)": [
         {"name": "Draw Power Forever", "url": "https://marvelcdb.com/deck/view/1085865", "deck_id": "1085865", "api_type": "deck"},
@@ -24,6 +26,7 @@ hero_decks = {
     ],
     "Captain America": [
         {"name": "Avengers Assemble", "url": "https://marvelcdb.com/deck/view/1086532", "deck_id": "1086532", "api_type": "deck"},
+        {"name": "Basic ATK FTW", "url": "https://marvelcdb.com/deck/view/1161366", "deck_id": "1161366", "api_type": "deck"},
     ],
     "Ms. Marvel": [
         {"name": "Multithwart", "url": "https://marvelcdb.com/deck/view/1090684", "deck_id": "1090684", "api_type": "deck"},
@@ -36,7 +39,7 @@ hero_decks = {
     ],
     "Doctor Strange": [
         {"name": "Mystical Avenging Readies", "url": "https://marvelcdb.com/deck/view/1086539", "deck_id": "1086539", "api_type": "deck"},
-        {"name": "Deck 2", "url": "https://marvelcdb.com/deck/view/1122835", "deck_id": "1122835", "api_type": "deck"},
+        {"name": "Did Someone Order A Doctor?", "url": "https://marvelcdb.com/deck/view/1122835", "deck_id": "1122835", "api_type": "deck"},
     ],
     "Hulk": [
         {"name": "Consistent Damage", "url": "https://marvelcdb.com/deck/view/1091215", "deck_id": "1091215", "api_type": "deck"},
@@ -203,7 +206,7 @@ hero_decks = {
     "Hulkling": [
         {"name": "Strength In Diversity & Numbers", "url": "https://marvelcdb.com/deck/view/1097339", "deck_id": "1097339", "api_type": "deck"},
     ],
-    "Wonderman": [
+    "Wonder Man": [
         {"name": "CE: MCU", "url": "https://marvelcdb.com/decklist/view/60364/avoid-damage-and-tuck-1.0", "deck_id": "60364", "api_type": "decklist"},
     ],
     "Hercules": [

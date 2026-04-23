@@ -10,91 +10,22 @@ from matplotlib.patches import Patch
 import copy
 import io
 import json
-import urllib.parse
-import streamlit.components.v1 as components
 from html import escape as html_escape
 from data.hero_image_urls import hero_image_urls
 from data.default_heroes import default_heroes
 from data.preset_options import preset_options
 from data.help_tips import help_tips
-from data.constants import STAT_NAMES, TIER_COLORS, DEFAULT_WEIGHTS
-from components.collection_filter import render_collection_filter
+from data.constants import STAT_NAMES, TIER_COLORS, DEFAULT_WEIGHTS, HERO_ALTER_EGOS
+from components.github_storage import load_json
+from components.weighting_utils import update_preset
 from data.hero_release_order import HERO_WAVE, WAVE_ORDER, HERO_LEGACY, LEGACY_WAVE_ORDER
 from components.nav_banner import render_nav_banner, render_page_header, render_footer
+from components.hero_card_viewer import render_hero_card_viewer
 
-# ----------------------------------------
-# Hero alter-ego mapping for hover cards
-# ----------------------------------------
-hero_alter_egos = {
-    "Black Panther (T'challa)": "T'Challa",
-    "Captain Marvel": "Carol Danvers",
-    "Iron Man": "Tony Stark",
-    "She-Hulk": "Jennifer Walters",
-    "Spider-Man (Peter)": "Peter Parker",
-    "Captain America": "Steve Rogers",
-    "Ms. Marvel": "Kamala Khan",
-    "Thor": "Odinson",
-    "Black Widow": "Natasha Romanoff",
-    "Doctor Strange": "Stephen Strange",
-    "Hulk": "Bruce Banner",
-    "Hawkeye": "Clint Barton",
-    "Spider-Woman": "Jessica Drew",
-    "Ant-Man": "Scott Lang",
-    "Wasp": "Nadia Van Dyne",
-    "Quicksilver": "Pietro Maximoff",
-    "Scarlet Witch": "Wanda Maximoff",
-    "Groot": "Groot",
-    "Rocket": "Rocket Raccoon",
-    "Star-Lord": "Peter Quill",
-    "Gamora": "Gamora",
-    "Drax": "Drax the Destroyer",
-    "Venom (Flash)": "Flash Thompson",
-    "Adam Warlock": "Adam Warlock",
-    "Spectrum": "Monica Rambeau",
-    "Nebula": "Nebula",
-    "War Machine": "James Rhodes",
-    "Valkyrie": "Brunnhilde",
-    "Vision": "Vision",
-    "Ghost Spider": "Gwen Stacy",
-    "Spider-Man (Miles)": "Miles Morales",
-    "Nova": "Sam Alexander",
-    "Ironheart": "Riri Williams",
-    "Spider-Ham": "Peter Porker",
-    "SP//dr": "Peni Parker",
-    "Colossus": "Piotr Rasputin",
-    "Shadowcat": "Kitty Pryde",
-    "Cyclops": "Scott Summers",
-    "Phoenix": "Jean Grey",
-    "Wolverine": "Logan",
-    "Storm": "Ororo Munroe",
-    "Gambit": "Remy LeBeau",
-    "Rogue": "Anna Marie",
-    "Cable": "Nathan Summers",
-    "Domino": "Neena Thurman",
-    "Psylocke": "Betsy Braddock",
-    "Angel": "Warren Worthington III",
-    "X-23": "Laura Kinney",
-    "Deadpool": "Wade Wilson",
-    "Bishop": "Lucas Bishop",
-    "Magik": "Illyana Rasputina",
-    "Iceman": "Bobby Drake",
-    "Jubilee": "Jubilation Lee",
-    "Nightcrawler": "Kurt Wagner",
-    "Magneto": "Erik Lehnsherr",
-    "Maria Hill": "Maria Hill",
-    "Nick Fury": "Nick Fury",
-    "Silk": "Cindy Moon",
-    "Black Panther (Shuri)": "Shuri",
-    "Falcon": "Sam Wilson",
-    "Winter Soldier": "Bucky Barnes",
-    "Tigra": "Greer Grant",
-    "Hulkling": "Teddy Altman",
-    "Hercules": "Hercules",
-    "Wonder Man": "Simon Williams",
-}
+# Use shared hero_alter_egos from constants
+hero_alter_egos = HERO_ALTER_EGOS
 
 render_nav_banner("hero-tier-list")
-render_collection_filter()
 
 # ----------------------------------------
 # Load weighting from shared URL query params (if present)
@@ -113,16 +44,6 @@ if "w" in query_params and not st.session_state.get("_shared_loaded"):
             st.toast("🔗 Loaded tier list from shared link!")
     except (ValueError, AttributeError):
         pass
-
-# ----------------------------------------
-# Define update_preset callback so that selecting a weighting preset updates slider values.
-# ----------------------------------------
-def update_preset():
-    preset = st.session_state.preset_choice
-    if preset != "Custom":
-        preset_vals = preset_options[preset]
-        for i, key in enumerate(STAT_NAMES):
-            st.session_state[key] = int(preset_vals[i])
 
 # ----------------------------------------
 # Main App Content Header
@@ -171,7 +92,7 @@ with bar_col3:
     )
 with bar_col4:
     st.write("")  # spacing
-    if st.button("📺 Tutorial & Info"):
+    if st.button("Tutorial"):
         st.session_state["_show_tutorial"] = not st.session_state.get("_show_tutorial", False)
         st.rerun()
 
@@ -344,11 +265,6 @@ Changes here carry over to all pages in your session.
 # ----------------------------------------
 heroes = st.session_state.heroes
 
-# Apply collection filter
-owned = st.session_state.get("owned_heroes")
-if owned is not None:
-    heroes = {h: s for h, s in heroes.items() if h in owned}
-
 # Compute raw dot products once for the current weight vector.
 raw_scores = {hero: float(np.dot(stats, weighting)) for hero, stats in heroes.items()}
 
@@ -389,9 +305,10 @@ std_score = max(np.std(hero_scores), 1e-6)
 threshold_S = mean_score + 1.5 * std_score
 threshold_A = mean_score + 0.5 * std_score
 threshold_B_lower = mean_score - 0.5 * std_score
-threshold_C = mean_score - 1.5 * std_score
+threshold_C = mean_score - 1.0 * std_score
+threshold_D = mean_score - 1.5 * std_score
 
-tiers = {"S": [], "A": [], "B": [], "C": [], "D": []}
+tiers = {"S": [], "A": [], "B": [], "C": [], "D": [], "F": []}
 for hero, score in scores.items():
     if score >= threshold_S:
         tiers["S"].append((hero, score))
@@ -401,8 +318,10 @@ for hero, score in scores.items():
         tiers["B"].append((hero, score))
     elif score >= threshold_C:
         tiers["C"].append((hero, score))
-    else:
+    elif score >= threshold_D:
         tiers["D"].append((hero, score))
+    else:
+        tiers["F"].append((hero, score))
 
 for tier in tiers:
     tiers[tier] = sorted(tiers[tier], key=lambda x: (-x[1], x[0]))
@@ -411,22 +330,6 @@ hero_to_tier = {}
 for tier, heroes_list in tiers.items():
     for hero, _ in heroes_list:
         hero_to_tier[hero] = tier
-
-# ----------------------------------------
-# Add background image with custom CSS
-# ----------------------------------------
-background_image_url = "https://github.com/alechoward-lab/Marvel-Champions-Hero-Tier-List/blob/main/images/background/marvel_champions_background_image_v4.jpg?raw=true"
-st.markdown(
-    f"""
-    <style>
-    .stApp {{
-        background: url({background_image_url}) no-repeat center center fixed;
-        background-size: cover;
-    }}
-    </style>
-    """,
-    unsafe_allow_html=True
-)
 
 # ----------------------------------------
 # Display Tier List with Images
@@ -473,21 +376,27 @@ if st.session_state.hd_view:
 }
 .tier-heroes img {
     display: block;
-    height: 100%;
+    height: 120px;
     width: auto;
-    max-height: 120px;
     object-fit: cover;
+    object-position: top;
     cursor: pointer;
 }
 .tier-heroes .hero-card {
     position: relative;
-    height: 120px;
+    height: 74px;
+    overflow: hidden;
+    transition: transform 0.15s ease;
+}
+.hero-card:hover {
+    transform: scale(1.08) rotate(var(--hover-rotate, -1deg));
+    z-index: 10;
 }
 .hero-name-overlay {
     position: absolute;
     bottom: 0; left: 0; right: 0;
     background: linear-gradient(transparent, rgba(0,0,0,0.88));
-    color: #fff;
+    color: #fff !important;
     text-align: center;
     padding: 18px 4px 6px;
     font-size: 10px;
@@ -520,10 +429,12 @@ if st.session_state.hd_view:
     _data_uri_map = _build_data_uri_map()
 
     tier_html_parts = ['<div class="home-tier-section">']
-    for tier in ["S", "A", "B", "C", "D"]:
+    for tier in ["S", "A", "B", "C", "D", "F"]:
         members = tiers[tier]
         tier_html_parts.append('<div class="tier-row">')
-        tier_html_parts.append(f'<div class="tier-label-block" style="--tier-color:{tier_colors[tier]};">{tier}</div>')
+        light = st.session_state.get("_light_mode", False)
+        label_extra = "color:#fff !important;text-shadow:2px 2px 0 #000,-1px -1px 0 rgba(0,0,0,0.3);" if light else ""
+        tier_html_parts.append(f'<div class="tier-label-block" style="--tier-color:{tier_colors[tier]};{label_extra}">{tier}</div>')
         tier_html_parts.append('<div class="tier-heroes">')
         for hero, score in members:
             alter = hero_alter_egos.get(hero, "")
@@ -544,7 +455,7 @@ if st.session_state.hd_view:
 else:
     # ── Streamlit native view (dynamic, reactive) ──
     num_cols = 8
-    for tier in ["S", "A", "B", "C", "D"]:
+    for tier in ["S", "A", "B", "C", "D", "F"]:
         members = tiers[tier]
         if not members:
             st.markdown(f"**<span style='color:{tier_colors[tier]};font-size:24px;'>{tier}</span>**", unsafe_allow_html=True)
@@ -565,6 +476,11 @@ else:
                     if hero in hero_image_urls:
                         st.image(hero_image_urls[hero], width="stretch")
 
+# ── Hero Card Viewer ──
+all_hero_names = [hero for tier in ["S", "A", "B", "C", "D", "F"] for hero, _ in tiers[tier]]
+if all_hero_names:
+    render_hero_card_viewer(all_hero_names, alter_egos=hero_alter_egos, key_prefix="tier_hcv")
+
 # ── Download tier list as PNG ──
 def build_tier_list_image(tiers, tier_colors, plot_title):
     """Render the tier list as a vertical image with hero card thumbnails."""
@@ -572,7 +488,7 @@ def build_tier_list_image(tiers, tier_colors, plot_title):
     import urllib.request
     import os
 
-    tier_order = ["S", "A", "B", "C", "D"]
+    tier_order = ["S", "A", "B", "C", "D", "F"]
     cards_per_row = 6
     card_w, card_h = 120, 168  # approximate card proportions
     tier_label_w = 60
@@ -589,33 +505,31 @@ def build_tier_list_image(tiers, tier_colors, plot_title):
         for chunk_start in range(0, len(hero_names), cards_per_row):
             chunk = hero_names[chunk_start:chunk_start + cards_per_row]
             label = t if chunk_start == 0 else ""
-            all_rows.append((label, t, chunk))  # Always track tier letter for color
+            all_rows.append((label, t, chunk))
 
     if not all_rows:
         return None
 
     img_w = tier_label_w + cards_per_row * (card_w + padding) + padding
-    title_h = 50
-    img_h = title_h + len(all_rows) * row_h + padding
+    img_h = len(all_rows) * row_h + padding
 
     canvas = Image.new("RGB", (img_w, img_h), color=(26, 26, 46))
 
-    # Draw title
     from PIL import ImageDraw, ImageFont
     draw = ImageDraw.Draw(canvas)
     try:
-        font_title = ImageFont.truetype("arial.ttf", 22)
-        font_tier = ImageFont.truetype("arial.ttf", 28)
+        font_tier = ImageFont.truetype("arialbd.ttf", 32)
     except OSError:
-        font_title = ImageFont.load_default()
-        font_tier = font_title
-    draw.text((img_w // 2, 10), plot_title, fill="white", font=font_title, anchor="mt")
+        try:
+            font_tier = ImageFont.truetype("arial.ttf", 32)
+        except OSError:
+            font_tier = ImageFont.load_default()
 
     # Map tier colors to RGB tuples
     _COLOR_NAME_TO_RGB = {
         "red": (255, 0, 0), "orange": (255, 165, 0), "green": (0, 128, 0),
         "blue": (0, 0, 255), "purple": (128, 0, 128), "yellow": (255, 255, 0),
-        "pink": (255, 192, 203), "white": (255, 255, 255),
+        "pink": (255, 192, 203), "white": (255, 255, 255), "gray": (128, 128, 128),
     }
 
     def color_to_rgb(c):
@@ -642,17 +556,18 @@ def build_tier_list_image(tiers, tier_colors, plot_title):
                 except Exception:
                     pass
 
-    y = title_h
+    y = 0
     for tier_label, tier_letter, heroes_in_row in all_rows:
-        # Tier label background - always use tier color for full column
         color = tier_rgb.get(tier_letter, (100, 100, 100))
         draw.rectangle([0, y, tier_label_w - 1, y + row_h - 1], fill=color)
         if tier_label:
-            # Draw the tier letter only on first row of tier
-            draw.text(
-                (tier_label_w // 2, y + row_h // 2),
-                tier_label, fill="white", font=font_tier, anchor="mm",
-            )
+            cx, cy = tier_label_w // 2, y + row_h // 2
+            # Comic-style text shadow / outline
+            for dx, dy in [(-2, -2), (-2, 2), (2, -2), (2, 2), (-1, 0), (1, 0), (0, -1), (0, 1)]:
+                draw.text((cx + dx, cy + dy), tier_label,
+                           fill=(0, 0, 0), font=font_tier, anchor="mm")
+            draw.text((cx, cy), tier_label,
+                       fill="white", font=font_tier, anchor="mm")
 
         # Paste hero cards
         x = tier_label_w + padding
@@ -679,8 +594,9 @@ with share_col:
     share_url = f"?w={weight_vals}"
     st.markdown(
         f'<a href="{share_url}" target="_blank" style="display:inline-block;padding:8px 16px;'
-        f'background:linear-gradient(135deg,#3498db,#2471a3);color:white;border-radius:6px;'
-        f'text-decoration:none;font-weight:bold;font-size:14px;margin-top:4px;">'
+        f'background:#222;color:#fff !important;border:2px solid #222;border-bottom:3px solid #ed1c24;'
+        f'text-decoration:none;font-weight:bold;font-size:14px;margin-top:4px;'
+        f'box-shadow:2px 2px 0 rgba(0,0,0,0.3);font-family:Bangers,cursive;letter-spacing:1px;">'
         f'🔗 Share This Tier List</a>',
         unsafe_allow_html=True
     )
@@ -689,57 +605,53 @@ with share_col:
 # Hot Takes — compare user tier list vs community average
 # ----------------------------------------
 try:
-    import os
-    _ratings_path = os.path.join(os.path.dirname(__file__), "..", "community_tier_lists.json")
-    if os.path.exists(_ratings_path):
-        with open(_ratings_path, "r") as _f:
-            _community_data = json.load(_f)
-        _submissions = _community_data.get("submissions", [])
-        if len(_submissions) >= 2:
-            _TIER_PTS = {"S": 5, "A": 4, "B": 3, "C": 2, "D": 1}
-            _hero_scores_community = {}
-            for sub in _submissions:
-                for tier_name, hero_list in sub.items():
-                    for h in hero_list:
-                        _hero_scores_community.setdefault(h, []).append(_TIER_PTS.get(tier_name, 3))
-            _community_avg = {h: np.mean(scores_list) for h, scores_list in _hero_scores_community.items()}
+    _community_data, _ = load_json("community_tier_lists.json", default={})
+    _submissions = _community_data.get("hero_power", {}).get("submissions", [])
+    if len(_submissions) >= 2:
+        _TIER_PTS = {"S": 6, "A": 5, "B": 4, "C": 3, "D": 2, "F": 1}
+        _hero_scores_community = {}
+        for sub in _submissions:
+            for tier_name, hero_list in sub.items():
+                for h in hero_list:
+                    _hero_scores_community.setdefault(h, []).append(_TIER_PTS.get(tier_name, 3))
+        _community_avg = {h: np.mean(scores_list) for h, scores_list in _hero_scores_community.items()}
 
-            _hot_takes = []
-            for hero, user_tier in hero_to_tier.items():
-                if hero in _community_avg:
-                    user_pts = _TIER_PTS[user_tier]
-                    comm_pts = _community_avg[hero]
-                    diff = user_pts - comm_pts
-                    if abs(diff) >= 1.0:
-                        comm_tier = min(_TIER_PTS.keys(), key=lambda t: abs(_TIER_PTS[t] - comm_pts))
-                        _hot_takes.append((hero, user_tier, comm_tier, diff))
+        _hot_takes = []
+        for hero, user_tier in hero_to_tier.items():
+            if hero in _community_avg:
+                user_pts = _TIER_PTS[user_tier]
+                comm_pts = _community_avg[hero]
+                diff = user_pts - comm_pts
+                if abs(diff) >= 1.0:
+                    comm_tier = min(_TIER_PTS.keys(), key=lambda t: abs(_TIER_PTS[t] - comm_pts))
+                    _hot_takes.append((hero, user_tier, comm_tier, diff))
 
-            if _hot_takes:
-                _hot_takes.sort(key=lambda x: abs(x[3]), reverse=True)
-                _top_takes = _hot_takes[:5]
-                takes_html = ""
-                for hero, u_tier, c_tier, diff in _top_takes:
-                    direction = "↑" if diff > 0 else "↓"
-                    takes_html += (
-                        f'<span style="display:inline-block;background:rgba(255,255,255,0.08);'
-                        f'padding:4px 10px;border-radius:6px;margin:3px 4px;font-size:13px;">'
-                        f'<b>{hero}</b> — You: <b>{u_tier}</b> {direction} Community: <b>{c_tier}</b></span>'
-                    )
-                st.markdown(
-                    f'<div style="background:linear-gradient(135deg,rgba(142,68,173,0.2),rgba(231,76,60,0.15));'
-                    f'border:1px solid rgba(142,68,173,0.3);border-radius:10px;padding:12px 16px;margin:12px 0;">'
-                    f'<span style="font-size:15px;font-weight:bold;">🔥 Your Hot Takes</span><br>'
-                    f'<span style="font-size:12px;color:#a0a8b8;">Heroes where your ranking differs most from the community</span><br>'
-                    f'<div style="margin-top:6px;">{takes_html}</div></div>',
-                    unsafe_allow_html=True,
+        if _hot_takes:
+            _hot_takes.sort(key=lambda x: abs(x[3]), reverse=True)
+            _top_takes = _hot_takes[:5]
+            takes_html = ""
+            for hero, u_tier, c_tier, diff in _top_takes:
+                direction = "↑" if diff > 0 else "↓"
+                takes_html += (
+                    f'<span style="display:inline-block;background:rgba(255,255,255,0.08);'
+                    f'padding:4px 10px;border-radius:6px;margin:3px 4px;font-size:13px;">'
+                    f'<b>{hero}</b> — You: <b>{u_tier}</b> {direction} Community: <b>{c_tier}</b></span>'
                 )
+            st.markdown(
+                f'<div style="background:linear-gradient(135deg,rgba(142,68,173,0.2),rgba(231,76,60,0.15));'
+                f'border:1px solid rgba(142,68,173,0.3);border-radius:10px;padding:12px 16px;margin:12px 0;">'
+                f'<span style="font-size:15px;font-weight:bold;">🔥 Your Hot Takes</span><br>'
+                f'<span style="font-size:12px;color:#a0a8b8;">Heroes where your ranking differs most from the community</span><br>'
+                f'<div style="margin-top:6px;">{takes_html}</div></div>',
+                unsafe_allow_html=True,
+            )
 except Exception:
     pass  # Gracefully skip if community data is unavailable
 
 # ----------------------------------------
 # Plotting
 # ----------------------------------------
-st.header("Hero Scores")
+st.markdown('<div class="comic-banner">Hero Scores</div>', unsafe_allow_html=True)
 sorted_hero_names = list(sorted_scores.keys())
 sorted_hero_scores = list(sorted_scores.values())
 bar_colors = [tier_colors[hero_to_tier[hero]] for hero in sorted_hero_names]
@@ -755,13 +667,27 @@ for label in ax.get_xticklabels():
     if hero in hero_to_tier:
         label.set_color(tier_colors[hero_to_tier[hero]])
 
+_light = st.session_state.get("_light_mode", False)
+_txt = "#23272a" if _light else "white"
+_bg = "#ffffff" if _light else "none"
+fig.patch.set_facecolor(_bg)
+ax.set_facecolor("#f8f8f8" if _light else "#0e1117")
+ax.set_ylabel("Scores", fontsize="x-large", color=_txt)
+ax.set_title(plot_title, fontweight='bold', fontsize=18, color=_txt)
+ax.tick_params(colors=_txt)
+for spine in ax.spines.values():
+    spine.set_color(_txt)
+
 legend_handles = [Patch(color=tier_colors[tier], label=f"Tier {tier}") for tier in tier_colors]
-ax.legend(handles=legend_handles, title="Tier Colors", loc="upper left", fontsize='x-large', title_fontsize='x-large')
+ax.legend(handles=legend_handles, title="Tier Colors", loc="upper left", fontsize='x-large',
+          facecolor=_bg, edgecolor=_txt, labelcolor=_txt, title_fontproperties={'size': 'x-large', 'weight': 'bold'})
 plt.tight_layout()
 ax.grid(axis='y', linestyle='--', alpha=0.7)
 st.pyplot(fig)
+plt.close(fig)
 st.markdown("<hr>", unsafe_allow_html=True)
 
+st.markdown('<div class="comic-banner">About This Tier List</div>', unsafe_allow_html=True)
 st.markdown(
     "**What is the Out of the Box tier list?** This tier list is card-pool agnostic — it ranks heroes "
     "independent of what deck you build around them or what cards you own. "

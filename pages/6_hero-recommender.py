@@ -4,11 +4,11 @@ Hero Recommender — Tell us what matters to you and we'll find the best hero fo
 
 import streamlit as st
 import numpy as np
-from data.default_heroes import default_heroes
 from data.hero_image_urls import hero_image_urls
 from data.hero_decks import hero_decks
 from data.help_tips import help_tips
 from data.constants import STAT_NAMES
+from components.hero_stats_manager import get_heroes
 from components.nav_banner import render_nav_banner, render_page_header, render_footer
 
 render_nav_banner("hero-recommender")
@@ -102,8 +102,8 @@ else:  # Strong / Top-tier
 
 # ─── Score heroes ───
 if st.button("🔍 Find My Heroes!", type="primary", width="stretch"):
-    owned = st.session_state.get("owned_heroes")
-    heroes_pool = {h: s for h, s in default_heroes.items() if owned is None or h in owned}
+    all_heroes = get_heroes()
+    heroes_pool = dict(all_heroes)
 
     # Compute raw stat sum for each hero to blend with strength preference
     raw_sums = {h: float(np.sum(s)) for h, s in heroes_pool.items()}
@@ -134,7 +134,7 @@ if st.session_state.get("rec_results"):
         with col_info:
             st.markdown(f"**#{rank} — {hero}** &nbsp; (Score: {int(score)})")
 
-            stats = default_heroes[hero]
+            stats = all_heroes.get(hero, get_heroes()[hero])
             top_stats = sorted(
                 [(FACTORS[i], int(stats[i])) for i in range(len(FACTORS)) if stats[i] > 0],
                 key=lambda x: x[1], reverse=True,

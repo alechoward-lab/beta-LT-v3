@@ -10,12 +10,11 @@ import random
 from html import escape as html_escape
 from data.hero_decks import hero_decks
 from data.hero_image_urls import hero_image_urls
-from components.collection_filter import render_collection_filter
 from components.nav_banner import render_nav_banner, render_page_header, render_footer
-from data.hero_release_order import HERO_WAVE, WAVE_ORDER
+from components.hero_card_viewer import get_obligation_nemesis
+from data.hero_release_order import HERO_RELEASE_INDEX, HERO_WAVE, WAVE_ORDER
 
 render_nav_banner("good-decks")
-render_collection_filter()
 
 # ─── Custom CSS ───
 st.markdown("""
@@ -187,15 +186,25 @@ st.markdown("""
         border-top: 1px solid rgba(255,255,255,0.1);
         margin: 6px 0;
     }
-    /* Two-column flowing layout */
-    .deck-columns {
-        column-count: 2;
-        column-gap: 20px;
+    /* Two-column deck layout */
+    .deck-section-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+        align-items: start;
+        margin-bottom: 10px;
+    }
+    .deck-section-column {
+        min-width: 0;
     }
     .faction-section {
-        break-inside: avoid;
-        -webkit-column-break-inside: avoid;
         margin-bottom: 4px;
+    }
+    @media (max-width: 900px) {
+        .deck-section-grid {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
     }
 
     /* ── Hero browse grid: overlay Select button on hover ── */
@@ -433,6 +442,43 @@ def build_card_row(card, qty, show_aspect_dot=False):
     """
 
 
+def section_weight(cards_with_qty, include_header=False):
+    """Estimate a section's vertical weight for balanced two-column rendering."""
+    type_groups = {card.get("type_code", "unknown") for card, _ in cards_with_qty}
+    return len(cards_with_qty) + len(type_groups) + (1 if include_header else 0)
+
+
+def render_section_grid_html(section_blocks):
+    """Render weighted HTML blocks into a stable two-column grid."""
+    if not section_blocks:
+        return ""
+
+    columns = [[], []]
+    weights = [0, 0]
+
+    for html_block, weight in section_blocks:
+        column_idx = 0 if weights[0] <= weights[1] else 1
+        columns[column_idx].append(html_block)
+        weights[column_idx] += weight
+
+    return (
+        '<div class="deck-section-grid">'
+        f'<div class="deck-section-column">{"".join(columns[0])}</div>'
+        f'<div class="deck-section-column">{"".join(columns[1])}</div>'
+        '</div>'
+    )
+
+
+def build_section_block(cards_with_qty, section_class, header_html="", show_aspect_dot=False):
+    """Build one deck-list section for the two-column grid."""
+    return (
+        '<div class="faction-section">'
+        f'{header_html}'
+        f'{render_card_section_html(cards_with_qty, section_class, show_aspect_dot=show_aspect_dot)}'
+        '</div>'
+    )
+
+
 def render_card_section_html(cards_with_qty, section_class, show_aspect_dot=False):
     """Build HTML for a group of cards, grouped by type. Returns HTML string."""
     html_parts = []
@@ -465,13 +511,20 @@ def render_card_section_html(cards_with_qty, section_class, show_aspect_dot=Fals
 
 def render_sorted_cards_html(cards_with_qty, sort_mode, show_aspect_dot=False):
     """Build HTML for cards sorted/grouped by the chosen mode. Returns HTML string."""
-    html_parts = ['<div class="deck-columns">']
+    section_blocks = []
 
     if sort_mode == "name":
         sorted_cards = sorted(cards_with_qty, key=lambda x: x[0].get("name", "").lower())
-        html_parts.append('<div class="faction-section">')
-        html_parts.extend(build_card_row(c, q, show_aspect_dot=show_aspect_dot) for c, q in sorted_cards)
-        html_parts.append('</div>')
+        midpoint = (len(sorted_cards) + 1) // 2
+        for chunk in (sorted_cards[:midpoint], sorted_cards[midpoint:]):
+            if not chunk:
+                continue
+            section_blocks.append((
+                '<div class="faction-section">'
+                f'{"".join(build_card_row(c, q, show_aspect_dot=show_aspect_dot) for c, q in chunk)}'
+                '</div>',
+                len(chunk),
+            ))
 
     elif sort_mode == "cost":
         by_cost = {}
@@ -484,10 +537,11 @@ def render_sorted_cards_html(cards_with_qty, sort_mode, show_aspect_dot=False):
             group.sort(key=lambda x: x[0].get("name", "").lower())
             total = sum(q for _, q in group)
             label = f"Cost {cost_key}" if cost_key >= 0 else "No Cost"
-            html_parts.append('<div class="faction-section">')
-            html_parts.append(f'<div class="faction-header type-basic">{label} ({total})</div>')
-            html_parts.extend(build_card_row(c, q, show_aspect_dot=show_aspect_dot) for c, q in group)
-            html_parts.append('</div>')
+            header_html = f'<div class="faction-header type-basic">{label} ({total})</div>'
+            section_blocks.append((
+                build_section_block(group, "basic", header_html=header_html, show_aspect_dot=show_aspect_dot),
+                section_weight(group, include_header=True),
+            ))
 
     elif sort_mode == "aspect":
         by_faction = {}
@@ -500,10 +554,11 @@ def render_sorted_cards_html(cards_with_qty, sort_mode, show_aspect_dot=False):
             total = sum(q for _, q in group)
             css_f = ASPECT_COLORS.get(faction, "basic")
             label_f = ASPECT_DISPLAY.get(faction, faction.title())
-            html_parts.append('<div class="faction-section">')
-            html_parts.append(f'<div class="faction-header type-{css_f}">{label_f} ({total})</div>')
-            html_parts.extend(build_card_row(c, q, show_aspect_dot=show_aspect_dot) for c, q in group)
-            html_parts.append('</div>')
+            header_html = f'<div class="faction-header type-{css_f}">{label_f} ({total})</div>'
+            section_blocks.append((
+                build_section_block(group, css_f, header_html=header_html, show_aspect_dot=show_aspect_dot),
+                section_weight(group, include_header=True),
+            ))
 
     elif sort_mode == "set":
         by_set = {}
@@ -514,13 +569,13 @@ def render_sorted_cards_html(cards_with_qty, sort_mode, show_aspect_dot=False):
             group = by_set[pack]
             group.sort(key=lambda x: x[0].get("name", "").lower())
             total = sum(q for _, q in group)
-            html_parts.append('<div class="faction-section">')
-            html_parts.append(f'<div class="faction-header type-basic">{html_escape(pack)} ({total})</div>')
-            html_parts.extend(build_card_row(c, q, show_aspect_dot=show_aspect_dot) for c, q in group)
-            html_parts.append('</div>')
+            header_html = f'<div class="faction-header type-basic">{html_escape(pack)} ({total})</div>'
+            section_blocks.append((
+                build_section_block(group, "basic", header_html=header_html, show_aspect_dot=show_aspect_dot),
+                section_weight(group, include_header=True),
+            ))
 
-    html_parts.append('</div>')
-    return "".join(html_parts)
+    return render_section_grid_html(section_blocks)
 
 
 def render_deck(deck_data, card_db, show_header=True):
@@ -587,27 +642,29 @@ def render_deck(deck_data, card_db, show_header=True):
     # ── Card display ──
     if aspect_cards:
         if sort_mode == "default" and not combine_aspects:
-            # Flowing two-column card layout grouped by aspect then type
+            # Balanced two-column card layout grouped by aspect then type
             cards_by_faction = {}
             for card, qty in aspect_cards:
                 f = card.get("faction_code", "basic")
                 cards_by_faction.setdefault(f, []).append((card, qty))
 
             factions = sorted(cards_by_faction.keys())
-            html_parts = ['<div class="deck-columns">']
+            section_blocks = []
 
             for faction in factions:
                 cards_f = cards_by_faction[faction]
                 css_f = ASPECT_COLORS.get(faction, "basic")
                 label_f = ASPECT_DISPLAY.get(faction, faction.title())
-                html_parts.append('<div class="faction-section">')
-                if len(factions) > 1:
-                    html_parts.append(f'<div class="faction-header type-{css_f}">{label_f} ({sum(q for _, q in cards_f)})</div>')
-                html_parts.append(render_card_section_html(cards_f, css_f))
-                html_parts.append('</div>')
+                include_header = len(factions) > 1
+                header_html = ""
+                if include_header:
+                    header_html = f'<div class="faction-header type-{css_f}">{label_f} ({sum(q for _, q in cards_f)})</div>'
+                section_blocks.append((
+                    build_section_block(cards_f, css_f, header_html=header_html),
+                    section_weight(cards_f, include_header=include_header),
+                ))
 
-            html_parts.append('</div>')
-            st.markdown("".join(html_parts), unsafe_allow_html=True)
+            st.markdown(render_section_grid_html(section_blocks), unsafe_allow_html=True)
         elif sort_mode == "default" and combine_aspects:
             # Combined: all aspect/basic cards grouped by type only
             css_combined = ASPECT_COLORS.get(aspect, "basic")
@@ -625,6 +682,25 @@ def render_deck(deck_data, card_db, show_header=True):
         with st.expander(f"Hero Cards ({hero_count})"):
             st.markdown(render_card_section_html(hero_cards, "hero"), unsafe_allow_html=True)
 
+    # ── Obligation & Nemesis Set ──
+    hero_code = deck_data.get("hero_code", "")
+    if hero_code:
+        obligation_cards, nemesis_cards = get_obligation_nemesis(hero_code, card_db)
+        if obligation_cards or nemesis_cards:
+            total_enc = (sum(c.get("quantity", 1) for c in obligation_cards)
+                         + sum(c.get("quantity", 1) for c in nemesis_cards))
+            with st.expander(f"Obligation & Nemesis ({total_enc})"):
+                html_parts = []
+                if obligation_cards:
+                    html_parts.append('<div class="card-type-header type-hero">Obligation</div>')
+                    for c in obligation_cards:
+                        html_parts.append(build_card_row(c, c.get("quantity", 1)))
+                if nemesis_cards:
+                    html_parts.append('<div class="card-type-header type-hero">Nemesis Set</div>')
+                    for c in nemesis_cards:
+                        html_parts.append(build_card_row(c, c.get("quantity", 1)))
+                st.markdown("".join(html_parts), unsafe_allow_html=True)
+
     if unknown_codes:
         with st.expander(f"{len(unknown_codes)} card(s) not found in database"):
             st.code(", ".join(unknown_codes))
@@ -632,18 +708,27 @@ def render_deck(deck_data, card_db, show_header=True):
 
 # ─── Main Page ───
 
-render_page_header("A GOOD Deck For Every Hero", "Browse recommended MarvelCDB deck lists for every hero")
+render_page_header("A GOOD Deck For Every Hero", "Browse Daring Lime's Deck Lists For Every Hero")
 
 # ── Hero selector (compact top bar) ──
+_SORT_OPTIONS = ["Alphabetical (A→Z)", "Oldest → Newest", "Newest → Oldest"]
+if "_decks_sort_val" not in st.session_state:
+    st.session_state._decks_sort_val = "Alphabetical (A→Z)"
+
 hero_names = sorted(hero_decks.keys())
 
-# Apply collection filter
-owned = st.session_state.get("owned_heroes")
-if owned is not None:
-    hero_names = [h for h in hero_names if h in owned]
-
-# Wave filter
-wave_col, _ = st.columns([1, 2])
+# Sort + wave filter
+_sort_val = st.session_state.get("_decks_sort_val", "Alphabetical (A→Z)")
+_sort_idx = _SORT_OPTIONS.index(_sort_val) if _sort_val in _SORT_OPTIONS else 0
+sort_col, wave_col, _ = st.columns([1, 1, 2])
+with sort_col:
+    decks_sort_order = st.selectbox(
+        "Sort order",
+        _SORT_OPTIONS,
+        index=_sort_idx,
+        key="decks_sort_order",
+    )
+    st.session_state._decks_sort_val = decks_sort_order
 with wave_col:
     decks_wave_filter = st.multiselect(
         "Filter by waves",
@@ -654,12 +739,22 @@ with wave_col:
 if decks_wave_filter:
     hero_names = [h for h in hero_names if HERO_WAVE.get(h) in decks_wave_filter]
 
+if decks_sort_order == "Oldest → Newest":
+    hero_names.sort(key=lambda h: HERO_RELEASE_INDEX.get(h, 9999))
+elif decks_sort_order == "Newest → Oldest":
+    hero_names.sort(key=lambda h: HERO_RELEASE_INDEX.get(h, 0), reverse=True)
+
 if not hero_names:
     st.info("No heroes match the selected wave.")
     st.stop()
 
 if "deck_hero" not in st.session_state:
     st.session_state.deck_hero = hero_names[random.randint(0, len(hero_names) - 1)]
+elif st.session_state.deck_hero not in hero_names:
+    st.session_state.deck_hero = hero_names[0]
+
+if st.session_state.get("_deck_hero_search") != st.session_state.deck_hero:
+    st.session_state._deck_hero_search = st.session_state.deck_hero
 
 def _on_hero_search_change():
     st.session_state.deck_hero = st.session_state._deck_hero_search
@@ -670,7 +765,6 @@ with sel_col:
     st.selectbox(
         "Hero",
         hero_names,
-        index=hero_names.index(selected_hero) if selected_hero in hero_names else 0,
         key="_deck_hero_search",
         on_change=_on_hero_search_change,
     )
@@ -721,25 +815,32 @@ if selected_hero:
             except requests.RequestException as e:
                 st.error(f"Failed to load deck from MarvelCDB: {e}")
         else:
-            st.markdown(
-                f'<div class="deck-summary-note">{len(decks_for_hero)} deck lists available. Pick a tab below.</div>',
-                unsafe_allow_html=True
-            )
-            tab_labels = [entry.get("name", f"Deck {i+1}") for i, entry in enumerate(decks_for_hero)]
-            tabs = st.tabs(tab_labels)
-            bg_injected = False
-            for tab, entry in zip(tabs, decks_for_hero):
-                with tab:
-                    try:
-                        deck_data = fetch_deck(entry["deck_id"], entry["api_type"])
-                        if not deck_data.get("url"):
-                            deck_data["url"] = entry["url"]
-                        if not bg_injected:
-                            inject_hero_art_background(deck_data, card_db)
-                            bg_injected = True
+            loaded_decks = []
+            load_errors = []
+            for entry in decks_for_hero:
+                try:
+                    deck_data = fetch_deck(entry["deck_id"], entry["api_type"])
+                    if not deck_data.get("url"):
+                        deck_data["url"] = entry["url"]
+                    loaded_decks.append((entry, deck_data))
+                except requests.RequestException as e:
+                    load_errors.append((entry, e))
+
+            if loaded_decks:
+                inject_hero_art_background(loaded_decks[0][1], card_db)
+                st.markdown(
+                    f'<div class="deck-summary-note">{len(loaded_decks)} deck lists available. Pick a tab below.</div>',
+                    unsafe_allow_html=True
+                )
+                tab_labels = [entry.get("name", f"Deck {i+1}") for i, (entry, _) in enumerate(loaded_decks)]
+                tabs = st.tabs(tab_labels)
+                for tab, (_, deck_data) in zip(tabs, loaded_decks):
+                    with tab:
                         render_deck(deck_data, card_db)
-                    except requests.RequestException as e:
-                        st.error(f"Failed to load deck from MarvelCDB: {e}")
+
+            for entry, error in load_errors:
+                entry_name = entry.get("name") or entry.get("deck_id", "deck")
+                st.error(f"Failed to load {entry_name} from MarvelCDB: {error}")
 
 # ── MarvelCDB Credit ──
 st.markdown("---")

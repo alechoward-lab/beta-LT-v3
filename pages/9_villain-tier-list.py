@@ -2,22 +2,25 @@ import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
-from copy import deepcopy
+from components.hero_stats_manager import get_heroes
 
 from data.villain_weights import villain_weights
 from data.villain_image_urls import villain_image_urls
-from data.default_heroes import default_heroes
 from data.hero_image_urls import hero_image_urls
 from data.villain_strategies import villain_strategies
 from data.hero_decks import hero_decks
 from data.constants import STAT_NAMES, TIER_COLORS
 import re
-from components.collection_filter import render_collection_filter
 from components.nav_banner import render_nav_banner, render_page_header, render_footer
+from data.villain_release_order import VILLAIN_RELEASE_INDEX, VILLAIN_WAVE, VILLAIN_WAVE_ORDER, VILLAIN_LEGACY
 from data.hero_release_order import HERO_WAVE, WAVE_ORDER, HERO_LEGACY, LEGACY_WAVE_ORDER
 
+# Villains that still use placeholder / default weights
+_DEFAULT_WEIGHT_VILLAINS = {
+    name for name, wave in VILLAIN_WAVE.items() if wave and "Wave 10" in wave
+}
+
 render_nav_banner("villain-tier-list")
-render_collection_filter()
 
 def format_strategy(text):
     """Format a strategy paragraph into bulleted markdown with bold keywords."""
@@ -53,6 +56,12 @@ villain = st.selectbox("Select a Villain", list(villain_weights.keys()))
 if villain not in villain_weights:
     st.error("No weighting defined for that villain yet.")
     st.stop()
+
+if villain in _DEFAULT_WEIGHT_VILLAINS:
+    st.warning(
+        f"⚠️ **{villain}** uses default placeholder weights — "
+        "the tier list may be less accurate until custom weights are added."
+    )
 
 # ----------------------------------------
 # Load villain preset ON CHANGE
@@ -111,12 +120,7 @@ weights = np.array([st.session_state.get(f"villain_{name}", 0) for name in facto
 # ----------------------------------------
 # Score heroes
 # ----------------------------------------
-heroes = deepcopy(default_heroes)
-
-# Apply collection filter
-owned = st.session_state.get("owned_heroes")
-if owned is not None:
-    heroes = {h: s for h, s in heroes.items() if h in owned}
+heroes = get_heroes()
 
 # Compute raw dot products once for the current villain weighting.
 raw_scores = {name: float(np.dot(stats, weights)) for name, stats in heroes.items()}
@@ -128,7 +132,7 @@ with fmt_col:
         "Format",
         ["Current", "Legacy"],
         index=1,
-        key="villain_fmt_filter",
+        key="vtl_fmt_filter",
         label_visibility="collapsed",
     )
 if villain_fmt_filter == "Current":
@@ -139,7 +143,7 @@ else:
         villain_wave_filter = st.multiselect(
             "Filter by waves",
             WAVE_ORDER,
-            key="villain_wave_filter",
+            key="vtl_wave_filter",
             placeholder="All Waves",
         )
     if villain_wave_filter:
@@ -159,7 +163,7 @@ thr_A = mean + 0.5 * std
 thr_B = mean - 0.5 * std
 thr_C = mean - 1.5 * std
 
-tiers = {"S": [], "A": [], "B": [], "C": [], "D": []}
+tiers = {"S": [], "A": [], "B": [], "C": [], "D": [], "F": []}
 for hero, sc in scores.items():
     if sc >= thr_S:
         tiers["S"].append((hero, sc))
@@ -169,8 +173,10 @@ for hero, sc in scores.items():
         tiers["B"].append((hero, sc))
     elif sc >= thr_C:
         tiers["C"].append((hero, sc))
-    else:
+    elif sc >= thr_C - 0.5 * std:
         tiers["D"].append((hero, sc))
+    else:
+        tiers["F"].append((hero, sc))
 
 for tier in tiers:
     tiers[tier].sort(key=lambda x: (-x[1], x[0]))
@@ -223,7 +229,7 @@ st.markdown("""
 tier_hero_cols = 10
 st.markdown('<div class="villain-tier-section">', unsafe_allow_html=True)
 card_index = 0
-for tier in ["S", "A", "B", "C", "D"]:
+for tier in ["S", "A", "B", "C", "D", "F"]:
     members = tiers[tier]
     if not members:
         continue
@@ -261,7 +267,7 @@ if top_heroes:
 # ----------------------------------------
 # Bar chart
 # ----------------------------------------
-st.header("Villain Specific Hero Scores")
+st.markdown('<div class="comic-banner">Villain Specific Hero Scores</div>', unsafe_allow_html=True)
 
 names = list(sorted_scores.keys())
 vals = list(sorted_scores.values())
@@ -269,16 +275,26 @@ colors = [tier_colors[hero_to_tier[h]] for h in names]
 
 fig, ax = plt.subplots(figsize=(14, 7), dpi=200)
 ax.bar(names, vals, color=colors)
-ax.set_title(f"Hero Scores Against {villain}", fontsize=18, fontweight="bold")
-ax.set_ylabel("Score", fontsize=14)
+
+_light = st.session_state.get("_light_mode", False)
+_txt = "#23272a" if _light else "white"
+_bg = "#ffffff" if _light else "none"
+fig.patch.set_facecolor(_bg)
+ax.set_facecolor("#f8f8f8" if _light else "#0e1117")
+ax.set_title(f"Hero Scores Against {villain}", fontsize=18, fontweight="bold", color=_txt)
+ax.set_ylabel("Score", fontsize=14, color=_txt)
 plt.xticks(rotation=45, ha="right")
+ax.tick_params(colors=_txt)
+for spine in ax.spines.values():
+    spine.set_color(_txt)
 
 for lbl in ax.get_xticklabels():
     hero_label = lbl.get_text()
-    lbl.set_color(tier_colors.get(hero_to_tier.get(hero_label, ""), "black"))
+    lbl.set_color(tier_colors.get(hero_to_tier.get(hero_label, ""), _txt))
 
 handles = [Patch(color=c, label=f"Tier {t}") for t, c in tier_colors.items()]
-ax.legend(handles=handles, title="Tiers", loc="upper left", fontsize=12, title_fontsize=12)
+ax.legend(handles=handles, title="Tiers", loc="upper left", fontsize=12, title_fontsize=12,
+          facecolor=_bg, edgecolor=_txt, labelcolor=_txt)
 
 st.pyplot(fig)
 plt.close(fig)

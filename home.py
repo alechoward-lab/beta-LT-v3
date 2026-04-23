@@ -10,18 +10,23 @@ import os
 from data.default_heroes import default_heroes
 from data.hero_image_urls import hero_image_urls
 from data.villain_image_urls import villain_image_urls
-from data.constants import TIER_COLORS
+from data.constants import TIER_COLORS, HERO_ALTER_EGOS
 from data.preset_options import preset_options
 from data.hero_release_order import HERO_RELEASE_INDEX, HERO_WAVE, WAVE_ORDER, HERO_LEGACY, LEGACY_WAVE_ORDER
 from data.villain_release_order import VILLAIN_RELEASE_INDEX, VILLAIN_WAVE, VILLAIN_WAVE_ORDER, VILLAIN_LEGACY
 from components.github_storage import load_json, save_json
 from components.nav_banner import render_nav_banner, render_page_header, render_footer
+from components.hero_card_viewer import render_hero_card_viewer, show_hero_cards_button
 
 render_nav_banner("home")
 
-TIERS = ["S", "A", "B", "C", "D"]
-TIER_POINTS = {"S": 5, "A": 4, "B": 3, "C": 2, "D": 1}
+TIERS = ["S", "A", "B", "C", "D", "F"]
+TIER_POINTS = {"S": 6, "A": 5, "B": 4, "C": 3, "D": 2, "F": 1}
 RATINGS_FILE = "community_tier_lists.json"
+
+# Player count options (hero_power and villain_difficulty only)
+PLAYER_COUNTS = ["Any", "Solo", "2-Player", "3-4 Player"]
+PLAYER_COUNT_TYPES = {"hero_power", "villain_difficulty"}  # types that support player count
 
 # Tier list type options
 TIER_LIST_TYPES = {
@@ -35,10 +40,31 @@ TIER_LIST_TYPES = {
 
 render_page_header("Community Tier Lists", "Rate heroes and villains by power or fun — your voice shapes the rankings!")
 
+_light = st.session_state.get("_light_mode", False)
+_tier_label_extra = "color:#fff !important;text-shadow:2px 2px 0 #000,-1px -1px 0 rgba(0,0,0,0.3);" if _light else ""
 
 # ─── Persistence helpers ───
-def load_data():
-    data, sha = load_json(RATINGS_FILE, default={})
+def _subs_key(player_count):
+    """Return the submissions key for a player count (e.g. 'submissions_solo')."""
+    if player_count == "Any":
+        return "submissions"
+    return f"submissions_{player_count.lower().replace('-', '')}"
+
+def _draft_key(tl_type, player_count="Any"):
+    """Return the session-state key for a draft/undo bucket."""
+    if tl_type in PLAYER_COUNT_TYPES:
+        return f"{tl_type}:{_subs_key(player_count)}"
+    return tl_type
+
+
+def _draft_keys_for_type(tl_type):
+    if tl_type in PLAYER_COUNT_TYPES:
+        return [_draft_key(tl_type, player_count=pc) for pc in PLAYER_COUNTS]
+    return [_draft_key(tl_type)]
+
+
+def _normalize_data(data):
+    """Ensure the community data matches the current schema."""
     # Migrate old format to new format if needed
     if "submissions" in data and not any(k in data for k in TIER_LIST_TYPES.keys()):
         # Old format: {"submissions": [...]} -> move to hero_power
@@ -51,11 +77,50 @@ def load_data():
             data[k] = {"submissions": []}
         elif "submissions" not in data[k]:
             data[k] = {"submissions": []}
+        # Ensure player-count sub-keys for applicable types
+        if k in PLAYER_COUNT_TYPES:
+            for pc in PLAYER_COUNTS:
+                sk = _subs_key(pc)
+                if sk not in data[k]:
+                    data[k][sk] = []
     return data
 
 
-def save_data(data):
-    save_json(data, RATINGS_FILE)
+def load_data(include_sha=False):
+    data, sha = load_json(RATINGS_FILE, default={})
+    data = _normalize_data(data)
+    if include_sha:
+        return data, sha
+    return data
+
+
+def save_data(data, sha=None):
+    return save_json(data, RATINGS_FILE, sha=sha)
+
+
+def submit_data(tl_type, player_count, submission):
+    """Load the latest community data, merge the new submission, and save it."""
+    supports_player_count = tl_type in PLAYER_COUNT_TYPES
+    active_subs_key = _subs_key(player_count) if supports_player_count else "submissions"
+    last_error = "Could not save your submission."
+
+    for _ in range(3):
+        all_data, data_sha = load_data(include_sha=True)
+        data = all_data.get(tl_type, {"submissions": []})
+        data.setdefault(active_subs_key, []).append(submission)
+        if supports_player_count and active_subs_key != "submissions":
+            data.setdefault("submissions", []).append(submission)
+        all_data[tl_type] = data
+
+        saved, error_message, retryable = save_data(all_data, sha=data_sha)
+        if saved:
+            return True, all_data, None
+
+        last_error = error_message or last_error
+        if not retryable:
+            break
+
+    return False, None, last_error
 
 
 def interpolate_scores(submission):
@@ -79,14 +144,16 @@ def interpolate_scores(submission):
     return hero_scores
 
 
-def build_community_tier_png(tiers, tier_colors, subject_images, title="Community Tier List"):
+def build_community_tier_png(tiers, tier_colors, subject_images, title="Community Tier List", compact=False):
     """Render a tier list as a PNG image and return the bytes."""
     from PIL import Image, ImageDraw, ImageFont
     import io as _io
 
-    tier_order = ["S", "A", "B", "C", "D"]
+    tier_order = ["S", "A", "B", "C", "D", "F"]
     cards_per_row = 8
-    card_w, card_h = 120, 168
+    full_card_h = 168
+    card_w = 120
+    card_h = int(full_card_h * 0.62) if compact else full_card_h
     tier_label_w = 60
     padding = 4
     row_h = card_h + padding
@@ -106,23 +173,22 @@ def build_community_tier_png(tiers, tier_colors, subject_images, title="Communit
         return None
 
     img_w = tier_label_w + cards_per_row * (card_w + padding) + padding
-    title_h = 50
-    img_h = title_h + len(all_rows) * row_h + padding
+    img_h = len(all_rows) * row_h + padding
 
     canvas = Image.new("RGB", (img_w, img_h), color=(26, 26, 46))
     draw = ImageDraw.Draw(canvas)
     try:
-        font_title = ImageFont.truetype("arial.ttf", 22)
-        font_tier = ImageFont.truetype("arial.ttf", 28)
+        font_tier = ImageFont.truetype("arialbd.ttf", 32)
     except OSError:
-        font_title = ImageFont.load_default()
-        font_tier = font_title
-    draw.text((img_w // 2, 10), title, fill="white", font=font_title, anchor="mt")
+        try:
+            font_tier = ImageFont.truetype("arial.ttf", 32)
+        except OSError:
+            font_tier = ImageFont.load_default()
 
     def color_to_rgb(c):
         c = c.strip().lower()
         _map = {"red": (255, 0, 0), "orange": (255, 165, 0), "green": (0, 128, 0),
-                "blue": (0, 0, 255), "purple": (128, 0, 128)}
+                "blue": (0, 0, 255), "purple": (128, 0, 128), "gray": (128, 128, 128)}
         if c in _map:
             return _map[c]
         c = c.lstrip("#")
@@ -139,17 +205,24 @@ def build_community_tier_png(tiers, tier_colors, subject_images, title="Communit
             if img_path and os.path.exists(img_path):
                 try:
                     card_img = Image.open(img_path).convert("RGB")
-                    card_img = card_img.resize((card_w, card_h), Image.LANCZOS)
+                    card_img = card_img.resize((card_w, full_card_h), Image.LANCZOS)
+                    if compact:
+                        card_img = card_img.crop((0, 0, card_w, card_h))
                     card_cache[name] = card_img
                 except Exception:
                     pass
 
-    y = title_h
+    y = 0
     for tier_label, tier_letter, names_in_row in all_rows:
         color = tier_rgb.get(tier_letter, (100, 100, 100))
         draw.rectangle([0, y, tier_label_w - 1, y + row_h - 1], fill=color)
         if tier_label:
-            draw.text((tier_label_w // 2, y + row_h // 2), tier_label,
+            cx, cy = tier_label_w // 2, y + row_h // 2
+            # Comic-style text shadow / outline
+            for dx, dy in [(-2, -2), (-2, 2), (2, -2), (2, 2), (-1, 0), (1, 0), (0, -1), (0, 1)]:
+                draw.text((cx + dx, cy + dy), tier_label,
+                           fill=(0, 0, 0), font=font_tier, anchor="mm")
+            draw.text((cx, cy), tier_label,
                        fill="white", font=font_tier, anchor="mm")
         x = tier_label_w + padding
         for name in names_in_row:
@@ -179,11 +252,16 @@ all_villains = sorted(villain_image_urls.keys())
 if "my_tier_placement" not in st.session_state:
     st.session_state.my_tier_placement = {}
 for tl_type in TIER_LIST_TYPES.keys():
-    if tl_type not in st.session_state.my_tier_placement:
-        st.session_state.my_tier_placement[tl_type] = {t: [] for t in TIERS}
+    for draft_key in _draft_keys_for_type(tl_type):
+        if draft_key not in st.session_state.my_tier_placement:
+            st.session_state.my_tier_placement[draft_key] = {t: [] for t in TIERS}
 
 if "assign_tier" not in st.session_state:
     st.session_state.assign_tier = "S"
+
+# Player count for applicable tier list types
+if "player_count" not in st.session_state:
+    st.session_state.player_count = "Any"
 
 # Track which tier list types the user has already submitted this session
 if "submitted_types" not in st.session_state:
@@ -192,11 +270,29 @@ if "submitted_types" not in st.session_state:
 if "tl_undo_stack" not in st.session_state:
     st.session_state.tl_undo_stack = {}  # keyed by tier_list_type
 for tl_type in TIER_LIST_TYPES.keys():
-    if tl_type not in st.session_state.tl_undo_stack:
-        st.session_state.tl_undo_stack[tl_type] = []
+    for draft_key in _draft_keys_for_type(tl_type):
+        if draft_key not in st.session_state.tl_undo_stack:
+            st.session_state.tl_undo_stack[draft_key] = []
 
 if "page_mode" not in st.session_state:
     st.session_state.page_mode = "view"  # "build" or "view"
+
+# Sort-order source of truth — stored in plain (non-widget) session-state
+# keys so they are never garbage-collected when st.rerun() terminates the
+# script before the selectbox widget has been rendered.
+for _sort_key in ("_hero_sort_val", "_villain_sort_val"):
+    if _sort_key not in st.session_state:
+        st.session_state[_sort_key] = "Oldest → Newest"
+
+# Group-select mode for batch placement
+if "tl_group_sel" not in st.session_state:
+    st.session_state.tl_group_sel = set()
+if "tl_group_mode" not in st.session_state:
+    st.session_state.tl_group_mode = False
+
+# Compact card view (crop text area)
+if "tl_compact" not in st.session_state:
+    st.session_state.tl_compact = True
 
 # ─── Tier List Type Selector ───
 type_options = list(TIER_LIST_TYPES.keys())
@@ -227,11 +323,29 @@ subject_images = villain_image_urls if is_villain_list else hero_image_urls
 subject_name = "villain" if is_villain_list else "hero"
 subject_name_plural = "villains" if is_villain_list else "heroes"
 
+# Player count selector (hero_power and villain_difficulty only)
+supports_player_count = current_tl_type in PLAYER_COUNT_TYPES
+if supports_player_count:
+    pc_cols = st.columns(len(PLAYER_COUNTS))
+    for i, pc in enumerate(PLAYER_COUNTS):
+        with pc_cols[i]:
+            is_active = st.session_state.player_count == pc
+            btn_type = "primary" if is_active else "secondary"
+            if st.button(pc, key=f"pc_{pc}", width="stretch", type=btn_type):
+                st.session_state.player_count = pc
+                st.rerun()
+
+current_player_count = st.session_state.player_count if supports_player_count else "Any"
+current_draft_key = _draft_key(current_tl_type, current_player_count)
+
 # Get data and placement for current tier list type
 all_data = st.session_state.community_tl_data
 data = all_data.get(current_tl_type, {"submissions": []})
-placement = st.session_state.my_tier_placement[current_tl_type]
-undo_stack = st.session_state.tl_undo_stack[current_tl_type]
+# Resolve the active submissions list for the current player count
+active_subs_key = _subs_key(current_player_count) if supports_player_count else "submissions"
+active_submissions = data.get(active_subs_key, [])
+placement = st.session_state.my_tier_placement[current_draft_key]
+undo_stack = st.session_state.tl_undo_stack[current_draft_key]
 
 # Flat set of placed subjects for quick lookup
 placed_subjects = set()
@@ -277,7 +391,7 @@ if st.session_state.show_comm_tutorial:
   <div style="flex:1; min-width:200px; background:rgba(155,89,182,0.15); border:1px solid rgba(155,89,182,0.3); border-radius:10px; padding:14px;">
     <div style="font-size:28px; text-align:center; margin-bottom:6px;">🎯</div>
     <div style="font-weight:bold; color:#9b59b6; font-size:14px; text-align:center; margin-bottom:4px;">How Tiers Work</div>
-    <div style="color:#c8cdd5; font-size:13px; text-align:center;">{subject_display} are grouped into <b style="color:#fff;">S, A, B, C, D</b> tiers based on their average score. Higher = better.</div>
+    <div style="color:#c8cdd5; font-size:13px; text-align:center;">{subject_display} are grouped into <b style="color:#fff;">S, A, B, C, D, F</b> tiers based on their average score. Higher = better.</div>
   </div>
   <div style="flex:1; min-width:200px; background:rgba(46,204,113,0.15); border:1px solid rgba(46,204,113,0.3); border-radius:10px; padding:14px;">
     <div style="font-size:28px; text-align:center; margin-bottom:6px;">🗳️</div>
@@ -300,7 +414,7 @@ if st.session_state.show_comm_tutorial:
   <div style="flex:1; min-width:180px; background:rgba(52,152,219,0.15); border:1px solid rgba(52,152,219,0.3); border-radius:10px; padding:14px;">
     <div style="font-size:28px; text-align:center; margin-bottom:6px;">1️⃣</div>
     <div style="font-weight:bold; color:#3498db; font-size:14px; text-align:center; margin-bottom:4px;">Select a Tier</div>
-    <div style="color:#c8cdd5; font-size:13px; text-align:center;">Use the <b style="color:#fff;">tier buttons (S, A, B, C, D)</b> to choose which tier you want to place {subject_display} into.</div>
+    <div style="color:#c8cdd5; font-size:13px; text-align:center;">Use the <b style="color:#fff;">tier buttons (S, A, B, C, D, F)</b> to choose which tier you want to place {subject_display} into.</div>
   </div>
   <div style="flex:1; min-width:180px; background:rgba(155,89,182,0.15); border:1px solid rgba(155,89,182,0.3); border-radius:10px; padding:14px;">
     <div style="font-size:28px; text-align:center; margin-bottom:6px;">2️⃣</div>
@@ -342,6 +456,7 @@ if st.session_state.show_comm_tutorial:
 # ════════════════════════════════════════════════════════════════════════════
 if st.session_state.page_mode == "view":
     # Inject tier-label-block CSS for view mode
+    _community_row_h = "74px" if st.session_state.get("tl_compact", True) else "120px"
     st.markdown("""
     <style>
     .tier-label-block {
@@ -356,18 +471,18 @@ if st.session_state.page_mode == "view":
         justify-content: center;
         min-width: 52px;
         max-width: 52px;
-        min-height: 120px;
+        min-height: %s;
     }
     </style>
-    """, unsafe_allow_html=True)
+    """ % _community_row_h, unsafe_allow_html=True)
     
     st.markdown("### 🏆 Community Tier List")
-    if not data["submissions"]:
+    if not active_submissions:
         st.info("No submissions yet — be the first to contribute!")
     else:
         # Compute interpolated average per subject across all submissions
         subject_scores_all = {s: [] for s in all_subjects}
-        for sub in data["submissions"]:
+        for sub in active_submissions:
             if isinstance(sub, dict) and any(isinstance(v, list) for v in sub.values()):
                 scores = interpolate_scores(sub)
             else:
@@ -388,9 +503,9 @@ if st.session_state.page_mode == "view":
             st.write(f"No {subject_name_plural} have been rated yet.")
         else:
             vals = np.array(list(subject_avg.values()))
-            mean, std = vals.mean(), vals.std()
+            mean, std = vals.mean(), max(vals.std(), 1e-6)
 
-            comm_tiers = {"S": [], "A": [], "B": [], "C": [], "D": []}
+            comm_tiers = {"S": [], "A": [], "B": [], "C": [], "D": [], "F": []}
             for subj, avg in subject_avg.items():
                 if avg >= mean + 1.0 * std:
                     comm_tiers["S"].append((subj, avg))
@@ -400,13 +515,16 @@ if st.session_state.page_mode == "view":
                     comm_tiers["B"].append((subj, avg))
                 elif avg >= mean - 1.0 * std:
                     comm_tiers["C"].append((subj, avg))
-                else:
+                elif avg >= mean - 1.5 * std:
                     comm_tiers["D"].append((subj, avg))
+                else:
+                    comm_tiers["F"].append((subj, avg))
 
             for tier in TIERS:
                 comm_tiers[tier].sort(key=lambda x: x[1], reverse=True)
 
-            st.caption(f"Based on **{len(data['submissions'])}** community submission(s)")
+            _pc_label = f" ({current_player_count})" if supports_player_count and current_player_count != "Any" else ""
+            st.caption(f"Based on **{len(active_submissions)}** community submission(s){_pc_label}")
 
             import base64 as _b64_view, os as _os_view
             @st.cache_data(show_spinner=False)
@@ -418,29 +536,39 @@ if st.session_state.page_mode == "view":
                 with open(path, "rb") as f:
                     return f"data:image/{mime};base64,{_b64_view.b64encode(f.read()).decode()}"
 
-            comm_html = ['<div style="display:flex;flex-direction:column;gap:0;">']
+            _comm_compact_cls = " compact-view" if st.session_state.get("tl_compact", True) else ""
+            _comm_card_h = "74px" if st.session_state.get("tl_compact", True) else "120px"
+            comm_html = [f'<div class="tier-view-wrap{_comm_compact_cls}" style="display:flex;flex-direction:column;gap:0;">']
             for tier in TIERS:
                 members = comm_tiers[tier]
                 if not members:
                     continue
                 comm_html.append(f'<div style="display:flex;align-items:stretch;gap:0;">')
-                comm_html.append(f'<div class="tier-label-block" style="--tier-color:{TIER_COLORS[tier]};min-width:52px;max-width:52px;flex-shrink:0;">{tier}</div>')
+                comm_html.append(f'<div class="tier-label-block" style="--tier-color:{TIER_COLORS[tier]};min-width:52px;max-width:52px;flex-shrink:0;{_tier_label_extra}">{tier}</div>')
                 comm_html.append('<div style="display:flex;flex-wrap:wrap;gap:0;flex:1;align-items:flex-start;">')
                 for subj, avg in members:
                     uri = _img_data_uri_view(subject_images.get(subj, ""))
                     if uri:
                         comm_html.append(
-                            f'<div style="position:relative;height:120px;cursor:pointer;" title="{subj}">'
-                            f'<img src="{uri}" alt="{subj}" style="display:block;height:100%;width:auto;">'
+                            f'<div class="hero-card" style="position:relative;height:{_comm_card_h};overflow:hidden;cursor:pointer;" title="{subj}">'
+                            f'<img src="{uri}" alt="{subj}" style="display:block;height:120px;width:auto;">'
                             f'</div>'
                         )
                 comm_html.append('</div></div>')
             comm_html.append('</div>')
             st.markdown(''.join(comm_html), unsafe_allow_html=True)
 
+            # Hero card viewer (hero lists only)
+            if not is_villain_list:
+                render_hero_card_viewer(
+                    [subj for tier in TIERS for subj, _ in comm_tiers[tier]],
+                    alter_egos=HERO_ALTER_EGOS,
+                    key_prefix="comm_view_hcv",
+                )
+
             # PNG download for community tier list
             tl_label = TIER_LIST_TYPES[current_tl_type]["label"]
-            png_bytes = build_community_tier_png(comm_tiers, TIER_COLORS, subject_images, title=f"{tl_label} — Community")
+            png_bytes = build_community_tier_png(comm_tiers, TIER_COLORS, subject_images, title=f"{tl_label} — Community", compact=st.session_state.get("tl_compact", False))
             if png_bytes:
                 st.download_button("⬇️ Download as PNG", png_bytes,
                                    file_name=f"community_{current_tl_type}.png", mime="image/png")
@@ -454,7 +582,7 @@ if st.session_state.page_mode == "view":
 # ════════════════════════════════════════════════════════════════════════════
 # BUILD MODE: Let users create their tier list
 # ════════════════════════════════════════════════════════════════════════════
-st.info(f"**{len(data['submissions'])}** community submission(s) on file. Build yours below!")
+st.info(f"**{len(active_submissions)}** community submission(s) on file. Build yours below!")
 
 # ─── Build Your Tier List ───
 st.markdown("### Build Your Tier List")
@@ -539,6 +667,27 @@ st.markdown("""
     width: 100%;
     aspect-ratio: 0.715;
 }
+/* ─── Compact mode: crop card images to art only (top ~62%) ─── */
+[data-testid="stVerticalBlock"]:has(.compact-cards) [data-testid="stImage"] {
+    overflow: hidden !important;
+    aspect-ratio: 1.153;
+}
+[data-testid="stVerticalBlock"]:has(.compact-cards) [data-testid="stImage"] img {
+    width: 100% !important;
+    height: auto !important;
+}
+[data-testid="stVerticalBlock"]:has(.compact-cards) .tier-label-block {
+    aspect-ratio: 1.153;
+    font-size: 22px;
+}
+/* Compact mode for HTML view tier rows */
+.compact-view .hero-card {
+    overflow: hidden;
+}
+.compact-view .hero-card img {
+    object-fit: cover;
+    object-position: top;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -548,10 +697,15 @@ if placed_count > 0:
     # Toggle between Edit and View modes
     if "tl_view_mode" not in st.session_state:
         st.session_state.tl_view_mode = False
-    view_col1, view_col2 = st.columns([4, 1])
+    view_col1, view_col2, view_col3 = st.columns([4, 1, 1])
     with view_col1:
-        st.markdown("### Your Current Tier List")
+        st.markdown("### Your Tier List")
     with view_col2:
+        compact_label = "📋 Full" if st.session_state.tl_compact else "🔍 Compact"
+        if st.button(compact_label, key="toggle_compact", width="stretch"):
+            st.session_state.tl_compact = not st.session_state.tl_compact
+            st.rerun()
+    with view_col3:
         view_label = "✏️ Edit" if st.session_state.tl_view_mode else "🖼️ View"
         if st.button(view_label, key="toggle_view_mode", width="stretch"):
             st.session_state.tl_view_mode = not st.session_state.tl_view_mode
@@ -574,18 +728,20 @@ if placed_count > 0:
             return out
         _uri_map = _build_uri_map(dict(subject_images))
 
-        view_parts = ['<div style="display:flex;flex-direction:column;gap:0;">']
+        _compact_cls = " compact-view" if st.session_state.tl_compact else ""
+        view_parts = [f'<div class="tier-view-wrap{_compact_cls}" style="display:flex;flex-direction:column;gap:0;">']
+        _view_card_h = "74px" if st.session_state.tl_compact else "120px"
         for tier in TIERS:
             members = placement[tier]
             view_parts.append('<div style="display:flex;align-items:stretch;gap:0;">')
-            view_parts.append(f'<div class="tier-label-block" style="--tier-color:{TIER_COLORS[tier]};min-width:52px;max-width:52px;flex-shrink:0;">{tier}</div>')
+            view_parts.append(f'<div class="tier-label-block" style="--tier-color:{TIER_COLORS[tier]};min-width:52px;max-width:52px;flex-shrink:0;{_tier_label_extra}">{tier}</div>')
             view_parts.append('<div style="display:flex;flex-wrap:wrap;gap:0;flex:1;align-items:flex-start;">')
             for subj in members:
                 uri = _uri_map.get(subj, "")
                 if uri:
                     view_parts.append(
-                        f'<div style="position:relative;height:120px;">'
-                        f'<img src="{uri}" alt="{subj}" style="display:block;height:100%;width:auto;">'
+                        f'<div class="hero-card" style="position:relative;height:{_view_card_h};overflow:hidden;">'
+                        f'<img src="{uri}" alt="{subj}" style="display:block;height:120px;width:auto;">'
                         f'</div>'
                     )
             view_parts.append('</div></div>')
@@ -594,9 +750,10 @@ if placed_count > 0:
         st.caption(f"{placed_count} / {len(all_subjects)} {subject_name_plural} placed")
     else:
         # ─── Interactive edit mode ───
+        _compact_edit = " compact-cards" if st.session_state.tl_compact else ""
         tier_container = st.container()
         with tier_container:
-            st.markdown('<div class="tier-placement-section"></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="tier-placement-section{_compact_edit}"></div>', unsafe_allow_html=True)
             st.caption(f"{placed_count} / {len(all_subjects)} {subject_name_plural} placed  —  hover to select, then use controls below")
 
         # Track which subject is selected for editing
@@ -617,7 +774,7 @@ if placed_count > 0:
                 with cols[0]:
                     if row_start == 0:
                         st.markdown(
-                            f'<div class="tier-label-block" style="--tier-color:{TIER_COLORS[tier]};">{tier}</div>',
+                            f'<div class="tier-label-block" style="--tier-color:{TIER_COLORS[tier]};{_tier_label_extra}">{tier}</div>',
                             unsafe_allow_html=True,
                         )
                 for k, subj in enumerate(row):
@@ -642,7 +799,7 @@ if placed_count > 0:
                     if row_start <= sel_idx < row_start + len(row):
                         if sel_idx < len(placement[sel_tier]):
                             sel_subj = placement[sel_tier][sel_idx]
-                            ctrl_cols = st.columns([2, 1, 1, 1, 1, 1, 1])
+                            ctrl_cols = st.columns([2, 1, 1, 1, 1, 1, 1] + ([0.6] if not is_villain_list else []))
                             with ctrl_cols[0]:
                                 st.markdown(f"**{sel_subj}** — {sel_tier} #{sel_idx + 1}")
                             with ctrl_cols[1]:
@@ -696,6 +853,9 @@ if placed_count > 0:
                                 if st.button("✓", key="ctrl_done", help="Deselect"):
                                     st.session_state.tl_selected = None
                                     st.rerun()
+                            if not is_villain_list:
+                                with ctrl_cols[7]:
+                                    show_hero_cards_button(sel_subj, alter_ego_hint=HERO_ALTER_EGOS.get(sel_subj, ""), key="ctrl_cards")
 
         # Clear stale selection
         if sel:
@@ -746,17 +906,22 @@ unplaced_subjects = [s for s in all_subjects if s not in placed_subjects]
 cols_per_row = 6
 
 if unplaced_subjects:
+    _SORT_OPTIONS = ["Alphabetical (A→Z)", "Oldest → Newest", "Newest → Oldest"]
     # ─── Sort + Format + Wave filter ───
     if is_villain_list:
         # Villains: Sort + Format filter (primary) + Wave filter (secondary — Legacy-aware)
+        _v_val = st.session_state.get("_villain_sort_val", "Oldest → Newest")
+        _v_sort_idx = _SORT_OPTIONS.index(_v_val) if _v_val in _SORT_OPTIONS else 1
         sort_col, fmt_col, wave_col = st.columns([1, 1, 1])
         with sort_col:
             sort_option = st.selectbox(
                 "Sort order",
-                ["Alphabetical (A→Z)", "Oldest → Newest", "Newest → Oldest"],
+                _SORT_OPTIONS,
+                index=_v_sort_idx,
                 key="villain_sort_order",
                 label_visibility="collapsed",
             )
+            st.session_state._villain_sort_val = sort_option
         with fmt_col:
             fmt_filter = st.selectbox(
                 "Format",
@@ -787,14 +952,18 @@ if unplaced_subjects:
         # else: already alphabetical from all_subjects
     else:
         # Heroes: Sort + Format filter (primary) + Wave filter (secondary — Legacy-aware)
+        _h_val = st.session_state.get("_hero_sort_val", "Oldest → Newest")
+        _h_sort_idx = _SORT_OPTIONS.index(_h_val) if _h_val in _SORT_OPTIONS else 1
         sort_col, fmt_col, wave_col = st.columns([1, 1, 1])
         with sort_col:
             sort_option = st.selectbox(
                 "Sort order",
-                ["Alphabetical (A→Z)", "Oldest → Newest", "Newest → Oldest"],
+                _SORT_OPTIONS,
+                index=_h_sort_idx,
                 key="hero_sort_order",
                 label_visibility="collapsed",
             )
+            st.session_state._hero_sort_val = sort_option
         with fmt_col:
             fmt_filter = st.selectbox(
                 "Format",
@@ -824,8 +993,13 @@ if unplaced_subjects:
             unplaced_subjects.sort(key=lambda h: HERO_RELEASE_INDEX.get(h, 0), reverse=True)
         # else: already alphabetical from all_subjects
 
-    # ─── Controls row: search, undo, bulk assign ───
-    ctrl1, ctrl2, ctrl3 = st.columns([3, 1, 1])
+    # ─── Controls row: search, undo, group select, bulk assign ───
+    group_mode = st.session_state.tl_group_mode
+    group_sel = st.session_state.tl_group_sel
+    # Prune stale selections (already placed heroes)
+    group_sel -= placed_subjects
+
+    ctrl1, ctrl2, ctrl3, ctrl4 = st.columns([3, 1, 1, 1])
     with ctrl1:
         search_filter = st.text_input(f"🔍 Search {subject_name_plural}", key="subject_search",
                                     placeholder="Type to filter...",
@@ -839,13 +1013,32 @@ if unplaced_subjects:
                 placement[tier].remove(subj)
             st.rerun()
     with ctrl3:
-        if st.button(f"Place all → {current_tier}", key="bulk_assign",
-                     width="stretch",
-                     help=f"Put all remaining {subject_name_plural} into {current_tier} tier"):
-            for s in unplaced_subjects:
-                placement[current_tier].append(s)
-                undo_stack.append((current_tier, s))
+        gs_label = f"☑ Select ({len(group_sel)})" if group_mode else "☐ Select"
+        if st.button(gs_label, key="toggle_group_mode", width="stretch",
+                     help="Toggle group-select mode to pick multiple, then place them together"):
+            st.session_state.tl_group_mode = not group_mode
+            if not group_mode is False:
+                pass  # keep selections when toggling on
             st.rerun()
+    with ctrl4:
+        if group_mode and group_sel:
+            if st.button(f"Place {len(group_sel)} → {current_tier}", key="group_place",
+                         width="stretch"):
+                for s in unplaced_subjects:
+                    if s in group_sel:
+                        placement[current_tier].append(s)
+                        undo_stack.append((current_tier, s))
+                group_sel.clear()
+                st.session_state.tl_group_mode = False
+                st.rerun()
+        else:
+            if st.button(f"Place all → {current_tier}", key="bulk_assign",
+                         width="stretch",
+                         help=f"Put all remaining {subject_name_plural} into {current_tier} tier"):
+                for s in unplaced_subjects:
+                    placement[current_tier].append(s)
+                    undo_stack.append((current_tier, s))
+                st.rerun()
 
     # Apply search filter
     if search_filter:
@@ -854,9 +1047,14 @@ if unplaced_subjects:
     else:
         filtered_subjects = unplaced_subjects
 
-    st.markdown('<div class="hero-assignment-section"></div>', unsafe_allow_html=True)
+    _compact_grid = " compact-cards" if st.session_state.tl_compact else ""
+    st.markdown(f'<div class="hero-assignment-section{_compact_grid}"></div>', unsafe_allow_html=True)
     st.caption(f"{len(filtered_subjects)} of {len(unplaced_subjects)} {subject_name_plural} remaining"
                + (f" (filtered)" if search_filter else ""))
+
+    # Hero card viewer (hero lists only)
+    if not is_villain_list:
+        render_hero_card_viewer(all_subjects, alter_egos=HERO_ALTER_EGOS, key_prefix="build_hcv")
 
     if filtered_subjects:
         for i in range(0, len(filtered_subjects), cols_per_row):
@@ -867,14 +1065,26 @@ if unplaced_subjects:
                     break
                 subj = filtered_subjects[idx]
                 with col:
+                    is_selected = group_mode and subj in group_sel
                     img = subject_images.get(subj, "")
                     if img:
                         st.image(img, width="stretch")
 
-                    if st.button(f"{subj}", key=f"place_{subj}", width="stretch"):
-                        placement[current_tier].append(subj)
-                        undo_stack.append((current_tier, subj))
-                        st.rerun()
+                    if group_mode:
+                        btn_label = f"✓ {subj}" if is_selected else subj
+                        if st.button(btn_label, key=f"place_{subj}", width="stretch",
+                                     type="primary" if is_selected else "secondary"):
+                            if subj in group_sel:
+                                group_sel.discard(subj)
+                            else:
+                                group_sel.add(subj)
+                            st.rerun()
+                    else:
+                        if st.button(f"{subj}", key=f"place_{subj}", width="stretch"):
+                            placement[current_tier].append(subj)
+                            undo_stack.append((current_tier, subj))
+                            st.session_state.tl_selected = None
+                            st.rerun()
     elif search_filter:
         st.info(f'No {subject_name_plural} matching "{search_filter}"')
 else:
@@ -882,7 +1092,8 @@ else:
 
 # ─── Submit / Export ───
 st.markdown("---")
-already_submitted = current_tl_type in st.session_state.submitted_types
+_submit_key = f"{current_tl_type}_{current_player_count}" if supports_player_count else current_tl_type
+already_submitted = _submit_key in st.session_state.submitted_types
 
 col_sub, col_clear, col_png = st.columns(3)
 with col_sub:
@@ -893,23 +1104,23 @@ with col_sub:
     elif st.button("✅ Submit My Tier List", type="primary", width="stretch"):
         # Store as {tier: [ordered subjects]}
         submission = {t: list(placement[t]) for t in TIERS}
-        data["submissions"].append(submission)
-        # Save the updated data back to the main data structure
-        all_data[current_tl_type] = data
-        save_data(all_data)
-        st.session_state.community_tl_data = all_data
-        st.session_state.submitted_types.add(current_tl_type)
-        st.success("Submitted!")
+        saved, updated_data, error_message = submit_data(current_tl_type, current_player_count, submission)
+        if saved:
+            st.session_state.community_tl_data = updated_data
+            st.session_state.submitted_types.add(_submit_key)
+            st.success("Submitted!")
+        else:
+            st.error(error_message)
 with col_clear:
     if st.button("🗑️ Clear My Placements", width="stretch"):
-        st.session_state.my_tier_placement[current_tl_type] = {t: [] for t in TIERS}
-        st.session_state.tl_undo_stack[current_tl_type] = []
+        st.session_state.my_tier_placement[current_draft_key] = {t: [] for t in TIERS}
+        st.session_state.tl_undo_stack[current_draft_key] = []
         st.rerun()
 with col_png:
     if placed_count > 0:
         my_tiers = {t: list(placement[t]) for t in TIERS}
         tl_label = TIER_LIST_TYPES[current_tl_type]["label"]
-        my_png = build_community_tier_png(my_tiers, TIER_COLORS, subject_images, title=f"My {tl_label}")
+        my_png = build_community_tier_png(my_tiers, TIER_COLORS, subject_images, title=f"My {tl_label}", compact=st.session_state.get("tl_compact", False))
         if my_png:
             st.download_button("⬇️ Download as PNG", my_png,
                                file_name=f"my_{current_tl_type}.png", mime="image/png")
@@ -940,15 +1151,17 @@ with st.expander("🛠️ Tools", expanded=False):
                     new_placement["A"].append(hero)
                 elif sc >= mean_s - 0.5 * std_s:
                     new_placement["B"].append(hero)
-                elif sc >= mean_s - 1.5 * std_s:
+                elif sc >= mean_s - 1.0 * std_s:
                     new_placement["C"].append(hero)
-                else:
+                elif sc >= mean_s - 1.5 * std_s:
                     new_placement["D"].append(hero)
+                else:
+                    new_placement["F"].append(hero)
             # Sort within each tier by score descending
             for t in TIERS:
                 new_placement[t].sort(key=lambda h: scores[h], reverse=True)
-            st.session_state.my_tier_placement[current_tl_type] = new_placement
-            st.session_state.tl_undo_stack[current_tl_type] = []
+            st.session_state.my_tier_placement[current_draft_key] = new_placement
+            st.session_state.tl_undo_stack[current_draft_key] = []
             st.rerun()
     else:
         st.markdown("**Quick Actions**")

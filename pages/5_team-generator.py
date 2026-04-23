@@ -11,11 +11,9 @@ import matplotlib.pyplot as plt
 from data.hero_image_urls import hero_image_urls
 from data.villain_image_urls import villain_image_urls
 from data.constants import TIER_COLORS
-from components.collection_filter import render_collection_filter
 from components.nav_banner import render_nav_banner, render_page_header, render_footer
 
 render_nav_banner("team-generator")
-render_collection_filter()
 from components.hero_stats_manager import initialize_hero_stats, get_heroes, render_hero_stats_editor
 from data.villain_weights import villain_weights
 from data.villain_strategies import villain_strategies
@@ -114,7 +112,7 @@ st.markdown("---")
 st.subheader("🏆 Choose Tier")
 tier_choice = st.selectbox(
     "Select tier",
-    ["S", "A", "B", "C", "D"],
+    ["S", "A", "B", "C", "D", "F"],
     key="generator_tier_choice"
 )
 
@@ -139,7 +137,7 @@ if st.button("🎲 Generate Random Team", type="primary", width="stretch", key="
     # Calculate mean and std for tier determination (from ALL possible teams)
     all_scores = [score for _, score in all_possible_teams]
     mean_score = np.mean(all_scores)
-    std_score = np.std(all_scores)
+    std_score = max(np.std(all_scores), 1e-6)
     
     # Now filter for teams that include locked heroes
     available_heroes = [h for h in hero_names if h not in locked_heroes]
@@ -171,9 +169,12 @@ if st.button("🎲 Generate Random Team", type="primary", width="stretch", key="
             if mean_score - 0.5 * std_score <= score < mean_score + 0.5 * std_score:
                 tier_teams.append(team)
         elif tier_choice == "C":
-            if mean_score - 1.5 * std_score <= score < mean_score - 0.5 * std_score:
+            if mean_score - 1.0 * std_score <= score < mean_score - 0.5 * std_score:
                 tier_teams.append(team)
         elif tier_choice == "D":
+            if mean_score - 1.5 * std_score <= score < mean_score - 1.0 * std_score:
+                tier_teams.append(team)
+        elif tier_choice == "F":
             if score < mean_score - 1.5 * std_score:
                 tier_teams.append(team)
     
@@ -259,13 +260,18 @@ if "generated_team" in st.session_state:
     ax.plot(angles, combined_stats_list, 'o-', linewidth=2.5, color=tier_color)
     ax.fill(angles, combined_stats_list, alpha=0.2, color=tier_color)
     
+    _light = st.session_state.get("_light_mode", False)
+    _txt = "#23272a" if _light else "white"
+    _grid = "#888" if _light else "white"
     ax.set_xticks(angles[:-1])
-    ax.set_xticklabels(factor_names, size=9, color='white')
+    ax.set_xticklabels(factor_names, size=9, color=_txt)
     ax.set_ylim(-6, 6)
     ax.set_yticks([-5, 0, 5])
-    ax.tick_params(colors='white')
-    ax.grid(True, alpha=0.3, color='white')
-    ax.set_title("Team Stat Profile", size=14, weight='bold', pad=20, color='white')
+    ax.tick_params(colors=_txt)
+    ax.grid(True, alpha=0.3, color=_grid)
+    ax.set_title("Team Stat Profile", size=14, weight='bold', pad=20, color=_txt)
+    for spine in ax.spines.values():
+        spine.set_color(_grid)
     ax.patch.set_alpha(0)
     
     st.pyplot(fig, transparent=True)

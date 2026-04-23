@@ -11,11 +11,9 @@ from data.hero_image_urls import hero_image_urls
 from data.villain_image_urls import villain_image_urls
 from data.constants import STAT_NAMES
 from components.hero_stats_manager import initialize_hero_stats, get_heroes, render_hero_stats_editor
-from components.collection_filter import render_collection_filter
 from components.nav_banner import render_nav_banner, render_page_header, render_footer
 
 render_nav_banner("team-builder")
-render_collection_filter()
 from data.preset_options import preset_options
 from data.help_tips import help_tips
 from data.villain_weights import villain_weights
@@ -286,31 +284,23 @@ if st.session_state.show_tier:
     team_score = base_team_score * (1.0 + synergy_multiplier)
 
     # Calculate all possible team combinations and their scores
-    all_combinations = []
     same_size_combinations = []
 
-    for team_size in range(1, 5):
-        for combo in combinations(hero_names, team_size):
-            combo_stats = np.mean([heroes[hero] for hero in combo], axis=0)
-            # Use preset weighting for this team size
-            combo_weighting = get_preset_for_team_size(team_size)
-            combo_base_score = float(np.dot(combo_stats, combo_weighting))
-            combo_synergy = calculate_team_synergy(list(combo), heroes, team_size)
-            combo_score = combo_base_score * (1.0 + combo_synergy)
-            all_combinations.append(combo_score)
-            
-            # Also track combinations of the same size for comparison
-            if team_size == len(st.session_state.team):
-                same_size_combinations.append(combo_score)
+    current_team_size = len(st.session_state.team)
+    for combo in combinations(hero_names, current_team_size):
+        combo_stats = np.mean([heroes[hero] for hero in combo], axis=0)
+        combo_weighting = get_preset_for_team_size(current_team_size)
+        combo_base_score = float(np.dot(combo_stats, combo_weighting))
+        combo_synergy = calculate_team_synergy(list(combo), heroes, current_team_size)
+        combo_score = combo_base_score * (1.0 + combo_synergy)
+        same_size_combinations.append(combo_score)
 
-    all_combinations = np.array(all_combinations)
-    mean_score = np.mean(all_combinations)
-    std_score = np.std(all_combinations)
+    same_size_combinations = np.array(same_size_combinations)
+    mean_score = np.mean(same_size_combinations)
+    std_score = max(np.std(same_size_combinations), 1e-6)
 
-    # Also calculate stats for same-size teams for percentile ranking
-    if same_size_combinations:
-        same_size_combinations = np.array(same_size_combinations)
-        # Calculate rank: teams with higher score + 1 (since rank 1 is the best)
+    # Calculate rank among same-size teams
+    if len(same_size_combinations) > 0:
         teams_with_higher_score = np.sum(same_size_combinations > team_score)
         team_rank = teams_with_higher_score + 1
         total_teams = len(same_size_combinations)
@@ -331,14 +321,18 @@ if st.session_state.show_tier:
         tier = "B"
         tier_color = "green"
         tier_text = "Good - Average"
-    elif team_score >= mean_score - 1.5 * std_score:
+    elif team_score >= mean_score - 1.0 * std_score:
         tier = "C"
         tier_color = "blue"
-        tier_text = "Below Average - Bottom 25%"
-    else:
+        tier_text = "Below Average"
+    elif team_score >= mean_score - 1.5 * std_score:
         tier = "D"
         tier_color = "purple"
-        tier_text = "Weak - Bottom 5%"
+        tier_text = "Weak - Bottom 10%"
+    else:
+        tier = "F"
+        tier_color = "gray"
+        tier_text = "Very Weak - Bottom 5%"
 
     col1, col2 = st.columns([1, 2])
 
@@ -395,13 +389,18 @@ if st.session_state.show_tier:
     ax.plot(angles, combined_stats_list, 'o-', linewidth=2.5, color=tier_color)
     ax.fill(angles, combined_stats_list, alpha=0.2, color=tier_color)
 
+    _light = st.session_state.get("_light_mode", False)
+    _txt = "#23272a" if _light else "white"
+    _grid = "#888" if _light else "white"
     ax.set_xticks(angles[:-1])
-    ax.set_xticklabels(factor_names, size=9, color='white')
+    ax.set_xticklabels(factor_names, size=9, color=_txt)
     ax.set_ylim(-6, 6)
     ax.set_yticks([-5, 0, 5])
-    ax.tick_params(colors='white')
-    ax.grid(True, alpha=0.3, color='white')
-    ax.set_title("Team Stat Profile", size=14, weight='bold', pad=20, color='white')
+    ax.tick_params(colors=_txt)
+    ax.grid(True, alpha=0.3, color=_grid)
+    ax.set_title("Team Stat Profile", size=14, weight='bold', pad=20, color=_txt)
+    for spine in ax.spines.values():
+        spine.set_color(_grid)
     ax.patch.set_alpha(0)
 
     st.pyplot(fig, transparent=True)

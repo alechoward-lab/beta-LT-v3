@@ -51,4 +51,12 @@ villain_weights = {        # E  T CV  S VD TH  R MC  C  S  U LG SI SC MC
     "M.O.D.O.K.":           [5, 2, 1, 3, 4, 1, 2, 3, 1, 0, 0, 1, 0, 1, 0],
     "Thunderbolts":         [3, 4, 1, 3, 5, 1, 2, 1, 1, 0, 0, 2, 0, 1, 0],
     "Baron Zemo":           [6, 2, 1, 4, 2, 1, 2, 1, 1, 0, 0, 1, 0, 2, 0],
+    "Enchantress":          [4, 2, 2, 2, 1, 2, 2, 1, 2, 2, 2, 1, 0, 1, 1],
+    "God of Lies":          [4, 2, 2, 2, 1, 2, 2, 1, 2, 2, 2, 1, 0, 1, 1],
+    "Iron Man (Civil War)":  [4, 2, 2, 2, 1, 2, 2, 1, 2, 2, 2, 1, 0, 1, 1],
+    "Captain Marvel (Civil War)": [4, 2, 2, 2, 1, 2, 2, 1, 2, 2, 2, 1, 0, 1, 1],
+    "Captain America (Civil War)": [4, 2, 2, 2, 1, 2, 2, 1, 2, 2, 2, 1, 0, 1, 1],
+    "Spider-Woman (Civil War)": [4, 2, 2, 2, 1, 2, 2, 1, 2, 2, 2, 1, 0, 1, 1],
+    "She-Hulk (Synthezoid)": [4, 2, 2, 2, 1, 2, 2, 1, 2, 2, 2, 1, 0, 1, 1],
+    "Vision (Synthezoid)":   [4, 2, 2, 2, 1, 2, 2, 1, 2, 2, 2, 1, 0, 1, 1],
 }

@@ -66,10 +66,11 @@ if videos:
         with cols[idx % 2]:
             # Make thumbnail a clickable link
             if video['thumbnail']:
+                from html import escape as _esc
                 st.markdown(
                     f"""
-                    <a href="{video['url']}" target="_blank" style="text-decoration: none;">
-                        <img src="{video['thumbnail']}" width="100%" loading="lazy" style="border-radius: 8px; cursor: pointer;">
+                    <a href="{_esc(video['url'])}" target="_blank" style="text-decoration: none;">
+                        <img src="{_esc(video['thumbnail'])}" width="100%" loading="lazy" style="border-radius: 8px; cursor: pointer;">
                     </a>
                     """,
                     unsafe_allow_html=True

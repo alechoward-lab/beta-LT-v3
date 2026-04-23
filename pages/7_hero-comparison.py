@@ -224,8 +224,14 @@ st.markdown("---")
 # Radar chart comparison
 st.subheader("🎯 Stat Profile Comparison")
 
-_bg_color = "#0e1117"
-_text_color = "#c8cdd5"
+_light = st.session_state.get("_light_mode", False)
+_bg_color = "#ffffff" if _light else "#0e1117"
+_text_color = "#333333" if _light else "#c8cdd5"
+_grid_color = (0, 0, 0, 0.12) if _light else (1, 1, 1, 0.12)
+_spine_color = (0, 0, 0, 0.2) if _light else (1, 1, 1, 0.2)
+_title_color = "#111111" if _light else "white"
+_legend_bg = "#f0f0f0" if _light else "#1a1a2e"
+_legend_edge = (0, 0, 0, 0.2) if _light else (1, 1, 1, 0.2)
 
 fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(projection='polar'),
                        facecolor=_bg_color)
@@ -251,17 +257,17 @@ ax.set_ylim(-6, 6)
 ax.set_yticks([-5, 0, 5])
 ax.set_yticklabels(["-5", "0", "5"], size=8, color=_text_color)
 ax.tick_params(colors=_text_color)
-ax.spines['polar'].set_color((1, 1, 1, 0.2))
+ax.spines['polar'].set_color(_spine_color)
 for gl in ax.yaxis.get_gridlines():
-    gl.set_color((1, 1, 1, 0.12))
+    gl.set_color(_grid_color)
     gl.set_linestyle('--')
 for gl in ax.xaxis.get_gridlines():
-    gl.set_color((1, 1, 1, 0.12))
+    gl.set_color(_grid_color)
     gl.set_linestyle('--')
 ax.legend(loc='upper right', bbox_to_anchor=(1.25, 1.1),
-          facecolor='#1a1a2e', edgecolor=(1, 1, 1, 0.2),
+          facecolor=_legend_bg, edgecolor=_legend_edge,
           labelcolor=_text_color, fontsize=10)
-ax.set_title("Hero Stat Profiles", size=14, weight='bold', pad=20, color='white')
+ax.set_title("Hero Stat Profiles", size=14, weight='bold', pad=20, color=_title_color)
 
 st.pyplot(fig)
 plt.close(fig)

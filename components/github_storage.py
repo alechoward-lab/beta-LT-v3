@@ -88,24 +88,38 @@ def load_json(local_path, default=None):
 
 
 def save_json(data, local_path, sha=None):
-    """Save JSON data — to GitHub if secrets are configured, else local file."""
+    """Save JSON data and return (ok, error_message, retryable)."""
     MAX_SIZE = 5 * 1024 * 1024  # 5 MB guard
     content_str = json.dumps(data)
     if len(content_str) > MAX_SIZE:
-        st.error("Data too large to save.")
-        return
+        return False, "Data too large to save.", False
 
     cfg = _github_cfg()
-    if cfg and _requests:
+    if cfg:
+        if not _requests:
+            return False, "Could not save to GitHub: requests is not installed.", False
+
         token, repo, path, branch = cfg
         try:
-            # Re-read to get latest SHA (handles concurrent writes)
-            _, current_sha = _gh_read(token, repo, path, branch)
-            _gh_write(token, repo, path, branch, content_str, sha=current_sha)
-            return
+            _gh_write(token, repo, path, branch, content_str, sha=sha)
+            return True, None, False
         except Exception as e:
-            st.warning(f"Could not save to GitHub: {e}")
+            response = getattr(e, "response", None)
+            retryable = response is not None and response.status_code in {409, 422}
+            if response is not None:
+                try:
+                    message = response.json().get("message") or response.text
+                except ValueError:
+                    message = response.text
+                error_message = f"Could not save to GitHub ({response.status_code}): {message}"
+            else:
+                error_message = f"Could not save to GitHub: {e}"
+            return False, error_message, retryable
 
     # Local fallback
-    with open(local_path, "w") as f:
-        json.dump(data, f)
+    try:
+        with open(local_path, "w") as f:
+            json.dump(data, f)
+        return True, None, False
+    except Exception as e:
+        return False, f"Could not save locally: {e}", False

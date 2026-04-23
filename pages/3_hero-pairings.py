@@ -48,18 +48,15 @@ STRONG_TEXT_THRESHOLD = 3
 import streamlit as st
 import numpy as np
 import random
-from copy import deepcopy
 
-from data.default_heroes import default_heroes
 from data.hero_image_urls import hero_image_urls
 from data.constants import TIER_COLORS
 from components.weighting_utils import initialize_weighting_stats, get_weighting_array, render_weighting_sliders
-from components.collection_filter import render_collection_filter
 from components.nav_banner import render_nav_banner, render_page_header, render_footer
+from components.hero_stats_manager import get_heroes
 from data.hero_release_order import HERO_WAVE, WAVE_ORDER, HERO_LEGACY, LEGACY_WAVE_ORDER
 
 render_nav_banner("hero-pairings")
-render_collection_filter()
 
 
 # ----------------------------------------
@@ -78,7 +75,7 @@ with st.expander("Adjust Weighting Factors (click to expand)", expanded=False):
 # ----------------------------------------
 # Load Data
 # ----------------------------------------
-heroes = deepcopy(default_heroes)
+heroes = get_heroes()
 hero_names = list(heroes.keys())
 
 
@@ -242,14 +239,14 @@ for hero_B in hero_names:
 # Tiering
 # ----------------------------------------
 vals = np.array(list(scores.values()))
-mean, std = vals.mean(), vals.std()
+mean, std = vals.mean(), max(vals.std(), 1e-6)
 
 thr_S = mean + 1.25 * std
 thr_A = mean + 0.4 * std
 thr_B = mean - 0.4 * std
 thr_C = mean - 1.25 * std
 
-tiers = {"S": [], "A": [], "B": [], "C": [], "D": []}
+tiers = {"S": [], "A": [], "B": [], "C": [], "D": [], "F": []}
 
 for hero, sc in scores.items():
     if sc >= thr_S:
@@ -260,8 +257,10 @@ for hero, sc in scores.items():
         tiers["B"].append(hero)
     elif sc >= thr_C:
         tiers["C"].append(hero)
-    else:
+    elif sc >= thr_C - 0.4 * std:
         tiers["D"].append(hero)
+    else:
+        tiers["F"].append(hero)
 
 
 # ----------------------------------------
@@ -360,7 +359,7 @@ tier_colors = TIER_COLORS
 
 num_cols = 5
 
-for tier in ["S", "A", "B", "C", "D"]:
+for tier in ["S", "A", "B", "C", "D", "F"]:
     members = tiers[tier]
     if not members:
         continue
