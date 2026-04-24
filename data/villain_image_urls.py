@@ -25,8 +25,8 @@ villain_image_urls = {
     "Kang": "images/Villains/12_Kang_1.jpg",
     # Wave 3 - Galaxy's Most Wanted
     "Drang": "images/Villains/13_Drang_2.jpg",
-    "Collector 1": "images/Villains/15_Collector_A1.jpg",
-    "Collector 2": "images/Villains/14_Collector_2.jpg",
+    "Collector 1": "images/Villains/14_Collector_2.jpg",
+    "Collector 2": "images/Villains/15_Collector_A1.jpg",
     "Nebula": "images/Villains/16_Nebula_2.jpg",
     "Ronan": "images/Villains/17_Ronan_2.jpg",
     # Wave 4 - Mad Titan's Shadow
