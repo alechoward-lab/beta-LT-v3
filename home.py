@@ -1272,21 +1272,34 @@ if saved_lists.is_enabled():
 
         # ── Update / delete existing saved list ──
         st.markdown("**Update or delete an existing saved list**")
-        upd_col1, upd_col2 = st.columns(2)
-        with upd_col1:
-            slug_input = st.text_input(
-                "Share slug",
-                key="saved_list_slug_input",
-                value=st.session_state.get("saved_list_known_slug", ""),
-                help="The part after ?list= in your share link.",
-            )
-        with upd_col2:
-            token_input = st.text_input(
-                "Edit code",
-                key="saved_list_edit_token_input",
-                type="password",
-                help="The edit code shown when you first saved (or after ?edit= in your edit link).",
-            )
+
+        # Accept full share/edit link or bare slug — parse slug out either way
+        _known_slug = st.session_state.get("saved_list_known_slug", "")
+        _default_link = f"?list={_known_slug}" if _known_slug else ""
+        raw_link_input = st.text_input(
+            "Share link or edit link",
+            key="saved_list_slug_input",
+            value=_default_link,
+            placeholder="e.g. ?list=abc12345 or the full edit link",
+            help="Paste the share link or edit link you received when saving.",
+        )
+        # Parse slug and optionally pre-fill edit token from the link
+        import urllib.parse as _urlparse
+        _parsed_qs = _urlparse.parse_qs(_urlparse.urlparse(raw_link_input.strip()).query)
+        _slug_from_link = (_parsed_qs.get("list") or [""])[0].strip()
+        _token_from_link = (_parsed_qs.get("edit") or [""])[0].strip()
+        # If the input has no ? treat the whole thing as a bare slug
+        slug_input = _slug_from_link or raw_link_input.strip().lstrip("?list=").strip()
+        # Pre-fill edit token from URL if not already set
+        if _token_from_link and not st.session_state.get("saved_list_edit_token_input"):
+            st.session_state["saved_list_edit_token_input"] = _token_from_link
+
+        token_input = st.text_input(
+            "Edit code",
+            key="saved_list_edit_token_input",
+            type="password",
+            help="The secret edit code from your edit link. Required to update or delete.",
+        )
 
         act_col1, act_col2 = st.columns(2)
         with act_col1:
