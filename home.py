@@ -354,11 +354,7 @@ if saved_lists.is_enabled():
                 else:
                     st.session_state.pop("_loaded_list_pc_warning", None)
 
-                # Prefill edit token if provided
-                if _qp_edit:
-                    st.session_state["saved_list_edit_token_input"] = _qp_edit
-
-                # Remember slug + edit for Update/Delete UI
+                # Remember slug so the share-link box can re-show it
                 st.session_state["_loaded_list_slug"] = _qp_slug
                 st.session_state["saved_list_known_slug"] = _qp_slug
 
@@ -1205,18 +1201,49 @@ if saved_lists.is_enabled():
 
     with st.expander("🔗 Save & Share This Tier List", expanded=False):
         st.caption(
-            "Save your tier list to a permanent link you can share or revisit. "
-            "Anyone with the link can view it. Anyone with the **edit code** "
-            "can update or delete it — keep it private."
+            "Save your tier list to a permanent link you can share, or paste a "
+            "link someone shared with you to load their tier list."
         )
+
+        # ── Load a shared tier list ──
+        st.markdown("**📥 Load a shared tier list**")
+        import urllib.parse as _urlparse
+        _load_input = st.text_input(
+            "Paste a shared link",
+            key="saved_list_load_input",
+            placeholder="e.g. https://...?list=gRPnZxPX  or just  gRPnZxPX",
+            help="Paste any share link or code. We'll auto-load it onto the tier list.",
+        )
+        if st.button(
+            "Load tier list",
+            key="saved_list_load_btn",
+            disabled=not _load_input.strip(),
+            width="stretch",
+        ):
+            _raw = _load_input.strip()
+            _parsed = _urlparse.parse_qs(_urlparse.urlparse(_raw).query)
+            _slug = (_parsed.get("list") or [""])[0].strip()
+            if not _slug:
+                # No query string — treat as bare slug (strip any leading "?list=")
+                _slug = _raw.split("?list=")[-1].split("&")[0].strip().lstrip("/")
+            if not saved_lists.is_valid_slug(_slug):
+                st.error("That doesn't look like a valid share link or code.")
+            else:
+                # Clear any previous load marker so the ingest block re-runs
+                st.session_state.pop("_loaded_list_slug", None)
+                st.query_params["list"] = _slug
+                st.rerun()
+
+        st.markdown("---")
+
+        # ── Save current tier list ──
+        st.markdown("**💾 Save & share this tier list**")
 
         # Per-session save-rate guard
         st.session_state.setdefault("_saved_list_save_times", [])
         SAVE_RATE_WINDOW_SEC = 3600
         SAVE_RATE_MAX = 5
 
-        # ── Create new saved list ──
-        st.markdown("**Create a new shareable link**")
         new_title = st.text_input(
             "Title (optional)",
             key="saved_list_new_title",
@@ -1225,11 +1252,12 @@ if saved_lists.is_enabled():
         )
         create_disabled = placed_count == 0
         if st.button(
-            "💾 Save & Share",
+            "Save & get share link",
             key="saved_list_create_btn",
             type="primary",
             disabled=create_disabled,
             help="Place at least one hero/villain first." if create_disabled else None,
+            width="stretch",
         ):
             import time as _time
             _now = _time.time()
@@ -1247,97 +1275,65 @@ if saved_lists.is_enabled():
                     _recent.append(_now)
                     st.session_state["_saved_list_save_times"] = _recent
                     st.session_state["saved_list_known_slug"] = info["slug"]
-                    st.session_state["saved_list_known_token"] = info["edit_token"]
-                    st.success("Saved! Copy your links below.")
+                    st.success("Saved! Your share link is below.")
                 else:
                     st.error(err or "Could not save.")
 
-        # ── Show last-created credentials (this session only) ──
+        # ── Show share link as a full URL (built client-side via JS) ──
         _last_slug = st.session_state.get("saved_list_known_slug")
-        _last_token = st.session_state.get("saved_list_known_token")
         if _last_slug:
-            share_url = f"?list={_last_slug}"
-            st.markdown("**Share link** (anyone can view)")
-            st.code(share_url, language="text")
-            if _last_token:
-                edit_url = f"?list={_last_slug}&edit={_last_token}"
-                st.markdown("**Edit link** (keep private — anyone with this can update/delete)")
-                st.code(edit_url, language="text")
-                st.caption(
-                    "We only show this edit code once per save. "
-                    "If you lose it, you'll need to create a new saved list."
-                )
-
-        st.markdown("---")
-
-        # ── Update / delete existing saved list ──
-        st.markdown("**Update or delete an existing saved list**")
-
-        # Accept full share/edit link or bare slug — parse slug out either way
-        _known_slug = st.session_state.get("saved_list_known_slug", "")
-        _default_link = f"?list={_known_slug}" if _known_slug else ""
-        raw_link_input = st.text_input(
-            "Share link or edit link",
-            key="saved_list_slug_input",
-            value=_default_link,
-            placeholder="e.g. ?list=abc12345 or the full edit link",
-            help="Paste the share link or edit link you received when saving.",
-        )
-        # Parse slug and optionally pre-fill edit token from the link
-        import urllib.parse as _urlparse
-        _parsed_qs = _urlparse.parse_qs(_urlparse.urlparse(raw_link_input.strip()).query)
-        _slug_from_link = (_parsed_qs.get("list") or [""])[0].strip()
-        _token_from_link = (_parsed_qs.get("edit") or [""])[0].strip()
-        # If the input has no ? treat the whole thing as a bare slug
-        slug_input = _slug_from_link or raw_link_input.strip().lstrip("?list=").strip()
-        # Pre-fill edit token from URL if not already set
-        if _token_from_link and not st.session_state.get("saved_list_edit_token_input"):
-            st.session_state["saved_list_edit_token_input"] = _token_from_link
-
-        token_input = st.text_input(
-            "Edit code",
-            key="saved_list_edit_token_input",
-            type="password",
-            help="The secret edit code from your edit link. Required to update or delete.",
-        )
-
-        act_col1, act_col2 = st.columns(2)
-        with act_col1:
-            if st.button(
-                "💾 Update saved list",
-                key="saved_list_update_btn",
-                disabled=not (slug_input and token_input and placed_count > 0),
-                width="stretch",
-            ):
-                ok, err = saved_lists.update_saved_list_with_token(
-                    slug=slug_input.strip(),
-                    edit_token=token_input.strip(),
-                    tiers={t: list(placement[t]) for t in TIERS},
-                    tier_list_type=current_tl_type,
-                    player_count=current_player_count,
-                    title=(st.session_state.get("saved_list_new_title") or None),
-                )
-                if ok:
-                    st.success("Updated.")
-                else:
-                    st.error(err or "Could not update.")
-        with act_col2:
-            if st.button(
-                "🗑️ Delete saved list",
-                key="saved_list_delete_btn",
-                disabled=not (slug_input and token_input),
-                width="stretch",
-            ):
-                ok, err = saved_lists.delete_saved_list_with_token(
-                    slug=slug_input.strip(),
-                    edit_token=token_input.strip(),
-                )
-                if ok:
-                    st.success("Deleted.")
-                    st.session_state.pop("saved_list_known_slug", None)
-                    st.session_state.pop("saved_list_known_token", None)
-                else:
-                    st.error(err or "Could not delete.")
+            import streamlit.components.v1 as _components
+            import json as _json
+            _slug_js = _json.dumps(_last_slug)
+            _components.html(
+                f"""
+                <div style="font-family: 'Source Sans Pro', sans-serif; margin-top: 4px;">
+                  <label style="font-size: 14px; color: rgba(250,250,250,0.85);
+                                display:block; margin-bottom: 4px;">
+                    Your share link:
+                  </label>
+                  <div style="display: flex; gap: 6px;">
+                    <input id="shareLinkBox" type="text" readonly
+                      style="flex:1; padding: 8px 10px; border-radius: 6px;
+                             border: 1px solid rgba(250,250,250,0.2);
+                             background: rgba(38,39,48,1); color: #fafafa;
+                             font-family: 'Source Code Pro', monospace; font-size: 13px;"/>
+                    <button id="copyShareBtn"
+                      style="padding: 8px 14px; border-radius: 6px; border: none;
+                             background: #ff4b4b; color: white; cursor: pointer;
+                             font-weight: 600;">Copy</button>
+                  </div>
+                  <div id="copyShareMsg" style="font-size:12px; color:#7ee787;
+                       margin-top:4px; min-height:16px;"></div>
+                </div>
+                <script>
+                  const slug = {_slug_js};
+                  // Streamlit embeds this in an iframe; use parent location.
+                  const loc = window.parent.location;
+                  const url = loc.origin + loc.pathname + "?list=" + slug;
+                  const box = document.getElementById("shareLinkBox");
+                  const btn = document.getElementById("copyShareBtn");
+                  const msg = document.getElementById("copyShareMsg");
+                  box.value = url;
+                  btn.addEventListener("click", async () => {{
+                    try {{
+                      await navigator.clipboard.writeText(url);
+                      msg.textContent = "✓ Copied!";
+                      setTimeout(() => {{ msg.textContent = ""; }}, 2000);
+                    }} catch (e) {{
+                      box.select(); document.execCommand("copy");
+                      msg.textContent = "✓ Copied!";
+                      setTimeout(() => {{ msg.textContent = ""; }}, 2000);
+                    }}
+                  }});
+                </script>
+                """,
+                height=110,
+            )
+            st.caption(
+                "Anyone with this link can view your tier list. "
+                "Saving again will create a new link — old links keep working."
+            )
 else:
     # Feature not configured — keep silent in UI to avoid noise.
     pass
