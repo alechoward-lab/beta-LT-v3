@@ -1,0 +1,18 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+.env
+.venv
+venv/
+env/
+
+# Streamlit local secrets (never commit these)
+.streamlit/secrets.toml
+
+# OS files
+.DS_Store
+Thumbs.db

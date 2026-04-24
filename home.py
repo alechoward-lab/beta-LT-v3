@@ -17,6 +17,7 @@ from data.villain_release_order import VILLAIN_RELEASE_INDEX, VILLAIN_WAVE, VILL
 from components.github_storage import load_json, save_json
 from components.nav_banner import render_nav_banner, render_page_header, render_footer
 from components.hero_card_viewer import render_hero_card_viewer, show_hero_cards_button
+from components import supabase_saved_lists as saved_lists
 
 render_nav_banner("home")
 
@@ -293,6 +294,78 @@ if "tl_group_mode" not in st.session_state:
 # Compact card view (crop text area)
 if "tl_compact" not in st.session_state:
     st.session_state.tl_compact = True
+
+# ─── Shared link ingest (?list=<slug>&edit=<token>) ──────────────────────────
+# One-time per slug: fetch saved list from Supabase, overwrite current draft
+# for the saved tier_list_type, switch to that type, set Build mode.
+# Player-count is NOT auto-switched (per locked decision); we just warn on
+# mismatch via _loaded_list_pc_warning.
+if saved_lists.is_enabled():
+    _qp = st.query_params
+    _qp_slug = _qp.get("list")
+    _qp_edit = _qp.get("edit")
+    if isinstance(_qp_slug, list):  # defensive (older streamlit)
+        _qp_slug = _qp_slug[0] if _qp_slug else None
+    if isinstance(_qp_edit, list):
+        _qp_edit = _qp_edit[0] if _qp_edit else None
+
+    if _qp_slug and st.session_state.get("_loaded_list_slug") != _qp_slug:
+        if not saved_lists.is_valid_slug(_qp_slug):
+            st.session_state["_loaded_list_slug"] = _qp_slug  # don't retry
+            st.warning("That share link doesn't look valid.")
+        else:
+            ok, row, err = saved_lists.get_saved_list_by_slug(_qp_slug)
+            if not ok:
+                st.session_state["_loaded_list_slug"] = _qp_slug
+                st.error(f"Could not load shared tier list: {err}")
+            elif row is None:
+                st.session_state["_loaded_list_slug"] = _qp_slug
+                st.warning("Shared tier list not found. It may have been deleted.")
+            else:
+                _saved_type = row.get("tier_list_type") or "hero_power"
+                _saved_pc = row.get("player_count") or "Any"
+                _payload = row.get("payload_json") or {}
+
+                # Pick valid catalog for type-aware normalization
+                if TIER_LIST_TYPES.get(_saved_type, {}).get("subject") == "villains":
+                    _valid = set(all_villains)
+                else:
+                    _valid = set(all_heroes)
+                _norm = saved_lists.normalize_payload(_payload, _valid)
+
+                # Apply: type switch, draft overwrite for that type's bucket
+                st.session_state.tier_list_type = _saved_type
+                _supports_pc = _saved_type in PLAYER_COUNT_TYPES
+                # Overwrite the bucket that matches the saved type+pc so it is
+                # findable when the user changes player count later.
+                _target_pc = _saved_pc if _supports_pc else "Any"
+                _target_key = _draft_key(_saved_type, _target_pc)
+                st.session_state.my_tier_placement[_target_key] = {
+                    t: list(_norm["tiers"].get(t, [])) for t in TIERS
+                }
+                st.session_state.tl_undo_stack[_target_key] = []
+
+                # Warn (not switch) if current player_count differs
+                if _supports_pc and st.session_state.get("player_count", "Any") != _target_pc:
+                    st.session_state["_loaded_list_pc_warning"] = (
+                        f"This shared list was saved for **{_target_pc}**. "
+                        f"Switch player count to view it in that context."
+                    )
+                else:
+                    st.session_state.pop("_loaded_list_pc_warning", None)
+
+                # Prefill edit token if provided
+                if _qp_edit:
+                    st.session_state["saved_list_edit_token_input"] = _qp_edit
+
+                # Remember slug + edit for Update/Delete UI
+                st.session_state["_loaded_list_slug"] = _qp_slug
+                st.session_state["saved_list_known_slug"] = _qp_slug
+
+                # Force Build mode so user sees the loaded draft
+                st.session_state.page_mode = "build"
+                st.toast("📥 Loaded shared tier list.")
+                st.rerun()
 
 # ─── Tier List Type Selector ───
 type_options = list(TIER_LIST_TYPES.keys())
@@ -1124,6 +1197,137 @@ with col_png:
         if my_png:
             st.download_button("⬇️ Download as PNG", my_png,
                                file_name=f"my_{current_tl_type}.png", mime="image/png")
+
+# ─── Save & Share (Supabase) ─────────────────────────────────────────────────
+if saved_lists.is_enabled():
+    if st.session_state.get("_loaded_list_pc_warning"):
+        st.warning(st.session_state["_loaded_list_pc_warning"])
+
+    with st.expander("🔗 Save & Share This Tier List", expanded=False):
+        st.caption(
+            "Save your tier list to a permanent link you can share or revisit. "
+            "Anyone with the link can view it. Anyone with the **edit code** "
+            "can update or delete it — keep it private."
+        )
+
+        # Per-session save-rate guard
+        st.session_state.setdefault("_saved_list_save_times", [])
+        SAVE_RATE_WINDOW_SEC = 3600
+        SAVE_RATE_MAX = 5
+
+        # ── Create new saved list ──
+        st.markdown("**Create a new shareable link**")
+        new_title = st.text_input(
+            "Title (optional)",
+            key="saved_list_new_title",
+            max_chars=80,
+            placeholder="e.g. My Solo Power Rankings",
+        )
+        create_disabled = placed_count == 0
+        if st.button(
+            "💾 Save & Share",
+            key="saved_list_create_btn",
+            type="primary",
+            disabled=create_disabled,
+            help="Place at least one hero/villain first." if create_disabled else None,
+        ):
+            import time as _time
+            _now = _time.time()
+            _recent = [t for t in st.session_state["_saved_list_save_times"] if _now - t < SAVE_RATE_WINDOW_SEC]
+            if len(_recent) >= SAVE_RATE_MAX:
+                st.error("You've saved a lot recently. Please wait a bit before saving again.")
+            else:
+                ok, info, err = saved_lists.create_saved_list(
+                    tiers={t: list(placement[t]) for t in TIERS},
+                    tier_list_type=current_tl_type,
+                    player_count=current_player_count,
+                    title=new_title or None,
+                )
+                if ok and info:
+                    _recent.append(_now)
+                    st.session_state["_saved_list_save_times"] = _recent
+                    st.session_state["saved_list_known_slug"] = info["slug"]
+                    st.session_state["saved_list_known_token"] = info["edit_token"]
+                    st.success("Saved! Copy your links below.")
+                else:
+                    st.error(err or "Could not save.")
+
+        # ── Show last-created credentials (this session only) ──
+        _last_slug = st.session_state.get("saved_list_known_slug")
+        _last_token = st.session_state.get("saved_list_known_token")
+        if _last_slug:
+            share_url = f"?list={_last_slug}"
+            st.markdown("**Share link** (anyone can view)")
+            st.code(share_url, language="text")
+            if _last_token:
+                edit_url = f"?list={_last_slug}&edit={_last_token}"
+                st.markdown("**Edit link** (keep private — anyone with this can update/delete)")
+                st.code(edit_url, language="text")
+                st.caption(
+                    "We only show this edit code once per save. "
+                    "If you lose it, you'll need to create a new saved list."
+                )
+
+        st.markdown("---")
+
+        # ── Update / delete existing saved list ──
+        st.markdown("**Update or delete an existing saved list**")
+        upd_col1, upd_col2 = st.columns(2)
+        with upd_col1:
+            slug_input = st.text_input(
+                "Share slug",
+                key="saved_list_slug_input",
+                value=st.session_state.get("saved_list_known_slug", ""),
+                help="The part after ?list= in your share link.",
+            )
+        with upd_col2:
+            token_input = st.text_input(
+                "Edit code",
+                key="saved_list_edit_token_input",
+                type="password",
+                help="The edit code shown when you first saved (or after ?edit= in your edit link).",
+            )
+
+        act_col1, act_col2 = st.columns(2)
+        with act_col1:
+            if st.button(
+                "💾 Update saved list",
+                key="saved_list_update_btn",
+                disabled=not (slug_input and token_input and placed_count > 0),
+                width="stretch",
+            ):
+                ok, err = saved_lists.update_saved_list_with_token(
+                    slug=slug_input.strip(),
+                    edit_token=token_input.strip(),
+                    tiers={t: list(placement[t]) for t in TIERS},
+                    tier_list_type=current_tl_type,
+                    player_count=current_player_count,
+                    title=(st.session_state.get("saved_list_new_title") or None),
+                )
+                if ok:
+                    st.success("Updated.")
+                else:
+                    st.error(err or "Could not update.")
+        with act_col2:
+            if st.button(
+                "🗑️ Delete saved list",
+                key="saved_list_delete_btn",
+                disabled=not (slug_input and token_input),
+                width="stretch",
+            ):
+                ok, err = saved_lists.delete_saved_list_with_token(
+                    slug=slug_input.strip(),
+                    edit_token=token_input.strip(),
+                )
+                if ok:
+                    st.success("Deleted.")
+                    st.session_state.pop("saved_list_known_slug", None)
+                    st.session_state.pop("saved_list_known_token", None)
+                else:
+                    st.error(err or "Could not delete.")
+else:
+    # Feature not configured — keep silent in UI to avoid noise.
+    pass
 
 # ─── Tools (bottom, discrete) ───
 st.markdown("---")
