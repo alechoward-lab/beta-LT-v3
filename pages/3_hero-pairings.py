@@ -54,7 +54,7 @@ from data.constants import TIER_COLORS
 from components.weighting_utils import initialize_weighting_stats, get_weighting_array, render_weighting_sliders
 from components.nav_banner import render_nav_banner, render_page_header, render_footer
 from components.hero_stats_manager import get_heroes
-from data.hero_release_order import HERO_WAVE, WAVE_ORDER, HERO_LEGACY
+from data.hero_release_order import HERO_WAVE, WAVE_ORDER, HERO_LEGACY, LEGACY_WAVE_ORDER
 
 render_nav_banner("hero-pairings")
 

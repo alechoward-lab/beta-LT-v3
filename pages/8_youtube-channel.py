@@ -28,18 +28,18 @@ def get_channel_videos():
             'extract_flat': 'in_playlist',
             'playlist_items': '1:100',  # Get first 100 videos
         }
-
+        
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info('https://www.youtube.com/channel/UCpV2UWmBTAeIKUso1LkeU2A/videos', download=False)
             videos = []
-
+            
             if 'entries' in info:
                 for entry in info['entries']:
                     if entry:  # Skip None entries
                         video_id = entry.get('id', '')
                         # Construct thumbnail URL from video_id
                         thumbnail = f"https://img.youtube.com/vi/{video_id}/maxresdefault.jpg"
-
+                        
                         videos.append({
                             'title': entry.get('title', 'Untitled'),
                             'video_id': video_id,
@@ -75,15 +75,15 @@ if videos:
                     """,
                     unsafe_allow_html=True
                 )
-
+            
             # Display video title
             st.subheader(video['title'])
-
+            
             # Display upload date
             if video['upload_date'] and len(video['upload_date']) >= 8:
                 date_str = f"{video['upload_date'][:4]}-{video['upload_date'][4:6]}-{video['upload_date'][6:8]}"
                 st.caption(f"📅 {date_str}")
-
+            
             st.divider()
 else:
     st.info("Loading videos or none available at the moment.")
@@ -93,7 +93,7 @@ st.markdown("---")
 # Information box
 st.info(
     """
-    🎥 **Tip:** Click any video thumbnail to watch it on YouTube!
+    🎥 **Tip:** Click any video thumbnail to watch it on YouTube! 
     You can also like, comment, and subscribe directly on YouTube.
     """
 )

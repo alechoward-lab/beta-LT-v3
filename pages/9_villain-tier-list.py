@@ -12,8 +12,8 @@ from data.hero_decks import hero_decks
 from data.constants import STAT_NAMES, TIER_COLORS
 import re
 from components.nav_banner import render_nav_banner, render_page_header, render_footer
-from data.villain_release_order import VILLAIN_WAVE
-from data.hero_release_order import HERO_WAVE, WAVE_ORDER, HERO_LEGACY
+from data.villain_release_order import VILLAIN_RELEASE_INDEX, VILLAIN_WAVE, VILLAIN_WAVE_ORDER, VILLAIN_LEGACY
+from data.hero_release_order import HERO_WAVE, WAVE_ORDER, HERO_LEGACY, LEGACY_WAVE_ORDER
 
 # Villains that still use placeholder / default weights
 _DEFAULT_WEIGHT_VILLAINS = {
@@ -33,7 +33,7 @@ def format_strategy(text):
     lines = []
     for s in sentences:
         for kw in keywords:
-            s = re.sub(rf'\b({kw})\b', r'**\1**', s, flags=re.IGNORECASE)
+            s = re.sub(rf'\b({kw})\b', rf'**\1**', s, flags=re.IGNORECASE)
         lines.append(f"- {s}")
     return "\n".join(lines)
 

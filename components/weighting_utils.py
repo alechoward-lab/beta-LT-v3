@@ -16,7 +16,7 @@ def initialize_weighting_stats():
     for key, default_value in DEFAULT_WEIGHTS.items():
         if key not in st.session_state:
             st.session_state[key] = default_value
-
+    
     if "preset_choice" not in st.session_state:
         st.session_state["preset_choice"] = "General Power: 2 Player"
 
@@ -42,7 +42,7 @@ def render_weighting_sliders(show_help=True):
     """
     Render all weighting stat sliders in the current context.
     These sliders update st.session_state directly.
-
+    
     Parameters:
     -----------
     show_help : bool
@@ -53,15 +53,15 @@ def render_weighting_sliders(show_help=True):
         "If you set something negative, the heroes with negative stats will go up, "
         "and the heroes with positive stats will go down."
     )
-
+    
     # Select weighting preset
-    st.selectbox(
-        "Select Weighting Option",
+    preset_choice = st.selectbox(
+        "Select Weighting Option", 
         list(preset_options.keys()) + ["Custom"],
         key="preset_choice",
         on_change=update_preset
     )
-
+    
     for stat_name in STAT_NAMES:
         st.slider(
             stat_name,
