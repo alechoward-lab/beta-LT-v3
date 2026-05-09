@@ -434,22 +434,36 @@ z-index:99999;box-shadow:0 8px 40px rgba(0,0,0,0.7);max-width:320px;">
         unsafe_allow_html=True,
     )
 
-    # Keyboard shortcuts: press ? to show help, 1-9 to jump to pages.
-    # Note: nav-banner links use plain `<a href>` navigation — the browser
-    # handles the routing. We do NOT intercept clicks to "preserve session
-    # state via Streamlit's sidebar router", because that interceptor was
-    # observed to break navigation on the /good-decks page after a deck was
-    # rendered (and Streamlit Cloud session-state behavior is the same either
-    # way: a multi-page nav reconnects the WebSocket).
+    # Keyboard shortcuts: press ? to show help, 1-9 to jump to pages
+    # Also intercept nav-link clicks to use Streamlit's client-side
+    # routing (via sidebar links) so session state is preserved.
     _nav_urls = [href for _, href, _ in NAV_PAGES]
     _shortcut_js = "".join(
-        f'case "{i+1}": window.parent.location.href = "{url}"; break;'
+        f'case "{i+1}": _stNav("{url}"); break;'
         for i, url in enumerate(_nav_urls[:9])
     )
     components.html(
         f"""<script>
 (function() {{
     var pd = window.parent.document;
+    function _stNav(targetPath) {{
+        var ls = pd.querySelectorAll('[data-testid=stSidebarNavLink]');
+        for (var i = 0; i < ls.length; i++) {{
+            if (new URL(ls[i].href).pathname === targetPath) {{ ls[i].click(); return; }}
+        }}
+        // Fallback if sidebar link not found
+        window.parent.location.href = targetPath;
+    }}
+    // Intercept clicks on custom nav-banner links
+    pd.addEventListener('click', function(e) {{
+        var a = e.target.closest && e.target.closest('.nav-link');
+        if (!a) return;
+        var href = a.getAttribute('href');
+        if (!href || href.startsWith('http')) return;
+        e.preventDefault();
+        e.stopPropagation();
+        _stNav(href);
+    }}, true);
     // Keyboard shortcuts
     pd.addEventListener('keydown', function(e) {{
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
