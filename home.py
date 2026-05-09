@@ -8,6 +8,7 @@ import numpy as np
 import json
 import os
 from html import escape as html_escape
+from streamlit_local_storage import LocalStorage
 from data.default_heroes import default_heroes
 from data.hero_image_urls import hero_image_urls
 from data.villain_image_urls import villain_image_urls
@@ -295,6 +296,71 @@ if "tl_group_mode" not in st.session_state:
 # Compact card view (crop text area)
 if "tl_compact" not in st.session_state:
     st.session_state.tl_compact = True
+
+# ─── localStorage draft persistence ──────────────────────────────────────────
+# Persists the in-progress tier list across page reloads / cross-page
+# navigation, so users don't lose their work when they hop to other pages
+# (or when Streamlit Cloud kills/recycles their session).
+#
+# We use the `streamlit-local-storage` component, which talks to the browser
+# via Streamlit's secure component-message channel. (A naive
+# `streamlit.components.v1.html` <script> approach cannot work here: those
+# iframes are sandboxed without `allow-top-navigation`, so they can neither
+# redirect the parent nor write into Streamlit's session_state directly.)
+DRAFT_LS_KEY = "dl_tl_draft_v1"
+_dl_storage = LocalStorage(key="dl_tl_storage_init")
+
+# 1) RESTORE — on the first script run after the component finishes loading,
+# `getItem` returns the previously-saved JSON string. Skip when a shared list
+# (?list=<slug>) is being loaded so the saved-link payload wins.
+if (
+    not st.session_state.get("_dl_restore_done")
+    and not st.query_params.get("list")
+):
+    _raw = _dl_storage.getItem(DRAFT_LS_KEY)
+    if _raw:
+        try:
+            _payload = (
+                json.loads(_raw) if isinstance(_raw, str) else dict(_raw)
+            )
+            _mtp = _payload.get("my_tier_placement") or {}
+            for _k, _tiers in _mtp.items():
+                if isinstance(_tiers, dict):
+                    st.session_state.my_tier_placement[_k] = {
+                        t: list(_tiers.get(t, [])) for t in TIERS
+                    }
+            if _payload.get("tier_list_type") in TIER_LIST_TYPES:
+                st.session_state.tier_list_type = _payload["tier_list_type"]
+            if _payload.get("player_count") in PLAYER_COUNTS:
+                st.session_state.player_count = _payload["player_count"]
+        except Exception:
+            pass
+        st.session_state["_dl_restore_done"] = True
+
+# 2) SAVE — push the current draft to localStorage whenever it changes. Only
+# write when the draft has at least one placement, otherwise the empty default
+# of a fresh script run would clobber a previously-saved draft before the
+# RESTORE step has had a chance to repopulate session_state. Explicit clears
+# go through `deleteItem` in the Clear button handler.
+try:
+    _mtp_now = st.session_state.my_tier_placement
+    _has_any = any(
+        any(_tiers.get(t) for t in TIERS)
+        for _tiers in _mtp_now.values()
+        if isinstance(_tiers, dict)
+    )
+    if _has_any:
+        _draft_payload = {
+            "my_tier_placement": _mtp_now,
+            "tier_list_type": st.session_state.tier_list_type,
+            "player_count": st.session_state.get("player_count", "Any"),
+        }
+        _draft_str = json.dumps(_draft_payload)
+        if st.session_state.get("_dl_last_saved") != _draft_str:
+            _dl_storage.setItem(DRAFT_LS_KEY, _draft_str, key="dl_tl_save")
+            st.session_state["_dl_last_saved"] = _draft_str
+except Exception:
+    pass
 
 # ─── Shared link ingest (?list=<slug>&edit=<token>) ──────────────────────────
 # One-time per slug: fetch saved list from Supabase, overwrite current draft
@@ -1235,6 +1301,12 @@ with col_clear:
     if st.button("🗑️ Clear My Placements", width="stretch"):
         st.session_state.my_tier_placement[current_draft_key] = {t: [] for t in TIERS}
         st.session_state.tl_undo_stack[current_draft_key] = []
+        # Wipe the persisted draft so the cleared state survives reload.
+        try:
+            _dl_storage.deleteItem(DRAFT_LS_KEY, key="dl_tl_clear")
+        except Exception:
+            pass
+        st.session_state["_dl_last_saved"] = ""
         st.rerun()
 with col_png:
     if placed_count > 0:
