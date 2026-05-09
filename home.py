@@ -7,7 +7,6 @@ import streamlit as st
 import numpy as np
 import json
 import os
-from html import escape as html_escape
 from data.default_heroes import default_heroes
 from data.hero_image_urls import hero_image_urls
 from data.villain_image_urls import villain_image_urls
@@ -818,55 +817,6 @@ if placed_count > 0:
         view_parts.append('</div>')
         st.markdown(''.join(view_parts), unsafe_allow_html=True)
         st.caption(f"{placed_count} / {len(all_subjects)} {subject_name_plural} placed")
-
-        # ─── Hot Takes — compare user placements vs community average ───
-        if not is_villain_list:
-            try:
-                _community_data = st.session_state.community_tl_data
-                _ht_subs = (_community_data.get("hero_power", {}) or {}).get("submissions", []) or []
-                if len(_ht_subs) >= 2:
-                    _TIER_PTS_HT = {"S": 6, "A": 5, "B": 4, "C": 3, "D": 2, "F": 1}
-                    _comm_pts = {}
-                    for _s in _ht_subs:
-                        for _tn, _hl in (_s or {}).items():
-                            _pt = _TIER_PTS_HT.get(_tn)
-                            if _pt is None:
-                                continue
-                            for _h in (_hl or []):
-                                _comm_pts.setdefault(_h, []).append(_pt)
-                    _comm_avg_ht = {_h: float(np.mean(_v)) for _h, _v in _comm_pts.items() if _v}
-                    _user_tier_of = {}
-                    for _t in TIERS:
-                        for _h in placement[_t]:
-                            _user_tier_of[_h] = _t
-                    _hot_takes = []
-                    for _h, _ut in _user_tier_of.items():
-                        if _h not in _comm_avg_ht:
-                            continue
-                        _diff = _TIER_PTS_HT[_ut] - _comm_avg_ht[_h]
-                        if abs(_diff) >= 1.0:
-                            _ct = min(_TIER_PTS_HT.keys(), key=lambda t: abs(_TIER_PTS_HT[t] - _comm_avg_ht[_h]))
-                            _hot_takes.append((_h, _ut, _ct, _diff))
-                    if _hot_takes:
-                        _hot_takes.sort(key=lambda x: abs(x[3]), reverse=True)
-                        _takes_html = ""
-                        for _h, _ut, _ct, _diff in _hot_takes[:5]:
-                            _arrow = "↑" if _diff > 0 else "↓"
-                            _takes_html += (
-                                f'<span style="display:inline-block;background:rgba(255,255,255,0.08);'
-                                f'padding:4px 10px;border-radius:6px;margin:3px 4px;font-size:13px;">'
-                                f'<b>{html_escape(_h)}</b> — You: <b>{_ut}</b> {_arrow} Community: <b>{_ct}</b></span>'
-                            )
-                        st.markdown(
-                            f'<div style="background:linear-gradient(135deg,rgba(142,68,173,0.2),rgba(231,76,60,0.15));'
-                            f'border:1px solid rgba(142,68,173,0.3);border-radius:10px;padding:12px 16px;margin:12px 0;">'
-                            f'<span style="font-size:15px;font-weight:bold;">🔥 Your Hot Takes</span><br>'
-                            f'<span style="font-size:12px;color:#a0a8b8;">Heroes where your ranking differs most from the community</span>'
-                            f'<div style="margin-top:6px;">{_takes_html}</div></div>',
-                            unsafe_allow_html=True,
-                        )
-            except Exception:
-                pass
     else:
         # ─── Interactive edit mode ───
         _compact_edit = " compact-cards" if st.session_state.tl_compact else ""
@@ -1385,149 +1335,8 @@ if saved_lists.is_enabled():
                 "Saving again will create a new link — old links keep working."
             )
 else:
-    # Supabase unavailable — offer encoded share-link fallback so links still work
-    with st.expander("🔗 Share Link (Offline Fallback)", expanded=False):
-        st.caption(
-            "Our hosted save service is temporarily offline. You can still share "
-            "your tier list using a self-contained link — no server required."
-        )
-        import base64 as _b64s
-        import zlib as _zlib
-        import urllib.parse as _urlparse2
-
-        # Auto-load from ?d= encoded payload
-        _qp_d = st.query_params.get("d")
-        if isinstance(_qp_d, list):
-            _qp_d = _qp_d[0] if _qp_d else None
-        if _qp_d and st.session_state.get("_loaded_d_token") != _qp_d:
-            try:
-                _raw_bytes = _zlib.decompress(_b64s.urlsafe_b64decode(_qp_d + "=" * (-len(_qp_d) % 4)))
-                _payload = json.loads(_raw_bytes.decode("utf-8"))
-                _saved_type = _payload.get("tier_list_type") or "hero_power"
-                _saved_pc = _payload.get("player_count") or "Any"
-                _valid = set(all_villains if TIER_LIST_TYPES.get(_saved_type, {}).get("subject") == "villains" else all_heroes)
-                _norm_tiers = {t: [h for h in (_payload.get("tiers", {}).get(t) or []) if h in _valid] for t in TIERS}
-                st.session_state.tier_list_type = _saved_type
-                _supports_pc2 = _saved_type in PLAYER_COUNT_TYPES
-                _target_pc2 = _saved_pc if _supports_pc2 else "Any"
-                _target_key2 = _draft_key(_saved_type, _target_pc2)
-                st.session_state.my_tier_placement[_target_key2] = _norm_tiers
-                st.session_state.tl_undo_stack[_target_key2] = []
-                st.session_state["_loaded_d_token"] = _qp_d
-                st.session_state.page_mode = "build"
-                st.toast("📥 Loaded shared tier list from link.")
-                st.rerun()
-            except Exception as _e:
-                st.session_state["_loaded_d_token"] = _qp_d
-                st.error(f"Could not decode that share link: {_e}")
-
-        # Build current encoded link
-        if placed_count > 0:
-            _payload_out = {
-                "tiers": {t: list(placement[t]) for t in TIERS},
-                "tier_list_type": current_tl_type,
-                "player_count": current_player_count,
-                "v": 1,
-            }
-            _enc = _b64s.urlsafe_b64encode(
-                _zlib.compress(json.dumps(_payload_out, separators=(",", ":")).encode("utf-8"), 9)
-            ).decode("ascii").rstrip("=")
-            import streamlit.components.v1 as _components
-            _enc_js = json.dumps(_enc)
-            _components.html(
-                f"""
-                <div style="font-family:'Source Sans Pro',sans-serif;margin-top:4px;">
-                  <label style="font-size:14px;color:rgba(250,250,250,0.85);display:block;margin-bottom:4px;">
-                    Self-contained share link:
-                  </label>
-                  <div style="display:flex;gap:6px;">
-                    <input id="shareDBox" type="text" readonly
-                      style="flex:1;padding:8px 10px;border-radius:6px;
-                             border:1px solid rgba(250,250,250,0.2);
-                             background:rgba(38,39,48,1);color:#fafafa;
-                             font-family:'Source Code Pro',monospace;font-size:12px;"/>
-                    <button id="copyDBtn"
-                      style="padding:8px 14px;border-radius:6px;border:none;
-                             background:#ff4b4b;color:white;cursor:pointer;font-weight:600;">Copy</button>
-                  </div>
-                  <div id="copyDMsg" style="font-size:12px;color:#7ee787;margin-top:4px;min-height:16px;"></div>
-                </div>
-                <script>
-                  const enc = {_enc_js};
-                  const loc = window.parent.location;
-                  const url = loc.origin + loc.pathname + "?d=" + enc;
-                  const box = document.getElementById("shareDBox");
-                  const btn = document.getElementById("copyDBtn");
-                  const msg = document.getElementById("copyDMsg");
-                  box.value = url;
-                  btn.addEventListener("click", async () => {{
-                    try {{
-                      await navigator.clipboard.writeText(url);
-                      msg.textContent = "✓ Copied!";
-                      setTimeout(() => {{ msg.textContent = ""; }}, 2000);
-                    }} catch (e) {{
-                      box.select(); document.execCommand("copy");
-                      msg.textContent = "✓ Copied!";
-                      setTimeout(() => {{ msg.textContent = ""; }}, 2000);
-                    }}
-                  }});
-                </script>
-                """,
-                height=110,
-            )
-            st.caption("Anyone who opens this link will see your exact tier list. Long, but no server needed.")
-        else:
-            st.info("Place at least one hero or villain to generate a share link.")
-
-# ─── Offline JSON export / import (always available) ───
-with st.expander("💾 Download / Upload Tier List (JSON)", expanded=False):
-    st.caption(
-        "Save your tier list as a file you can keep, share, or re-upload later. "
-        "Works regardless of whether the online save service is up."
-    )
-    _json_payload = {
-        "tiers": {t: list(placement[t]) for t in TIERS},
-        "tier_list_type": current_tl_type,
-        "player_count": current_player_count,
-        "v": 1,
-    }
-    _json_bytes = json.dumps(_json_payload, indent=2).encode("utf-8")
-    _dl_col, _ul_col = st.columns(2)
-    with _dl_col:
-        st.download_button(
-            "⬇️ Download tier list (.json)",
-            _json_bytes,
-            file_name=f"{current_tl_type}_{current_player_count}.json".lower().replace(" ", "_"),
-            mime="application/json",
-            disabled=placed_count == 0,
-            width="stretch",
-        )
-    with _ul_col:
-        _uploaded = st.file_uploader(
-            "Upload tier list (.json)",
-            type=["json"],
-            key="tl_json_upload",
-            label_visibility="collapsed",
-        )
-        if _uploaded is not None and st.session_state.get("_last_uploaded_name") != _uploaded.name:
-            try:
-                _data_in = json.loads(_uploaded.read().decode("utf-8"))
-                _t_type = _data_in.get("tier_list_type") or current_tl_type
-                _t_pc = _data_in.get("player_count") or "Any"
-                _valid_u = set(all_villains if TIER_LIST_TYPES.get(_t_type, {}).get("subject") == "villains" else all_heroes)
-                _norm_u = {t: [h for h in (_data_in.get("tiers", {}).get(t) or []) if h in _valid_u] for t in TIERS}
-                st.session_state.tier_list_type = _t_type
-                _supports_pc_u = _t_type in PLAYER_COUNT_TYPES
-                _target_pc_u = _t_pc if _supports_pc_u else "Any"
-                _target_key_u = _draft_key(_t_type, _target_pc_u)
-                st.session_state.my_tier_placement[_target_key_u] = _norm_u
-                st.session_state.tl_undo_stack[_target_key_u] = []
-                st.session_state["_last_uploaded_name"] = _uploaded.name
-                st.session_state.page_mode = "build"
-                st.toast("📥 Loaded tier list from JSON.")
-                st.rerun()
-            except Exception as _e:
-                st.error(f"Could not load that file: {_e}")
+    # Feature not configured — keep silent in UI to avoid noise.
+    pass
 
 # ─── Tools (bottom, discrete) ───
 st.markdown("---")
