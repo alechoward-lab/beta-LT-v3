@@ -369,9 +369,7 @@ with page_boundary("good-decks"):
         src = _hero_thumb_src(hero)
         if not src:
             continue
-        # Append #deck-section so the browser auto-scrolls to the deck
-        # immediately after navigation (no JS / iframe needed).
-        href = f"?hero={quote(hero)}#deck-section"
+        href = f"?hero={quote(hero)}"
         safe_name = html_escape(hero)
         is_sel = hero == selected_hero
         cls = "dhg-card selected" if is_sel else "dhg-card"
@@ -392,17 +390,8 @@ with page_boundary("good-decks"):
     cards_html.append("</div>")
 
     _exp_label = f"🦸 Choose hero — currently: {selected_hero}"
-    # If the page was reached via an explicit ?hero= choice, the user has
-    # already picked — collapse the grid so the deck is immediately visible.
-    _hero_in_url = bool(st.query_params.get("hero"))
-    with st.expander(_exp_label, expanded=not _hero_in_url):
+    with st.expander(_exp_label, expanded=True):
         st.markdown("".join(cards_html), unsafe_allow_html=True)
-
-    # Scroll-target anchor for browser-native auto-scroll after a hero pick.
-    st.markdown(
-        '<div id="deck-section" style="scroll-margin-top:80px;"></div>',
-        unsafe_allow_html=True,
-    )
 
     # ── Helpers for badges/labels ──
     def _aspect_chip(aspect: str) -> str:
