@@ -139,7 +139,7 @@ def _render_card_grid(cards, cols_per_row=4, show_qty=True):
                         f'<a href="{card_link}" target="_blank">'
                         f'<img src="{html_escape(img_url)}" '
                         f'style="{_CARD_IMG_STYLE}" '
-                        f'alt="{html_escape(card.get("name",""))}">' 
+                        f'alt="{html_escape(card.get("name",""))}">'
                         f'</a>',
                         unsafe_allow_html=True,
                     )
@@ -179,7 +179,7 @@ def _hero_cards_dialog(hero_name, alter_ego_hint=""):
             st.markdown(
                 f'<a href="{hero_link}" target="_blank">'
                 f'<img src="{html_escape(hero_url)}" style="max-width:200px;width:100%;border-radius:8px;" '
-                f'alt="{html_escape(hero_card.get("name",""))}">' 
+                f'alt="{html_escape(hero_card.get("name",""))}">'
                 f'</a>',
                 unsafe_allow_html=True,
             )
@@ -192,7 +192,7 @@ def _hero_cards_dialog(hero_name, alter_ego_hint=""):
                 st.markdown(
                     f'<a href="{alter_link}" target="_blank">'
                     f'<img src="{html_escape(alter_url)}" style="max-width:200px;width:100%;border-radius:8px;" '
-                    f'alt="{html_escape(alter_card.get("name",""))}">' 
+                    f'alt="{html_escape(alter_card.get("name",""))}">'
                     f'</a>',
                     unsafe_allow_html=True,
                 )

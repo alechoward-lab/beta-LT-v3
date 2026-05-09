@@ -1,5 +1,5 @@
 # villain_weights.py
-villain_weights = {        # E  T CV  S VD TH  R MC  C  S  U LG SI SC MC  
+villain_weights = {        # E  T CV  S VD TH  R MC  C  S  U LG SI SC MC
     "Rhino":                [4, 2, 2, 5, 1, 1, 3, 1, 2, 0, 0, 1, 0, 1, 0],
     "Klaw":                 [4, 4, 1, 1, 1, 5, 2, 5, 1, 0, 0, 1, 0, 1, 1],
     "Ultron":               [4, 0, 1, 3, 1, 1, 1, 8, 1, 0, 2, 1, 0, 3, 1],

@@ -1,0 +1,347 @@
+/* Deck-page consolidated styles. Loaded once via st.markdown so we don't
+   re-inject the same rules per render. Kept in sync with classes used by
+   components/deck_renderer.py and pages/1_good-decks.py. */
+
+.deck-title {
+    font-family: 'Bangers', cursive, Impact, sans-serif;
+    font-size: 26px;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 6px;
+    letter-spacing: 1.2px;
+    text-shadow: 1px 1px 0 #000;
+    line-height: 1.15;
+}
+.deck-summary-note {
+    font-size: 13px;
+    color: #d0d0d0;
+    margin-bottom: 10px;
+    letter-spacing: 0.02em;
+}
+.aspect-badge {
+    display: inline-block;
+    padding: 3px 11px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: white;
+    margin-left: 8px;
+    vertical-align: middle;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.6);
+    box-shadow: 1px 1px 0 rgba(0,0,0,0.45);
+}
+/* Aspect colors tuned for WCAG AA contrast against white text. */
+.aspect-aggression { background-color: #a93226; }
+.aspect-justice    { background-color: #9a7d0a; } /* darkened from #d4a017 for AA */
+.aspect-leadership { background-color: #1f618d; }
+.aspect-protection { background-color: #1e8449; } /* darkened from #27ae60 for AA */
+.aspect-basic      { background-color: #5d6d7e; }
+.aspect-pool       { background-color: #6c3483; }
+
+.card-type-header {
+    font-size: 13px;
+    font-weight: bold;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin: 8px 0 3px 0;
+    border-left: 3px solid;
+    opacity: 0.9;
+}
+.faction-header {
+    font-size: 15px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 6px 10px;
+    border-radius: 8px;
+    margin: 0 0 8px 0;
+    border: 1px solid;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);
+}
+.type-hero       { border-color: #9b59b6; background: rgba(155,89,182,0.18); color: #d6a8e6; }
+.type-aggression { border-color: #c0392b; background: rgba(192,57,43,0.12); color: #e74c3c; }
+.type-justice    { border-color: #d4a017; background: rgba(212,160,23,0.12); color: #f1c40f; }
+.type-leadership { border-color: #2471a3; background: rgba(36,113,163,0.12); color: #3498db; }
+.type-protection { border-color: #27ae60; background: rgba(39,174,96,0.12); color: #2ecc71; }
+.type-basic      { border-color: #7f8c8d; background: rgba(127,140,141,0.12); color: #bdc3c7; }
+.type-pool       { border-color: #8e44ad; background: rgba(142,68,173,0.12); color: #a569bd; }
+
+.card-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin-bottom: 0px;
+    position: relative;
+    border-left: 2px solid transparent;
+    transition: background 0.12s ease, border-color 0.12s ease;
+}
+.card-row:hover { background: rgba(255,255,255,0.07); border-left-color: #ed1c24; }
+.card-qty   { font-weight: bold; font-size: 13px; color: #f0f0f0; min-width: 20px; text-align: center; }
+.card-name  { font-size: 13px; color: #e0e0e0; flex-grow: 1; position: relative; }
+.card-name a { color: #e0e0e0; text-decoration: none; }
+.card-name a:hover  { color: #3498db; text-decoration: underline; }
+.card-name a:focus-visible {
+    outline: 2px solid #3498db;
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+.card-cost { font-size: 11px; color: #aaa; min-width: 30px; text-align: right; }
+
+.aspect-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.dot-aggression { background: #c0392b; }
+.dot-justice    { background: #d4a017; }
+.dot-leadership { background: #2471a3; }
+.dot-protection { background: #27ae60; }
+.dot-basic      { background: #7f8c8d; }
+.dot-pool       { background: #8e44ad; }
+.dot-hero       { background: #95a5a6; }
+
+/* Single shared card hover preview (#10): one floating <img> for all rows. */
+#card-hover-preview {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    width: 250px;
+    border-radius: 6px;
+    border: 2px solid #555;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.7);
+    pointer-events: none;
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+}
+
+.deck-stats {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin: 6px 0 12px 0;
+}
+.deck-stat {
+    background: rgba(255,255,255,0.05);
+    padding: 4px 12px;
+    border-radius: 3px;
+    font-size: 12px;
+    color: #ccc;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-left: 3px solid rgba(237,28,36,0.6);
+}
+.deck-stat strong {
+    color: #f7c948;
+    font-family: 'Bangers', cursive, Impact, sans-serif;
+    letter-spacing: 0.8px;
+    font-size: 14px;
+    margin-right: 3px;
+}
+.mcdb-link {
+    display: inline-block;
+    padding: 4px 14px;
+    background: linear-gradient(180deg, #2980b9 0%, #1a5276 100%);
+    color: white !important;
+    border-radius: 3px;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+    box-shadow: 1px 1px 0 rgba(0,0,0,0.4);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.mcdb-link:hover {
+    background: linear-gradient(180deg, #3498db 0%, #2471a3 100%);
+    color: white !important;
+    transform: translate(-1px, -1px);
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+}
+
+.section-divider {
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    margin: 6px 0;
+}
+
+.deck-section-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    align-items: start;
+    margin-bottom: 10px;
+}
+.deck-section-column { min-width: 0; }
+.faction-section { margin-bottom: 4px; }
+@media (max-width: 900px) {
+    .deck-section-grid { grid-template-columns: 1fr; gap: 0; }
+}
+
+/* ── Hero browse grid ── */
+.dhg-wrap {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 8px;
+    width: 100%;
+    margin-bottom: 8px;
+}
+.dhg-card {
+    position: relative;
+    display: block;
+    text-decoration: none !important;
+    color: inherit !important;
+    border-radius: 7px;
+    overflow: hidden;
+    background: rgba(0,0,0,0.4);
+    border: 2px solid rgba(255,255,255,0.08);
+    transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+}
+.dhg-card:hover {
+    transform: translateY(-2px);
+    border-color: #2471a3;
+    box-shadow: 0 6px 16px rgba(36,113,163,0.4);
+}
+.dhg-card:focus-visible {
+    outline: 3px solid #f7c948;
+    outline-offset: 2px;
+    border-color: #f7c948;
+}
+.dhg-card.selected {
+    border-color: #2471a3;
+    box-shadow: 0 0 0 2px #2471a3, 0 6px 16px rgba(36,113,163,0.5);
+}
+.dhg-imgwrap {
+    width: 100%;
+    aspect-ratio: 1.3;
+    background-color: #111;
+    display: block;
+    overflow: hidden;
+    position: relative;
+}
+.dhg-img {
+    /* Replicate the old `background-size: 135% auto; background-position:
+       center 16%` crop using a real <img> tag (lazy-loadable, accessible).
+       The image is scaled to 135% width and shifted up so the hero's face
+       sits in the visible area instead of the chest/shoulders. */
+    position: absolute;
+    top: 16%;
+    left: 50%;
+    width: 135%;
+    height: auto;
+    transform: translate(-50%, -16%);
+    display: block;
+    pointer-events: none;
+}
+.dhg-name {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #f0f0f0;
+    padding: 3px 3px 5px;
+    line-height: 1.15;
+    background: rgba(0,0,0,0.55);
+}
+.dhg-card.selected .dhg-name {
+    background: #2471a3;
+    color: #fff;
+}
+.dhg-badge {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    background: #2471a3;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 3px;
+    box-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+}
+
+/* ── Sticky "currently: X" mobile bar (#1) ── */
+.dhg-sticky-bar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: linear-gradient(180deg, rgba(15,15,20,0.96), rgba(15,15,20,0.85));
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding: 6px 10px;
+    margin: -6px -10px 8px -10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #ddd;
+}
+.dhg-sticky-bar strong { color: #f7c948; font-weight: 700; }
+.dhg-sticky-bar .dhg-sticky-link {
+    margin-left: auto;
+    color: #3498db;
+    font-weight: 600;
+    text-decoration: none;
+}
+.dhg-sticky-bar .dhg-sticky-link:hover { text-decoration: underline; }
+
+/* ── Tab labels with aspect chips (#6) ── */
+.deck-tab-aspect-chip {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+
+/* ── Highlight the active deck tab in green ── */
+.stApp [data-baseweb="tab-list"] [role="tab"][aria-selected="true"] {
+    background-color: #1e7e34 !important;
+    color: #ffffff !important;
+    border-radius: 6px 6px 0 0;
+    box-shadow: inset 0 -3px 0 #145523;
+    padding-left: 16px !important;
+    padding-right: 20px !important;
+}
+.stApp [data-baseweb="tab-list"] [role="tab"][aria-selected="true"] p {
+    color: #ffffff !important;
+    font-weight: 700;
+}
+
+/* ── Floating hero art toggle (#5) ── */
+.card-float {
+    position: fixed;
+    bottom: 20px;
+    z-index: 999;
+    transition: left 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+.card-float-left  { left: 20px;  transform-origin: bottom left; }
+.card-float-right { right: 20px; transform-origin: bottom right; }
+.stApp:has([data-testid="stSidebar"][aria-expanded="true"]) .card-float-left { left: 340px; }
+.card-float img {
+    width: 160px;
+    border-radius: 10px;
+    border: 2px solid rgba(255,255,255,0.6);
+    box-shadow: 0 6px 25px rgba(0,0,0,0.6), 0 0 8px rgba(255,255,255,0.15);
+    display: block;
+    transition: border 0.3s ease, box-shadow 0.3s ease;
+}
+.card-float:hover { transform: scale(1.6); }
+.card-float:hover img {
+    border-color: rgba(255,255,255,0.9);
+    box-shadow: 0 0 15px rgba(255,255,255,0.5), 0 0 30px rgba(255,255,255,0.2), 0 12px 40px rgba(0,0,0,0.8);
+}
+@media (max-width: 1200px) {
+    body:not(.show-hero-art) .card-float { display: none; }
+}
+@media (max-width: 700px) {
+    /* Always hide on phones regardless of toggle. */
+    .card-float { display: none !important; }
+}

@@ -5,7 +5,6 @@ Hero Comparison Tool - Compare two heroes side-by-side
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.patches import Patch
 
 from data.hero_image_urls import hero_image_urls
 from components.hero_stats_manager import initialize_hero_stats, get_heroes, render_hero_stats_editor
@@ -13,7 +12,7 @@ from data.preset_options import preset_options
 from data.hero_decks import hero_decks
 from data.constants import STAT_NAMES
 from components.nav_banner import render_nav_banner, render_page_header, render_footer
-from data.hero_release_order import HERO_WAVE, WAVE_ORDER, HERO_LEGACY, LEGACY_WAVE_ORDER
+from data.hero_release_order import HERO_WAVE, WAVE_ORDER, HERO_LEGACY
 
 render_nav_banner("hero-comparison")
 
@@ -37,7 +36,7 @@ with col1:
     preset_options_list = list(preset_options.keys()) + ["Custom"]
     if "custom_presets" in st.session_state:
         preset_options_list.extend(list(st.session_state.custom_presets.keys()))
-    
+
     preset_choice = st.selectbox(
         "Weighting Preset",
         preset_options_list,
@@ -54,10 +53,10 @@ elif preset_choice != "Custom" and preset_choice in preset_options:
 else:
     # Custom weighting - show sliders
     factor_names = STAT_NAMES
-    
+
     weights = []
     col_a, col_b = st.columns(2)
-    
+
     for i, factor in enumerate(factor_names):
         col = col_a if i % 2 == 0 else col_b
         with col:
@@ -70,7 +69,7 @@ else:
                 help=help_tips.get(factor, "")
             )
             weights.append(weight)
-    
+
     weighting = np.array(weights)
 
 st.markdown("---")
@@ -294,7 +293,7 @@ with col2:
     elif power_2 > power_1:
         st.error(f"❌ {hero_2} Wins\n(+{power_2 - power_1:.1f})")
     else:
-        st.info(f"🟰 Tied")
+        st.info("🟰 Tied")
 
 with col3:
     st.metric(hero_2, f"{power_2:.1f}")
@@ -308,12 +307,12 @@ with col1:
     st.markdown(f"**{hero_1}**")
     strengths_1 = [(factor_names[i], int(stats_1[i])) for i in range(len(factor_names)) if stats_1[i] >= 3]
     weaknesses_1 = [(factor_names[i], int(stats_1[i])) for i in range(len(factor_names)) if stats_1[i] <= -3]
-    
+
     if strengths_1:
         st.markdown("**Top Strengths:**")
         for stat, val in sorted(strengths_1, key=lambda x: x[1], reverse=True)[:3]:
             st.write(f"- {stat}: {val:+d}")
-    
+
     if weaknesses_1:
         st.markdown("**Main Weaknesses:**")
         for stat, val in sorted(weaknesses_1, key=lambda x: x[1])[:3]:
@@ -323,12 +322,12 @@ with col2:
     st.markdown(f"**{hero_2}**")
     strengths_2 = [(factor_names[i], int(stats_2[i])) for i in range(len(factor_names)) if stats_2[i] >= 3]
     weaknesses_2 = [(factor_names[i], int(stats_2[i])) for i in range(len(factor_names)) if stats_2[i] <= -3]
-    
+
     if strengths_2:
         st.markdown("**Top Strengths:**")
         for stat, val in sorted(strengths_2, key=lambda x: x[1], reverse=True)[:3]:
             st.write(f"- {stat}: {val:+d}")
-    
+
     if weaknesses_2:
         st.markdown("**Main Weaknesses:**")
         for stat, val in sorted(weaknesses_2, key=lambda x: x[1])[:3]:

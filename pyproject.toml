@@ -1,0 +1,22 @@
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+extend-exclude = [".venv", "data/_mcdb_cache"]
+
+[tool.ruff.lint]
+# Keep the rule set conservative — this is an existing codebase, not a fresh
+# project, so we want CI to flag real bugs (F = pyflakes) and basic style
+# issues (E/W = pycodestyle) without rewriting the world.
+select = ["E", "F", "W", "I"]
+# Ignore overly-strict line length, ambiguous variable name (Streamlit pages
+# legitimately use _ prefixed names), and import-order rewrites in pages/
+# (Streamlit requires render_nav_banner before any other st.* call).
+ignore = ["E501", "E741", "I001"]
+
+[tool.ruff.lint.per-file-ignores]
+"pages/*.py" = ["E402"]   # render_nav_banner imports happen after st imports
+"home.py"    = ["E402"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts   = "-q"

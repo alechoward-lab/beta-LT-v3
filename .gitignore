@@ -16,3 +16,10 @@ env/
 # OS files
 .DS_Store
 Thumbs.db
+
+# MarvelCDB API snapshot cache (rebuilt at runtime)
+data/_mcdb_cache/
+
+# Ruff temp output
+ruff_out.txt
+ruff_stats.txt

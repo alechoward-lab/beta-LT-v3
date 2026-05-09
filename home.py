@@ -13,7 +13,7 @@ from data.hero_image_urls import hero_image_urls
 from data.villain_image_urls import villain_image_urls
 from data.constants import TIER_COLORS, HERO_ALTER_EGOS
 from data.preset_options import preset_options
-from data.hero_release_order import HERO_RELEASE_INDEX, HERO_WAVE, WAVE_ORDER, HERO_LEGACY, LEGACY_WAVE_ORDER
+from data.hero_release_order import HERO_RELEASE_INDEX, HERO_WAVE, WAVE_ORDER, HERO_LEGACY
 from data.villain_release_order import VILLAIN_RELEASE_INDEX, VILLAIN_WAVE, VILLAIN_WAVE_ORDER, VILLAIN_LEGACY
 from components.github_storage import load_json, save_json
 from components.nav_banner import render_nav_banner, render_page_header, render_footer
@@ -545,7 +545,7 @@ if st.session_state.page_mode == "view":
     }
     </style>
     """ % _community_row_h, unsafe_allow_html=True)
-    
+
     st.markdown("### 🏆 Community Tier List")
     if not active_submissions:
         st.info("No submissions yet — be the first to contribute!")
@@ -596,7 +596,8 @@ if st.session_state.page_mode == "view":
             _pc_label = f" ({current_player_count})" if supports_player_count and current_player_count != "Any" else ""
             st.caption(f"Based on **{len(active_submissions)}** community submission(s){_pc_label}")
 
-            import base64 as _b64_view, os as _os_view
+            import base64 as _b64_view
+            import os as _os_view
             @st.cache_data(show_spinner=False)
             def _img_data_uri_view(path):
                 if not path or not _os_view.path.exists(path):
@@ -613,7 +614,7 @@ if st.session_state.page_mode == "view":
                 members = comm_tiers[tier]
                 if not members:
                     continue
-                comm_html.append(f'<div style="display:flex;align-items:stretch;gap:0;">')
+                comm_html.append('<div style="display:flex;align-items:stretch;gap:0;">')
                 comm_html.append(f'<div class="tier-label-block" style="--tier-color:{TIER_COLORS[tier]};min-width:52px;max-width:52px;flex-shrink:0;{_tier_label_extra}">{tier}</div>')
                 comm_html.append('<div style="display:flex;flex-wrap:wrap;gap:0;flex:1;align-items:flex-start;">')
                 for subj, avg in members:
@@ -1136,7 +1137,7 @@ if unplaced_subjects:
         if st.button(gs_label, key="toggle_group_mode", width="stretch",
                      help="Toggle group-select mode to pick multiple, then place them together"):
             st.session_state.tl_group_mode = not group_mode
-            if not group_mode is False:
+            if group_mode is not False:
                 pass  # keep selections when toggling on
             st.rerun()
     with ctrl4:
@@ -1169,7 +1170,7 @@ if unplaced_subjects:
     _compact_grid = " compact-cards" if st.session_state.tl_compact else ""
     st.markdown(f'<div class="hero-assignment-section{_compact_grid}"></div>', unsafe_allow_html=True)
     st.caption(f"{len(filtered_subjects)} of {len(unplaced_subjects)} {subject_name_plural} remaining"
-               + (f" (filtered)" if search_filter else ""))
+               + (" (filtered)" if search_filter else ""))
 
     # Hero card viewer (hero lists only)
     if not is_villain_list:
@@ -1393,7 +1394,6 @@ else:
         )
         import base64 as _b64s
         import zlib as _zlib
-        import urllib.parse as _urlparse2
 
         # Auto-load from ?d= encoded payload
         _qp_d = st.query_params.get("d")

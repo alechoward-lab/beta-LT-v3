@@ -16,9 +16,8 @@ from data.default_heroes import default_heroes
 from data.preset_options import preset_options
 from data.help_tips import help_tips
 from data.constants import STAT_NAMES, TIER_COLORS, DEFAULT_WEIGHTS, HERO_ALTER_EGOS
-from components.github_storage import load_json
 from components.weighting_utils import update_preset
-from data.hero_release_order import HERO_WAVE, WAVE_ORDER, HERO_LEGACY, LEGACY_WAVE_ORDER
+from data.hero_release_order import HERO_WAVE, WAVE_ORDER, HERO_LEGACY
 from components.nav_banner import render_nav_banner, render_page_header, render_footer
 from components.hero_card_viewer import render_hero_card_viewer
 
@@ -412,7 +411,8 @@ if st.session_state.hd_view:
 </style>
 """, unsafe_allow_html=True)
 
-    import base64, os
+    import base64
+    import os
 
     @st.cache_resource(show_spinner=False)
     def _build_data_uri_map():
@@ -485,7 +485,6 @@ if all_hero_names:
 def build_tier_list_image(tiers, tier_colors, plot_title):
     """Render the tier list as a vertical image with hero card thumbnails."""
     from PIL import Image
-    import urllib.request
     import os
 
     tier_order = ["S", "A", "B", "C", "D", "F"]
