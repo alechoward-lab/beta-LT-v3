@@ -12,13 +12,14 @@ LOGO_URL = "https://github.com/alechoward-lab/Marvel-Champions-Hero-Tier-List/bl
 
 NAV_PAGES = [
     ("Community Tier Lists", "/", "home"),
-    ("Out of the Box", "/hero-tier-list", "hero-tier-list"),
     ("Decks For Every Hero", "/good-decks", "good-decks"),
+    ("Out of the Box", "/hero-tier-list", "hero-tier-list"),
     ("Hero Pairings", "/hero-pairings", "hero-pairings"),
     ("Team Builder", "/team-builder", "team-builder"),
     ("Team Generator", "/team-generator", "team-generator"),
-    ("Recommender", "/hero-recommender", "hero-recommender"),
+    ("Hero Recommender", "/hero-recommender", "hero-recommender"),
     ("Hero Comparison", "/hero-comparison", "hero-comparison"),
+    ("Hero Cards", "/hero-cards", "hero-cards"),
     ("YouTube", "/youtube-channel", "youtube-channel"),
     ("Villain Tier List", "/villain-tier-list", "villain-tier-list"),
 ]
@@ -43,14 +44,32 @@ def render_nav_banner(current_page=""):
     _bg_url_light = "./app/static/bg_v5.jpg"
 
     st.markdown(f"""<style>
-@import url('https://fonts.googleapis.com/css2?family=Bangers&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bangers&family=Inter:wght@400;500;600;700&display=swap');
+
+/* ── Body typography ── */
+.stApp, .stApp p, .stApp li, .stApp label,
+[data-testid="stMarkdownContainer"] p,
+[data-testid="stMarkdownContainer"] li {{
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}}
+/* Preserve Streamlit's Material Symbols icon font */
+[data-testid="stIconMaterial"],
+.material-symbols-rounded,
+.material-symbols-outlined,
+.material-icons {{
+    font-family: 'Material Symbols Rounded', 'Material Symbols Outlined', 'Material Icons' !important;
+}}
 
 .stApp {{
     background: url({_bg_url}) no-repeat center center fixed;
     background-size: cover;
 }}
 [data-testid="stMainBlockContainer"] {{
-    background: rgba(10, 10, 28, 0.96);
+    background: linear-gradient(180deg, rgba(12, 12, 30, 0.97) 0%, rgba(8, 8, 22, 0.97) 100%);
+    border-left: 1px solid rgba(255,255,255,0.04);
+    border-right: 1px solid rgba(255,255,255,0.04);
 }}
 
 /* ── Nav Banner — Comic Book Tab Bar ── */
@@ -58,7 +77,7 @@ def render_nav_banner(current_page=""):
     display: flex;
     align-items: center;
     gap: 4px;
-    background: #0d0d1a;
+    background: linear-gradient(180deg, #15152a 0%, #0a0a18 100%);
     padding: 6px 10px;
     border-radius: 0px;
     margin-bottom: 18px;
@@ -66,7 +85,7 @@ def render_nav_banner(current_page=""):
     justify-content: center;
     border: 3px solid #222;
     border-bottom: 4px solid #ed1c24;
-    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.6);
+    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.05);
     position: relative;
 }}
 .nav-link {{
@@ -87,12 +106,21 @@ def render_nav_banner(current_page=""):
     background: rgba(255, 255, 255, 0.08);
     color: #ffffff;
     text-decoration: none;
+    transform: translateY(-1px);
 }}
 .nav-active {{
-    background: #ed1c24 !important;
+    background: linear-gradient(180deg, #ed1c24 0%, #b71c1c 100%) !important;
     color: #ffffff !important;
     border: none;
-    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.25) !important;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.4);
+}}
+
+/* ── Accessible focus rings ── */
+*:focus-visible {{
+    outline: 2px solid #f7c948 !important;
+    outline-offset: 2px !important;
+    border-radius: 4px;
 }}
 
 /* ── Comic-style borders on key containers ── */
@@ -245,19 +273,69 @@ hr {{
     to   {{ opacity: 1; transform: translateY(0); }}
 }}
 
-/* ── Scrollbar ── */
+/* ── Scrollbar — modern, comic accent ── */
 ::-webkit-scrollbar {{
-    width: 8px;
+    width: 10px;
+    height: 10px;
 }}
 ::-webkit-scrollbar-track {{
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.25);
 }}
 ::-webkit-scrollbar-thumb {{
-    background: rgba(237, 28, 36, 0.4);
-    border-radius: 4px;
+    background: linear-gradient(180deg, rgba(237,28,36,0.55) 0%, rgba(183,28,28,0.55) 100%);
+    border-radius: 6px;
+    border: 2px solid rgba(0,0,0,0.3);
+    background-clip: padding-box;
 }}
 ::-webkit-scrollbar-thumb:hover {{
-    background: rgba(237, 28, 36, 0.6);
+    background: linear-gradient(180deg, rgba(237,28,36,0.85) 0%, rgba(183,28,28,0.85) 100%);
+    background-clip: padding-box;
+}}
+
+/* ── Polish: text inputs & selects ── */
+[data-baseweb="input"] input,
+[data-testid="stTextInput"] input,
+[data-testid="stTextArea"] textarea {{
+    border-radius: 4px !important;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}}
+[data-baseweb="input"] input:focus,
+[data-testid="stTextInput"] input:focus,
+[data-testid="stTextArea"] textarea:focus {{
+    border-color: rgba(237,28,36,0.6) !important;
+    box-shadow: 0 0 0 2px rgba(237,28,36,0.18) !important;
+}}
+
+/* ── Polish: multiselect / select tags ── */
+[data-baseweb="tag"] {{
+    background: linear-gradient(180deg, #ed1c24 0%, #b71c1c 100%) !important;
+    color: #fff !important;
+    border-radius: 3px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    font-size: 11px !important;
+}}
+
+/* ── Polish: alerts ── */
+[data-testid="stAlert"] {{
+    border-radius: 4px !important;
+    border-left: 4px solid #ed1c24 !important;
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.4) !important;
+}}
+
+/* ── Polish: metrics ── */
+[data-testid="stMetric"] {{
+    background: rgba(255,255,255,0.04) !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    border-left: 3px solid #ed1c24 !important;
+    border-radius: 4px !important;
+    padding: 10px 14px !important;
+}}
+[data-testid="stMetricValue"] {{
+    font-family: 'Bangers', cursive, Impact, sans-serif !important;
+    letter-spacing: 1.5px !important;
+    color: #f7c948 !important;
 }}
 
 /* ── Mobile-friendly adjustments ── */
@@ -760,15 +838,24 @@ code {{
     display: flex;
     justify-content: center;
     align-items: center;
-    background: #0d0d1a;
+    background: linear-gradient(180deg, #15152a 0%, #0a0a18 100%);
     padding: 14px 20px;
     border: 3px solid #222;
     border-bottom: 4px solid #ed1c24;
     border-radius: 0px;
-    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.6);
+    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.05);
     margin-bottom: 16px;
     text-align: center;
     position: relative;
+    overflow: hidden;
+}}
+.page-header::before {{
+    content: "";
+    position: absolute;
+    top: 0; left: -50%;
+    width: 200%; height: 100%;
+    background: radial-gradient(ellipse at center top, rgba(237,28,36,0.10) 0%, transparent 60%);
+    pointer-events: none;
 }}
 .page-header .logo {{
     height: 50px;
@@ -841,22 +928,33 @@ code {{
 
 def render_footer(show_card_credits=False):
     """Render a consistent footer across all pages."""
-    st.markdown("---")
+    st.markdown(
+        '<div style="height:2px;margin:24px 0 14px 0;'
+        'background:linear-gradient(90deg, transparent 0%, rgba(237,28,36,0.8) 20%, rgba(237,28,36,0.8) 80%, transparent 100%);"></div>',
+        unsafe_allow_html=True,
+    )
     credits = (
-        '<span style="font-family:Bangers,cursive;font-size:14px;letter-spacing:1px;color:#f7c948;">CREATED BY</span> '
-        '<a href="https://www.youtube.com/channel/UCpV2UWmBTAeIKUso1LkeU2A" target="_blank" style="color:#ed1c24;font-weight:bold;">DARING LIME</a>'
+        '<span style="font-family:Bangers,cursive;font-size:14px;letter-spacing:1.5px;color:#f7c948;">CREATED BY</span> '
+        '<a href="https://www.youtube.com/channel/UCpV2UWmBTAeIKUso1LkeU2A" target="_blank" '
+        'style="color:#ed1c24;font-weight:bold;text-decoration:none;">DARING LIME</a>'
         ' &nbsp;·&nbsp; '
-        '<a href="https://discord.gg/ReF5jDSHqV" target="_blank" style="color:#ed1c24;font-weight:bold;">DISCORD</a>'
+        '<a href="https://discord.gg/ReF5jDSHqV" target="_blank" '
+        'style="color:#ed1c24;font-weight:bold;text-decoration:none;">DISCORD</a>'
         ' &nbsp;·&nbsp; '
-        '<span style="color:#888;">Card data by</span> <a href="https://marvelcdb.com" target="_blank" style="color:#ed1c24;">MarvelCDB</a>'
+        '<span style="color:#888;">Card data by</span> '
+        '<a href="https://marvelcdb.com" target="_blank" style="color:#ed1c24;text-decoration:none;">MarvelCDB</a>'
     )
     if show_card_credits:
         credits += (
             ' &nbsp;·&nbsp; '
-            '<span style="color:#888;">Card images from the Cerebro Discord bot by UnicornSnuggler</span>'
+            '<span style="color:#888;">Card images via Cerebro Discord bot by UnicornSnuggler</span>'
         )
     st.markdown(
-        f'<div style="text-align:center; font-size:12px; padding:8px 0 16px 0; '
-        f'border-top: 2px solid rgba(237,28,36,0.3);">{credits}</div>',
+        f'<div class="site-footer" style="text-align:center; font-size:12px; '
+        f'padding:14px 18px; margin: 0 0 10px 0; '
+        f'background: rgba(255,255,255,0.03); '
+        f'border: 1px solid rgba(255,255,255,0.06); '
+        f'border-radius: 4px; '
+        f'box-shadow: 2px 2px 0 rgba(0,0,0,0.4);">{credits}</div>',
         unsafe_allow_html=True,
     )

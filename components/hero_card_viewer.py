@@ -248,13 +248,18 @@ def render_hero_card_viewer(hero_names, alter_egos=None, key_prefix="hcv"):
         _hero_cards_dialog(selected, alter_egos.get(selected, ""))
 
 
-def show_hero_cards_button(hero_name, alter_ego_hint="", key="hcv_inline"):
-    """Render a single '🃏 Cards' button that opens the hero card dialog.
+def show_hero_cards_button(hero_name, alter_ego_hint="", key="hcv_inline", label="🃏"):
+    """Render a single button that opens the hero card dialog.
 
     Intended for use inline in control rows (e.g. tier-list edit controls).
     Returns True if the button was clicked.
     """
-    if st.button("🃏", key=key, help=f"View {hero_name}'s cards"):
+    if st.button(label, key=key, help=f"View {hero_name}'s cards"):
         _hero_cards_dialog(hero_name, alter_ego_hint)
         return True
     return False
+
+
+def open_hero_cards_dialog(hero_name, alter_ego_hint=""):
+    """Programmatically open the hero card dialog."""
+    _hero_cards_dialog(hero_name, alter_ego_hint)

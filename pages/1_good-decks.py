@@ -7,11 +7,17 @@ import requests
 import json
 import re
 import random
+import os
+import base64
+from urllib.parse import quote
+import numpy as np
 from html import escape as html_escape
 from data.hero_decks import hero_decks
 from data.hero_image_urls import hero_image_urls
+from data.constants import HERO_ALTER_EGOS
 from components.nav_banner import render_nav_banner, render_page_header, render_footer
-from components.hero_card_viewer import get_obligation_nemesis
+from components.hero_card_viewer import get_obligation_nemesis, open_hero_cards_dialog
+from components.github_storage import load_json
 from data.hero_release_order import HERO_RELEASE_INDEX, HERO_WAVE, WAVE_ORDER
 
 render_nav_banner("good-decks")
@@ -20,10 +26,14 @@ render_nav_banner("good-decks")
 st.markdown("""
 <style>
     .deck-title {
-        font-size: 22px;
+        font-family: 'Bangers', cursive, Impact, sans-serif;
+        font-size: 26px;
         font-weight: bold;
         color: white;
-        margin-bottom: 4px;
+        margin-bottom: 6px;
+        letter-spacing: 1.2px;
+        text-shadow: 1px 1px 0 #000;
+        line-height: 1.15;
     }
     .deck-summary-note {
         font-size: 13px;
@@ -33,12 +43,17 @@ st.markdown("""
     }
     .aspect-badge {
         display: inline-block;
-        padding: 2px 10px;
-        border-radius: 10px;
-        font-size: 12px;
-        font-weight: bold;
+        padding: 3px 11px;
+        border-radius: 3px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
         color: white;
-        margin-left: 6px;
+        margin-left: 8px;
+        vertical-align: middle;
+        text-shadow: 0 1px 1px rgba(0,0,0,0.4);
+        box-shadow: 1px 1px 0 rgba(0,0,0,0.45);
     }
     .aspect-aggression { background-color: #c0392b; }
     .aspect-justice { background-color: #d4a017; }
@@ -67,7 +82,7 @@ st.markdown("""
         border: 1px solid;
         box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);
     }
-    .type-hero { border-color: #95a5a6; background: rgba(149,165,166,0.15); color: #bdc3c7; }
+    .type-hero { border-color: #9b59b6; background: rgba(155,89,182,0.18); color: #d6a8e6; }
     .type-aggression { border-color: #c0392b; background: rgba(192,57,43,0.12); color: #e74c3c; }
     .type-justice { border-color: #d4a017; background: rgba(212,160,23,0.12); color: #f1c40f; }
     .type-leadership { border-color: #2471a3; background: rgba(36,113,163,0.12); color: #3498db; }
@@ -79,13 +94,16 @@ st.markdown("""
         display: flex;
         align-items: center;
         gap: 6px;
-        padding: 1px 6px;
+        padding: 2px 8px;
         border-radius: 3px;
         margin-bottom: 0px;
         position: relative;
+        border-left: 2px solid transparent;
+        transition: background 0.12s ease, border-color 0.12s ease;
     }
     .card-row:hover {
-        background: rgba(255,255,255,0.06);
+        background: rgba(255,255,255,0.07);
+        border-left-color: #ed1c24;
     }
     .card-qty {
         font-weight: bold;
@@ -151,35 +169,46 @@ st.markdown("""
     }
     .deck-stats {
         display: flex;
-        gap: 12px;
+        gap: 10px;
         flex-wrap: wrap;
-        margin: 4px 0 8px 0;
+        align-items: center;
+        margin: 6px 0 12px 0;
     }
     .deck-stat {
         background: rgba(255,255,255,0.05);
-        padding: 3px 10px;
-        border-radius: 6px;
+        padding: 4px 12px;
+        border-radius: 3px;
         font-size: 12px;
         color: #ccc;
+        border: 1px solid rgba(255,255,255,0.07);
+        border-left: 3px solid rgba(237,28,36,0.6);
     }
     .deck-stat strong {
-        color: white;
+        color: #f7c948;
+        font-family: 'Bangers', cursive, Impact, sans-serif;
+        letter-spacing: 0.8px;
+        font-size: 14px;
+        margin-right: 3px;
     }
     .mcdb-link {
         display: inline-block;
-        padding: 4px 12px;
-        background: #2471a3;
+        padding: 4px 14px;
+        background: linear-gradient(180deg, #2980b9 0%, #1a5276 100%);
         color: white !important;
-        border-radius: 5px;
+        border-radius: 3px;
         text-decoration: none;
         font-size: 12px;
-        font-weight: bold;
+        font-weight: 700;
+        letter-spacing: 0.5px;
         margin-top: 2px;
-        transition: background 0.2s;
+        box-shadow: 1px 1px 0 rgba(0,0,0,0.4);
+        transition: transform 0.12s ease, box-shadow 0.12s ease;
     }
     .mcdb-link:hover {
-        background: #1a5276;
+        background: linear-gradient(180deg, #3498db 0%, #2471a3 100%);
         color: white !important;
+        transform: translate(-1px, -1px);
+        box-shadow: 2px 2px 0 rgba(0,0,0,0.5);
     }
     .section-divider {
         border: none;
@@ -207,56 +236,68 @@ st.markdown("""
         }
     }
 
-    /* ── Hero browse grid: overlay Select button on hover ── */
-    [data-testid="stVerticalBlock"]:has(.deck-hero-browse) [data-testid="stColumn"] {
-        position: relative;
-        padding: 0 !important;
-        overflow: hidden;
+    /* ── Hero browse grid: cropped (compact) hero cards with centered button below ── */
+    [data-testid="stVerticalBlock"]:has(.deck-hero-browse) [data-testid="stImage"] {
+        overflow: hidden !important;
+        aspect-ratio: 1.153;
+        border-radius: 6px;
+        width: 100% !important;
     }
-    /* The inner vertical block inside each column: no gaps, relative for containment */
-    [data-testid="stVerticalBlock"]:has(.deck-hero-browse) [data-testid="stColumn"] > [data-testid="stVerticalBlockBorderWrapper"] {
-        position: relative;
-    }
-    [data-testid="stVerticalBlock"]:has(.deck-hero-browse) [data-testid="stColumn"] > [data-testid="stVerticalBlockBorderWrapper"] > div > [data-testid="stVerticalBlock"] {
-        position: relative;
-    }
-    /* Button container: fill column, sit on top of image */
-    [data-testid="stVerticalBlock"]:has(.deck-hero-browse) [data-testid="stColumn"] .stButton {
-        position: absolute !important;
-        top: 0 !important;
-        left: 0 !important;
+    [data-testid="stVerticalBlock"]:has(.deck-hero-browse) [data-testid="stImage"] img {
         width: 100% !important;
         height: 100% !important;
-        z-index: 10;
-        opacity: 0;
-        transition: opacity 0.2s ease;
-        pointer-events: none;
-        margin: 0 !important;
+        object-fit: cover !important;
+        object-position: center top !important;
+        display: block !important;
+    }
+    [data-testid="stVerticalBlock"]:has(.deck-hero-browse) [data-testid="stColumn"] {
         padding: 0 !important;
     }
-    [data-testid="stVerticalBlock"]:has(.deck-hero-browse) [data-testid="stColumn"]:hover .stButton {
-        opacity: 1;
-        pointer-events: auto;
+    [data-testid="stVerticalBlock"]:has(.deck-hero-browse) [data-testid="stColumn"] [data-testid="stVerticalBlock"] {
+        gap: 2px !important;
+    }
+    /* Centered, obvious select button below the image */
+    [data-testid="stVerticalBlock"]:has(.deck-hero-browse) [data-testid="stColumn"] .stButton {
+        margin: 2px 0 0 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        display: flex !important;
+        justify-content: center !important;
     }
     [data-testid="stVerticalBlock"]:has(.deck-hero-browse) [data-testid="stColumn"] .stButton > button {
         width: 100% !important;
-        height: 100% !important;
-        background: rgba(0, 0, 0, 0.5) !important;
+        background: #2471a3 !important;
         color: #fff !important;
-        border: 2px solid rgba(255,255,255,0.4) !important;
-        border-radius: 8px !important;
-        font-size: 14px !important;
-        font-weight: 600 !important;
-        padding: 0 !important;
+        border: 2px solid #222 !important;
+        border-bottom: 3px solid #222 !important;
+        border-radius: 4px !important;
+        font-size: 12px !important;
+        font-weight: 700 !important;
+        padding: 4px 0 !important;
         margin: 0 !important;
+        text-align: center !important;
+        line-height: 1.1 !important;
+        white-space: nowrap !important;
+        box-shadow: 1px 1px 0 rgba(0,0,0,0.4) !important;
+    }
+    [data-testid="stVerticalBlock"]:has(.deck-hero-browse) [data-testid="stColumn"] .stButton > button:hover {
+        background: #1a5276 !important;
+        border-color: #fff !important;
+    }
+    /* Highlight currently-selected hero with primary button styling */
+    [data-testid="stVerticalBlock"]:has(.deck-hero-browse) [data-testid="stColumn"] .stButton > button[kind="primary"] {
+        background: #ed1c24 !important;
+        border-color: #fff !important;
     }
     [data-testid="stVerticalBlock"]:has(.deck-hero-browse) [data-testid="stHorizontalBlock"] {
-        gap: 4px !important;
-        margin-bottom: 2px !important;
+        gap: 6px !important;
+        margin-bottom: 8px !important;
     }
-    [data-testid="stVerticalBlock"]:has(.deck-hero-browse) [data-testid="stVerticalBlockBorderWrapper"],
-    [data-testid="stVerticalBlock"]:has(.deck-hero-browse) [data-testid="stVerticalBlock"] {
-        gap: 0 !important;
+    [data-testid="stVerticalBlock"]:has(.deck-hero-browse) [data-testid="stCaptionContainer"] {
+        text-align: center;
+        font-size: 11px !important;
+        margin: 2px 0 4px 0 !important;
+        padding: 0 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -273,9 +314,13 @@ def fetch_all_cards():
     return {card["code"]: card for card in cards}
 
 
-@st.cache_data(ttl=3600, show_spinner="Loading deck...")
+@st.cache_data(ttl=300, show_spinner="Loading deck...")
 def fetch_deck(deck_id, api_type):
-    """Fetch a single deck or decklist from MarvelCDB."""
+    """Fetch a single deck or decklist from MarvelCDB.
+
+    Short TTL (5 min) so authors who update their decks on MarvelCDB don't
+    have to wait for a server reboot to see the latest version.
+    """
     if api_type == "decklist":
         url = f"https://marvelcdb.com/api/public/decklist/{deck_id}"
     else:
@@ -283,6 +328,41 @@ def fetch_deck(deck_id, api_type):
     resp = requests.get(url, timeout=30)
     resp.raise_for_status()
     return resp.json()
+
+
+# ─── Community tier helper ──────────────────────────────────────────────────
+_TIER_PTS_DECK = {"S": 6, "A": 5, "B": 4, "C": 3, "D": 2, "F": 1}
+
+
+@st.cache_data(ttl=600, show_spinner=False)
+def _community_hero_avg():
+    """Return {hero: avg_tier_pts} from the community Hero Power tier list."""
+    try:
+        data, _ = load_json("community_tier_lists.json", default={})
+    except Exception:
+        return {}
+    subs = (data.get("hero_power", {}) or {}).get("submissions", []) or []
+    if len(subs) < 2:
+        return {}
+    pts = {}
+    for s in subs:
+        for t, hl in (s or {}).items():
+            p = _TIER_PTS_DECK.get(t)
+            if p is None:
+                continue
+            for h in (hl or []):
+                pts.setdefault(h, []).append(p)
+    return {h: float(np.mean(v)) for h, v in pts.items() if v}
+
+
+def _community_tier_for(hero_name):
+    """Return ('S' | 'A' | ... | None, avg_score | None) for a hero."""
+    avg_map = _community_hero_avg()
+    if hero_name not in avg_map:
+        return None, None
+    avg = avg_map[hero_name]
+    tier = min(_TIER_PTS_DECK.keys(), key=lambda t: abs(_TIER_PTS_DECK[t] - avg))
+    return tier, avg
 
 
 # ─── Display helpers ───
@@ -509,9 +589,9 @@ def render_card_section_html(cards_with_qty, section_class, show_aspect_dot=Fals
     return "".join(html_parts)
 
 
-def render_sorted_cards_html(cards_with_qty, sort_mode, show_aspect_dot=False):
+def render_sorted_cards_html(cards_with_qty, sort_mode, show_aspect_dot=False, prepend_blocks=None):
     """Build HTML for cards sorted/grouped by the chosen mode. Returns HTML string."""
-    section_blocks = []
+    section_blocks = list(prepend_blocks) if prepend_blocks else []
 
     if sort_mode == "name":
         sorted_cards = sorted(cards_with_qty, key=lambda x: x[0].get("name", "").lower())
@@ -606,16 +686,51 @@ def render_deck(deck_data, card_db, show_header=True):
         else:
             aspect_cards.append((card, qty))
 
+    # Merge duplicate printings (same card name) into a single row with summed qty
+    def _merge_by_name(cards_with_qty):
+        merged = {}
+        order = []
+        for card, qty in cards_with_qty:
+            key = card.get("name", "")
+            if key in merged:
+                existing_card, existing_qty = merged[key]
+                # Prefer a printing that has an image so the hover preview works
+                if not existing_card.get("imagesrc") and card.get("imagesrc"):
+                    existing_card = card
+                merged[key] = (existing_card, existing_qty + qty)
+            else:
+                merged[key] = (card, qty)
+                order.append(key)
+        return [merged[k] for k in order]
+
+    hero_cards = _merge_by_name(hero_cards)
+    aspect_cards = _merge_by_name(aspect_cards)
+
     total_cards = sum(slots.values())
     hero_count = sum(q for _, q in hero_cards)
     aspect_count = sum(q for _, q in aspect_cards)
 
-    # ── Deck title + aspect badge + stats + link ──
+    # ── Deck title + aspect badge + stats + link + view cards ──
     if show_header:
         link_html = f' &nbsp; <a class="mcdb-link" href="{deck_url}" target="_blank">MarvelCDB ↗</a>' if deck_url else ""
+        # Community tier badge
+        hero_code_h = deck_data.get("hero_code", "")
+        hero_card_h = card_db.get(hero_code_h, {}) if hero_code_h else {}
+        hero_display_name = hero_card_h.get("name") or st.session_state.get("deck_hero", "")
+        comm_tier, comm_avg = _community_tier_for(hero_display_name)
+        tier_badge_html = ""
+        if comm_tier:
+            tier_color = {"S": "#e74c3c", "A": "#e67e22", "B": "#f1c40f",
+                          "C": "#2ecc71", "D": "#3498db", "F": "#95a5a6"}.get(comm_tier, "#95a5a6")
+            tier_badge_html = (
+                f'<span class="aspect-badge" style="background:{tier_color};" '
+                f'title="Community Hero Power avg {comm_avg:.2f}/6">'
+                f'Community Tier {comm_tier}</span>'
+            )
         st.markdown(
             f'<div class="deck-title">{deck_name}'
             f'<span class="aspect-badge aspect-{aspect_class}">{aspect_label}</span>'
+            f'{tier_badge_html}'
             f'</div>'
             f'<div class="deck-stats">'
             f'<div class="deck-stat"><strong>{total_cards}</strong> cards</div>'
@@ -626,11 +741,11 @@ def render_deck(deck_data, card_db, show_header=True):
 
     # ── Sort selector ──
     deck_id = deck_data.get("id", "unknown")
-    sort_col, combine_col = st.columns([3, 1])
+    sort_col, combine_col, view_col = st.columns([3, 1, 1])
     with sort_col:
         sort_choice = st.radio(
             "Sort by",
-            ["Type", "Name", "Cost", "Aspect", "Set"],
+            ["Type", "Name", "Cost", "Set"],
             index=0,
             horizontal=True,
             key=f"deck_sort_{deck_id}",
@@ -638,9 +753,25 @@ def render_deck(deck_data, card_db, show_header=True):
     sort_mode = sort_choice.lower() if sort_choice != "Type" else "default"
     with combine_col:
         combine_aspects = st.checkbox("Combine aspects", value=False, key=f"deck_combine_{deck_id}")
+    with view_col:
+        st.write("")
+        hero_code_btn = deck_data.get("hero_code", "")
+        hero_card_btn = card_db.get(hero_code_btn, {}) if hero_code_btn else {}
+        hero_name_btn = hero_card_btn.get("name") or st.session_state.get("deck_hero", "")
+        if hero_name_btn and st.button("View Hero Cards", key=f"view_hero_cards_{deck_id}"):
+            open_hero_cards_dialog(hero_name_btn, HERO_ALTER_EGOS.get(hero_name_btn, ""))
+
+    # ── Hero block (always pinned to top-left of the card grid) ──
+    hero_prepend_blocks = []
+    if hero_cards:
+        hero_header_html = f'<div class="faction-header type-hero">Hero Cards ({hero_count})</div>'
+        hero_prepend_blocks.append((
+            build_section_block(hero_cards, "hero", header_html=hero_header_html),
+            section_weight(hero_cards, include_header=True),
+        ))
 
     # ── Card display ──
-    if aspect_cards:
+    if aspect_cards or hero_prepend_blocks:
         if sort_mode == "default" and not combine_aspects:
             # Balanced two-column card layout grouped by aspect then type
             cards_by_faction = {}
@@ -649,7 +780,7 @@ def render_deck(deck_data, card_db, show_header=True):
                 cards_by_faction.setdefault(f, []).append((card, qty))
 
             factions = sorted(cards_by_faction.keys())
-            section_blocks = []
+            section_blocks = list(hero_prepend_blocks)
 
             for faction in factions:
                 cards_f = cards_by_faction[faction]
@@ -668,38 +799,45 @@ def render_deck(deck_data, card_db, show_header=True):
         elif sort_mode == "default" and combine_aspects:
             # Combined: all aspect/basic cards grouped by type only
             css_combined = ASPECT_COLORS.get(aspect, "basic")
-            st.markdown(render_card_section_html(aspect_cards, css_combined, show_aspect_dot=True), unsafe_allow_html=True)
+            combined_blocks = list(hero_prepend_blocks)
+            if aspect_cards:
+                combined_blocks.append((
+                    build_section_block(aspect_cards, css_combined, show_aspect_dot=True),
+                    section_weight(aspect_cards),
+                ))
+            st.markdown(render_section_grid_html(combined_blocks), unsafe_allow_html=True)
         else:
-            st.markdown(render_sorted_cards_html(aspect_cards, sort_mode, show_aspect_dot=combine_aspects), unsafe_allow_html=True)
+            st.markdown(
+                render_sorted_cards_html(
+                    aspect_cards, sort_mode,
+                    show_aspect_dot=combine_aspects,
+                    prepend_blocks=hero_prepend_blocks,
+                ),
+                unsafe_allow_html=True,
+            )
 
-    # ── Description (between aspect cards and hero cards) ──
+    # ── Description (below the deck card grid) ──
     if show_header and description.strip():
         with st.expander("Deck Description"):
             st.markdown(description)
 
-    # ── Hero Cards (collapsed at bottom) ──
-    if hero_cards:
-        with st.expander(f"Hero Cards ({hero_count})"):
-            st.markdown(render_card_section_html(hero_cards, "hero"), unsafe_allow_html=True)
-
-    # ── Obligation & Nemesis Set ──
+    # ── Obligation & Nemesis Set (inline, like aspect cards) ──
     hero_code = deck_data.get("hero_code", "")
     if hero_code:
         obligation_cards, nemesis_cards = get_obligation_nemesis(hero_code, card_db)
         if obligation_cards or nemesis_cards:
             total_enc = (sum(c.get("quantity", 1) for c in obligation_cards)
                          + sum(c.get("quantity", 1) for c in nemesis_cards))
-            with st.expander(f"Obligation & Nemesis ({total_enc})"):
-                html_parts = []
-                if obligation_cards:
-                    html_parts.append('<div class="card-type-header type-hero">Obligation</div>')
-                    for c in obligation_cards:
-                        html_parts.append(build_card_row(c, c.get("quantity", 1)))
-                if nemesis_cards:
-                    html_parts.append('<div class="card-type-header type-hero">Nemesis Set</div>')
-                    for c in nemesis_cards:
-                        html_parts.append(build_card_row(c, c.get("quantity", 1)))
-                st.markdown("".join(html_parts), unsafe_allow_html=True)
+            html_parts = [f'<div class="faction-header type-hero">Obligation &amp; Nemesis ({total_enc})</div>']
+            if obligation_cards:
+                html_parts.append('<div class="card-type-header type-hero">Obligation</div>')
+                for c in obligation_cards:
+                    html_parts.append(build_card_row(c, c.get("quantity", 1)))
+            if nemesis_cards:
+                html_parts.append('<div class="card-type-header type-hero">Nemesis Set</div>')
+                for c in nemesis_cards:
+                    html_parts.append(build_card_row(c, c.get("quantity", 1)))
+            st.markdown("".join(html_parts), unsafe_allow_html=True)
 
     if unknown_codes:
         with st.expander(f"{len(unknown_codes)} card(s) not found in database"):
@@ -748,45 +886,166 @@ if not hero_names:
     st.info("No heroes match the selected wave.")
     st.stop()
 
+# Handle ?hero=<HeroName> from clickable grid
+_qp_hero = st.query_params.get("hero")
+if isinstance(_qp_hero, list):
+    _qp_hero = _qp_hero[0] if _qp_hero else None
+if _qp_hero and _qp_hero in hero_names:
+    st.session_state.deck_hero = _qp_hero
+    try:
+        del st.query_params["hero"]
+    except Exception:
+        pass
+
 if "deck_hero" not in st.session_state:
     st.session_state.deck_hero = hero_names[random.randint(0, len(hero_names) - 1)]
 elif st.session_state.deck_hero not in hero_names:
     st.session_state.deck_hero = hero_names[0]
 
-if st.session_state.get("_deck_hero_search") != st.session_state.deck_hero:
-    st.session_state._deck_hero_search = st.session_state.deck_hero
-
-def _on_hero_search_change():
-    st.session_state.deck_hero = st.session_state._deck_hero_search
-
 selected_hero = st.session_state.deck_hero
-sel_col, _ = st.columns([1, 3])
-with sel_col:
-    st.selectbox(
-        "Hero",
-        hero_names,
+
+
+@st.cache_data(show_spinner=False)
+def _deck_build_uri_map(_urls):
+    out = {}
+    for hero, path in _urls.items():
+        if not path:
+            continue
+        if path.startswith("http://") or path.startswith("https://"):
+            out[hero] = path
+            continue
+        if not os.path.exists(path):
+            continue
+        ext = os.path.splitext(path)[1].lower().lstrip(".")
+        mime = {"jpg": "jpeg", "jpeg": "jpeg", "png": "png",
+                "gif": "gif", "webp": "webp"}.get(ext, "jpeg")
+        with open(path, "rb") as f:
+            out[hero] = f"data:image/{mime};base64,{base64.b64encode(f.read()).decode()}"
+    return out
+
+
+_DECK_URI_MAP = _deck_build_uri_map(dict(hero_image_urls))
+
+# ── Search box + refresh button ──
+search_col, refresh_col = st.columns([3, 1])
+with search_col:
+    _hero_search = st.text_input(
+        "Search hero",
         key="_deck_hero_search",
-        on_change=_on_hero_search_change,
+        placeholder="🔍 Search hero by name…",
+        label_visibility="collapsed",
     )
-selected_hero = st.session_state.deck_hero
+with refresh_col:
+    if st.button(
+        "🔄 Refresh deck data",
+        key="_deck_refresh_btn",
+        help="Re-fetch decks and cards from MarvelCDB so updates appear without restarting the site.",
+        width="stretch",
+    ):
+        fetch_deck.clear()
+        fetch_all_cards.clear()
+        st.toast("✅ Deck data refreshed from MarvelCDB.")
+        st.rerun()
 
-with st.expander("Browse all heroes", expanded=False):
-    st.markdown('<div class="deck-hero-browse"></div>', unsafe_allow_html=True)
-    cols_per_row = 8
-    for i in range(0, len(hero_names), cols_per_row):
-        cols = st.columns(cols_per_row)
-        for j, col in enumerate(cols):
-            idx = i + j
-            if idx >= len(hero_names):
-                break
-            hero = hero_names[idx]
-            with col:
-                if st.button("Select", key=f"hero_btn_{idx}", width="stretch"):
-                    st.session_state.deck_hero = hero
-                    st.rerun()
-                img_path = hero_image_urls.get(hero, "")
-                if img_path:
-                    st.image(img_path, width="stretch")
+# Apply search filter to the visible grid (selected hero remains valid)
+filtered_names = hero_names
+if _hero_search:
+    _q = _hero_search.strip().lower()
+    filtered_names = [h for h in hero_names if _q in h.lower()]
+    if not filtered_names:
+        st.info(f"No heroes match '{_hero_search}'.")
+        filtered_names = hero_names
+
+# ── Hero image grid (always visible, cropped, clickable) ──
+st.markdown(
+    """<style>
+    .dhg-wrap {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+        gap: 8px;
+        width: 100%;
+        margin-bottom: 8px;
+    }
+    .dhg-card {
+        position: relative;
+        display: block;
+        text-decoration: none !important;
+        color: inherit !important;
+        border-radius: 7px;
+        overflow: hidden;
+        background: rgba(0,0,0,0.4);
+        border: 2px solid rgba(255,255,255,0.08);
+        transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+    }
+    .dhg-card:hover {
+        transform: translateY(-2px);
+        border-color: #2471a3;
+        box-shadow: 0 6px 16px rgba(36,113,163,0.4);
+    }
+    .dhg-card.selected {
+        border-color: #2471a3;
+        box-shadow: 0 0 0 2px #2471a3, 0 6px 16px rgba(36,113,163,0.5);
+    }
+    .dhg-imgwrap {
+        width: 100%;
+        aspect-ratio: 1.3;
+        background-color: #111;
+        background-size: 135% auto;
+        background-position: center 16%;
+        background-repeat: no-repeat;
+        display: block;
+    }
+    .dhg-name {
+        text-align: center;
+        font-size: 11px;
+        font-weight: 700;
+        color: #f0f0f0;
+        padding: 3px 3px 5px;
+        line-height: 1.15;
+        background: rgba(0,0,0,0.55);
+    }
+    .dhg-card.selected .dhg-name {
+        background: #2471a3;
+        color: #fff;
+    }
+    .dhg-badge {
+        position: absolute;
+        top: 4px;
+        left: 4px;
+        background: #2471a3;
+        color: #fff;
+        font-size: 10px;
+        font-weight: 800;
+        padding: 2px 6px;
+        border-radius: 3px;
+        box-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+    }
+    </style>""",
+    unsafe_allow_html=True,
+)
+
+cards_html = ['<div class="dhg-wrap">']
+for hero in filtered_names:
+    uri = _DECK_URI_MAP.get(hero)
+    if not uri:
+        continue
+    href = f"?hero={quote(hero)}"
+    safe_name = html_escape(hero)
+    is_sel = hero == selected_hero
+    cls = "dhg-card selected" if is_sel else "dhg-card"
+    badge = '<div class="dhg-badge">✓</div>' if is_sel else ""
+    cards_html.append(
+        f'<a class="{cls}" href="{href}" target="_self" title="View decks for {safe_name}">'
+        f'{badge}'
+        f'<div class="dhg-imgwrap" style="background-image:url({uri});"></div>'
+        f'<div class="dhg-name">{safe_name}</div>'
+        f'</a>'
+    )
+cards_html.append("</div>")
+
+_exp_label = f"🦸 Choose hero — currently: {selected_hero}"
+with st.expander(_exp_label, expanded=True):
+    st.markdown("".join(cards_html), unsafe_allow_html=True)
 
 st.markdown("---")
 

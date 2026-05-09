@@ -66,7 +66,7 @@ for _k, _v in _defaults.items():
     if _k not in st.session_state:
         st.session_state[_k] = _v
 
-bar_col1, bar_col2, bar_col3, bar_col4 = st.columns([3, 1.2, 1.2, 1])
+bar_col1, bar_col2, bar_col3, bar_col4 = st.columns([2.6, 1.6, 1.4, 1])
 with bar_col1:
     preset_choice = st.selectbox(
         "Weighting Preset",
@@ -600,53 +600,6 @@ with share_col:
         f'🔗 Share This Tier List</a>',
         unsafe_allow_html=True
     )
-
-# ----------------------------------------
-# Hot Takes — compare user tier list vs community average
-# ----------------------------------------
-try:
-    _community_data, _ = load_json("community_tier_lists.json", default={})
-    _submissions = _community_data.get("hero_power", {}).get("submissions", [])
-    if len(_submissions) >= 2:
-        _TIER_PTS = {"S": 6, "A": 5, "B": 4, "C": 3, "D": 2, "F": 1}
-        _hero_scores_community = {}
-        for sub in _submissions:
-            for tier_name, hero_list in sub.items():
-                for h in hero_list:
-                    _hero_scores_community.setdefault(h, []).append(_TIER_PTS.get(tier_name, 3))
-        _community_avg = {h: np.mean(scores_list) for h, scores_list in _hero_scores_community.items()}
-
-        _hot_takes = []
-        for hero, user_tier in hero_to_tier.items():
-            if hero in _community_avg:
-                user_pts = _TIER_PTS[user_tier]
-                comm_pts = _community_avg[hero]
-                diff = user_pts - comm_pts
-                if abs(diff) >= 1.0:
-                    comm_tier = min(_TIER_PTS.keys(), key=lambda t: abs(_TIER_PTS[t] - comm_pts))
-                    _hot_takes.append((hero, user_tier, comm_tier, diff))
-
-        if _hot_takes:
-            _hot_takes.sort(key=lambda x: abs(x[3]), reverse=True)
-            _top_takes = _hot_takes[:5]
-            takes_html = ""
-            for hero, u_tier, c_tier, diff in _top_takes:
-                direction = "↑" if diff > 0 else "↓"
-                takes_html += (
-                    f'<span style="display:inline-block;background:rgba(255,255,255,0.08);'
-                    f'padding:4px 10px;border-radius:6px;margin:3px 4px;font-size:13px;">'
-                    f'<b>{hero}</b> — You: <b>{u_tier}</b> {direction} Community: <b>{c_tier}</b></span>'
-                )
-            st.markdown(
-                f'<div style="background:linear-gradient(135deg,rgba(142,68,173,0.2),rgba(231,76,60,0.15));'
-                f'border:1px solid rgba(142,68,173,0.3);border-radius:10px;padding:12px 16px;margin:12px 0;">'
-                f'<span style="font-size:15px;font-weight:bold;">🔥 Your Hot Takes</span><br>'
-                f'<span style="font-size:12px;color:#a0a8b8;">Heroes where your ranking differs most from the community</span><br>'
-                f'<div style="margin-top:6px;">{takes_html}</div></div>',
-                unsafe_allow_html=True,
-            )
-except Exception:
-    pass  # Gracefully skip if community data is unavailable
 
 # ----------------------------------------
 # Plotting
