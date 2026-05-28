@@ -12,6 +12,7 @@ from data.hero_decks import hero_decks
 from data.constants import STAT_NAMES, TIER_COLORS
 import re
 from components.nav_banner import render_nav_banner, render_page_header, render_footer
+from components.marvelcdb_decks import format_deck_link
 from data.villain_release_order import VILLAIN_RELEASE_INDEX, VILLAIN_WAVE, VILLAIN_WAVE_ORDER, VILLAIN_LEGACY
 from data.hero_release_order import HERO_WAVE, WAVE_ORDER, HERO_LEGACY, LEGACY_WAVE_ORDER
 
@@ -260,7 +261,7 @@ if top_heroes:
         for hero, score in top_heroes:
             deck_entries = hero_decks.get(hero, [])
             if deck_entries:
-                links = " · ".join(f"[{e['name']}]({e['url']})" for e in deck_entries)
+                links = " · ".join(format_deck_link(e).replace("📋 ", "", 1) for e in deck_entries)
                 tier_label = "S" if (hero, score) in tiers["S"] else "A"
                 st.markdown(f"**{hero}** ({tier_label}) — {links}")
 

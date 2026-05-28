@@ -12,6 +12,7 @@ from data.hero_decks import hero_decks
 from data.hero_image_urls import hero_image_urls
 from components.nav_banner import render_nav_banner, render_page_header, render_footer
 from components.hero_card_viewer import get_obligation_nemesis
+from components.marvelcdb_decks import get_deck_age_label
 from data.hero_release_order import HERO_RELEASE_INDEX, HERO_WAVE, WAVE_ORDER
 
 render_nav_banner("good-decks")
@@ -613,6 +614,8 @@ def render_deck(deck_data, card_db, show_header=True):
     # ── Deck title + aspect badge + stats + link ──
     if show_header:
         link_html = f' &nbsp; <a class="mcdb-link" href="{deck_url}" target="_blank">MarvelCDB ↗</a>' if deck_url else ""
+        deck_age_label = get_deck_age_label(deck_data.get("id"), deck_data.get("api_type", "deck"))
+        age_html = f'<div class="deck-stat">Edited <strong>{deck_age_label}</strong></div>' if deck_age_label else ""
         st.markdown(
             f'<div class="deck-title">{deck_name}'
             f'<span class="aspect-badge aspect-{aspect_class}">{aspect_label}</span>'
@@ -620,6 +623,7 @@ def render_deck(deck_data, card_db, show_header=True):
             f'<div class="deck-stats">'
             f'<div class="deck-stat"><strong>{total_cards}</strong> cards</div>'
             f'<div class="deck-stat"><strong>{aspect_count}</strong> aspect/basic</div>'
+            f'{age_html}'
             f'{link_html}</div>',
             unsafe_allow_html=True
         )
@@ -808,6 +812,7 @@ if selected_hero:
             entry = decks_for_hero[0]
             try:
                 deck_data = fetch_deck(entry["deck_id"], entry["api_type"])
+                deck_data["api_type"] = entry["api_type"]
                 if not deck_data.get("url"):
                     deck_data["url"] = entry["url"]
                 inject_hero_art_background(deck_data, card_db)
@@ -820,6 +825,7 @@ if selected_hero:
             for entry in decks_for_hero:
                 try:
                     deck_data = fetch_deck(entry["deck_id"], entry["api_type"])
+                    deck_data["api_type"] = entry["api_type"]
                     if not deck_data.get("url"):
                         deck_data["url"] = entry["url"]
                     loaded_decks.append((entry, deck_data))

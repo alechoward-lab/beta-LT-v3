@@ -10,6 +10,7 @@ from data.help_tips import help_tips
 from data.constants import STAT_NAMES
 from components.hero_stats_manager import get_heroes
 from components.nav_banner import render_nav_banner, render_page_header, render_footer
+from components.marvelcdb_decks import format_deck_link
 
 render_nav_banner("hero-recommender")
 
@@ -144,7 +145,7 @@ if st.session_state.get("rec_results"):
 
             deck_entries = hero_decks.get(hero, [])
             if deck_entries:
-                links = " · ".join(f"[{e['name']}]({e['url']})" for e in deck_entries)
+                links = " · ".join(format_deck_link(e).replace("📋 ", "", 1) for e in deck_entries)
                 st.markdown(f"📋 Decks: {links}")
 
         st.markdown("---")

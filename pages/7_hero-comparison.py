@@ -13,6 +13,7 @@ from data.preset_options import preset_options
 from data.hero_decks import hero_decks
 from data.constants import STAT_NAMES
 from components.nav_banner import render_nav_banner, render_page_header, render_footer
+from components.marvelcdb_decks import format_deck_link
 from data.hero_release_order import HERO_WAVE, WAVE_ORDER, HERO_LEGACY, LEGACY_WAVE_ORDER
 
 render_nav_banner("hero-comparison")
@@ -174,14 +175,14 @@ with col1:
         st.image(hero_image_urls[hero_1], width="stretch")
     st.markdown(f"### {hero_1}")
     for entry in hero_decks.get(hero_1, []):
-        st.markdown(f"📋 [{entry['name']}]({entry['url']})")
+        st.markdown(format_deck_link(entry))
 
 with col2:
     if hero_2 in hero_image_urls:
         st.image(hero_image_urls[hero_2], width="stretch")
     st.markdown(f"### {hero_2}")
     for entry in hero_decks.get(hero_2, []):
-        st.markdown(f"📋 [{entry['name']}]({entry['url']})")
+        st.markdown(format_deck_link(entry))
 
 st.markdown("---")
 

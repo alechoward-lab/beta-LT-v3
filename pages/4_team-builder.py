@@ -12,6 +12,7 @@ from data.villain_image_urls import villain_image_urls
 from data.constants import STAT_NAMES
 from components.hero_stats_manager import initialize_hero_stats, get_heroes, render_hero_stats_editor
 from components.nav_banner import render_nav_banner, render_page_header, render_footer
+from components.marvelcdb_decks import format_deck_link
 
 render_nav_banner("team-builder")
 from data.preset_options import preset_options
@@ -147,7 +148,7 @@ if st.session_state.team:
             # Deck links
             deck_entries = hero_decks.get(hero, [])
             for entry in deck_entries:
-                st.markdown(f"📋 [{entry['name']}]({entry['url']})")
+                st.markdown(format_deck_link(entry))
             
             if st.button("❌ Remove", key=f"remove_{hero}_{idx}"):
                 st.session_state.team.remove(hero)

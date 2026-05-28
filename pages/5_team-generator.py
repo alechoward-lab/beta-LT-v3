@@ -12,6 +12,7 @@ from data.hero_image_urls import hero_image_urls
 from data.villain_image_urls import villain_image_urls
 from data.constants import TIER_COLORS
 from components.nav_banner import render_nav_banner, render_page_header, render_footer
+from components.marvelcdb_decks import format_deck_link
 
 render_nav_banner("team-generator")
 from components.hero_stats_manager import initialize_hero_stats, get_heroes, render_hero_stats_editor
@@ -215,7 +216,7 @@ if "generated_team" in st.session_state:
                 # Deck links
                 deck_entries = hero_decks.get(hero, [])
                 for entry in deck_entries:
-                    st.markdown(f"📋 [{entry['name']}]({entry['url']})")
+                    st.markdown(format_deck_link(entry))
     
     # Display score
     col1, col2, col3 = st.columns(3)
