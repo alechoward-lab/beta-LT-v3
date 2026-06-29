@@ -210,7 +210,7 @@ hero_decks = {
         {"name": "CE: MCU", "url": "https://marvelcdb.com/decklist/view/60364/avoid-damage-and-tuck-1.0", "deck_id": "60364", "api_type": "decklist"},
     ],
     "Hercules": [
-        {"name": "Daring Lime's Divine Reckoning", "url": "https://marvelcdb.com/decklist/view/63267/daring-lime-s-divine-reckoning-1.0", "deck_id": "63267", "api_type": "deck"},
-        {"name": "Current Environment Justice", "url": "https://marvelcdb.com/decklist/view/60058/labor-of-love-current-environment-1-test-1.0", "deck_id": "60058", "api_type": "deck"},
+        {"name": "Daring Lime's Divine Reckoning", "url": "https://marvelcdb.com/decklist/view/63267/daring-lime-s-divine-reckoning-1.0", "deck_id": "63267", "api_type": "decklist"},
+        {"name": "Current Environment Justice", "url": "https://marvelcdb.com/decklist/view/60058/labor-of-love-current-environment-1-test-1.0", "deck_id": "60058", "api_type": "decklist"},
     ],
 }
