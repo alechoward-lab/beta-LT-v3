@@ -1,6 +1,5 @@
 """Silver Surfer custom hero files and card previews."""
 
-import json
 import re
 from pathlib import Path
 
@@ -12,8 +11,7 @@ from components.nav_banner import render_footer, render_nav_banner, render_page_
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 STATIC_DIR = PROJECT_ROOT / "static"
-SOURCE_JSON = STATIC_DIR / "Silver Surfer v9 Public.json"
-PDF_DRIVE_FOLDER_URL = "https://drive.google.com/drive/folders/1SEvVI5f8KEuyC6oM75CcnmuDzkKDq0og"
+DRIVE_FOLDER_URL = "https://drive.google.com/drive/folders/1SEvVI5f8KEuyC6oM75CcnmuDzkKDq0og"
 
 
 def numbered_pngs(folder_name: str) -> list[Path]:
@@ -212,49 +210,20 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-try:
-    save_data = json.loads(SOURCE_JSON.read_text(encoding="utf-8"))
-    silver_surfer_bag = next(
-        obj for obj in save_data["ObjectStates"]
-        if obj.get("Name") == "Bag" and obj.get("Nickname") == "Silver Surfer v9 Public"
-    )
-    save_data["Grid"] = {
-        "Type": 0,
-        "Lines": False,
-        "Color": {"r": 0.5, "g": 0.5, "b": 0.5},
-        "Opacity": 0.75,
-        "ThickLines": False,
-        "Snapping": False,
-        "Offset": False,
-        "BothSnapping": False,
-        "xSize": 2.0,
-        "ySize": 2.0,
-    }
-    save_data["ObjectStates"] = [silver_surfer_bag]
-    object_json = json.dumps(save_data, indent=2).encode("utf-8")
-except (OSError, json.JSONDecodeError, KeyError, StopIteration) as exc:
-    object_json = None
-    object_error = str(exc)
-
 with download_columns[0]:
     st.subheader("Tabletop Simulator")
-    if object_json is None:
-        st.error(f"The TTS object could not be prepared: {object_error}")
-    else:
-        st.download_button(
-            "Download TTS Object (.json)",
-            data=object_json,
-            file_name="Silver Surfer v9 Public.json",
-            mime="application/json",
-            key="download_silver_surfer_tts_object",
-            width="stretch",
-        )
+    st.write("Tabletop Simulator object, hosted on Google Drive.")
+    st.markdown(
+        f'<a class="pdf-download-link" href="{DRIVE_FOLDER_URL}" '
+        'target="_blank" rel="noopener noreferrer">Open TTS Object in Google Drive</a>',
+        unsafe_allow_html=True,
+    )
 
 with download_columns[1]:
     st.subheader("Card Fronts")
     st.write("Printable PDF of the card fronts, hosted on Google Drive.")
     st.markdown(
-        f'<a class="pdf-download-link" href="{PDF_DRIVE_FOLDER_URL}" '
+        f'<a class="pdf-download-link" href="{DRIVE_FOLDER_URL}" '
         'target="_blank" rel="noopener noreferrer">Open Fronts PDF in Google Drive</a>',
         unsafe_allow_html=True,
     )
@@ -263,7 +232,7 @@ with download_columns[2]:
     st.subheader("Card Backs")
     st.write("Printable PDF of the card backs, hosted on Google Drive.")
     st.markdown(
-        f'<a class="pdf-download-link" href="{PDF_DRIVE_FOLDER_URL}" '
+        f'<a class="pdf-download-link" href="{DRIVE_FOLDER_URL}" '
         'target="_blank" rel="noopener noreferrer">Open Backs PDF in Google Drive</a>',
         unsafe_allow_html=True,
     )
@@ -271,7 +240,7 @@ with download_columns[2]:
 with st.expander("How to install and open the object in Tabletop Simulator"):
     st.markdown(
         """
-1. Download **TTS Object (.json)** above.
+1. Open the **TTS Object in Google Drive** above and download the JSON file.
 2. Move the JSON file into Tabletop Simulator's **Saved Objects** folder:
    - **Windows:** `Documents\\My Games\\Tabletop Simulator\\Saves\\Saved Objects`
    - **macOS:** `~/Library/Tabletop Simulator/Saves/Saved Objects`
