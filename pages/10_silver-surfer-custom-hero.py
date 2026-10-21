@@ -13,6 +13,8 @@ from components.nav_banner import render_footer, render_nav_banner, render_page_
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 STATIC_DIR = PROJECT_ROOT / "static"
 SOURCE_JSON = STATIC_DIR / "Silver Surfer v9 Public.json"
+FRONTS_PDF = STATIC_DIR / "Silver_Surfer_Fronts.pdf"
+BACKS_PDF = STATIC_DIR / "Silver_Surfer_Backs.pdf"
 
 
 def numbered_pngs(folder_name: str) -> list[Path]:
@@ -218,23 +220,25 @@ with download_columns[0]:
 with download_columns[1]:
     st.subheader("Card Fronts")
     st.write("Printable PDF of the card fronts.")
-    st.markdown(
-        '<a href="/app/static/Silver_Surfer_Fronts.pdf" download="Silver_Surfer_Fronts.pdf" '
-        'style="display:inline-block;width:100%;box-sizing:border-box;text-align:center;'
-        'padding:0.45rem 0.9rem;border-radius:0.4rem;background:#ed1c24;color:white;'
-        'text-decoration:none;font-weight:700">Download Fronts PDF</a>',
-        unsafe_allow_html=True,
+    st.download_button(
+        "Download Fronts PDF",
+        data=lambda: FRONTS_PDF.read_bytes(),
+        file_name=FRONTS_PDF.name,
+        mime="application/pdf",
+        key="download_silver_surfer_fronts_pdf",
+        width="stretch",
     )
 
 with download_columns[2]:
     st.subheader("Card Backs")
     st.write("Printable PDF of the card backs.")
-    st.markdown(
-        '<a href="/app/static/Silver_Surfer_Backs.pdf" download="Silver_Surfer_Backs.pdf" '
-        'style="display:inline-block;width:100%;box-sizing:border-box;text-align:center;'
-        'padding:0.45rem 0.9rem;border-radius:0.4rem;background:#ed1c24;color:white;'
-        'text-decoration:none;font-weight:700">Download Backs PDF</a>',
-        unsafe_allow_html=True,
+    st.download_button(
+        "Download Backs PDF",
+        data=lambda: BACKS_PDF.read_bytes(),
+        file_name=BACKS_PDF.name,
+        mime="application/pdf",
+        key="download_silver_surfer_backs_pdf",
+        width="stretch",
     )
 
 with st.expander("How to install and open the object in Tabletop Simulator"):
