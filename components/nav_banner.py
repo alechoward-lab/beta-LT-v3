@@ -21,6 +21,7 @@ NAV_PAGES = [
     ("Hero Comparison", "/hero-comparison", "hero-comparison"),
     ("YouTube", "/youtube-channel", "youtube-channel"),
     ("Villain Tier List", "/villain-tier-list", "villain-tier-list"),
+    ("Silver Surfer", "/silver-surfer-custom-hero", "silver-surfer-custom-hero"),
 ]
 
 
@@ -839,7 +840,7 @@ code {{
     st.toggle(f"{mode_icon} Light mode", value=light_mode, key="_light_mode")
 
 
-def render_footer(show_card_credits=False):
+def render_footer(show_card_credits=False, show_card_data_credit=True):
     """Render a consistent footer across all pages."""
     st.markdown("---")
     credits = (
@@ -847,9 +848,12 @@ def render_footer(show_card_credits=False):
         '<a href="https://www.youtube.com/channel/UCpV2UWmBTAeIKUso1LkeU2A" target="_blank" style="color:#ed1c24;font-weight:bold;">DARING LIME</a>'
         ' &nbsp;·&nbsp; '
         '<a href="https://discord.gg/ReF5jDSHqV" target="_blank" style="color:#ed1c24;font-weight:bold;">DISCORD</a>'
-        ' &nbsp;·&nbsp; '
-        '<span style="color:#888;">Card data by</span> <a href="https://marvelcdb.com" target="_blank" style="color:#ed1c24;">MarvelCDB</a>'
     )
+    if show_card_data_credit:
+        credits += (
+            ' &nbsp;·&nbsp; '
+            '<span style="color:#888;">Card data by</span> <a href="https://marvelcdb.com" target="_blank" style="color:#ed1c24;">MarvelCDB</a>'
+        )
     if show_card_credits:
         credits += (
             ' &nbsp;·&nbsp; '

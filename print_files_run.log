@@ -1,0 +1,358 @@
+[START] print_files.py is running: C:\Users\alech\OneDrive\Documents\GitHub\beta-LT-v3\print_files (3).py
+[INFO] Loaded script file: C:\Users\alech\OneDrive\Documents\GitHub\beta-LT-v3\print_files (3).py
+[INFO] Python executable: C:\Users\alech\OneDrive\Documents\GitHub\beta-LT-v3\.venv-1\Scripts\python.exe
+====================================================================
+Marvel Champions — Silver Surfer Print Sheet Generator
+====================================================================
+Project folder: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards
+Output folder:  C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files
+
+INPUT SUMMARY
+  Main card fronts: 29  |  C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\absolute order png fronts
+  Duplicate Planet 5 Ego front(s) omitted: 1
+  Aspect card fronts: 71  |  C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Aspect Cards\_OUTPUT_V4_3\png_all
+  Total front images: 99
+  Available back-image files: 28  |  C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\absolute order png backs
+  Player-card back template: 1 Hero_Back - Copy (2).png
+  Original ordered back images retained: 28
+  Player backs added for aspect cards: 71
+  Total back images: 99
+
+Front order: numbered main cards first, then aspect cards in natural filename order.
+Back order: all supplied back PNGs in natural filename order, followed by player-card backs for aspect cards.
+Each sheet holds up to 9 images. Front and back page counts may differ if supplied main-card backs do not match the main-front count.
+
+Creating front sheets from 99 PNG files (11 page(s))...
+  [1/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_01.png
+  [2/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_02.png
+  [3/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_03.png
+  [4/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_04.png
+  [5/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_05.png
+  [6/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_06.png
+  [7/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_07.png
+  [8/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_08.png
+  [9/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_09.png
+  [10/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_10.png
+  [11/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_11.png
+
+Creating back sheets from 99 PNG files (11 page(s))...
+  [1/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_01.png
+  [2/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_02.png
+  [3/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_03.png
+  [4/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_04.png
+  [5/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_05.png
+  [6/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_06.png
+  [7/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_07.png
+  [8/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_08.png
+  [9/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_09.png
+  [10/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_10.png
+  [11/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_11.png
+Writing PDF: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\Silver_Surfer_Fronts.pdf
+SUCCESS: Created PDF (11 pages): C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\Silver_Surfer_Fronts.pdf
+Writing PDF: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\Silver_Surfer_Backs.pdf
+SUCCESS: Created PDF (11 pages): C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\Silver_Surfer_Backs.pdf
+Site front PDF replaced: C:\Users\alech\OneDrive\Documents\GitHub\beta-LT-v3\static\Silver_Surfer_Fronts.pdf
+Site back PDF replaced:  C:\Users\alech\OneDrive\Documents\GitHub\beta-LT-v3\static\Silver_Surfer_Backs.pdf
+
+====================================================================
+SUCCESS — print files generated
+Output folder: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files
+Front PDF: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\Silver_Surfer_Fronts.pdf
+Back PDF:  C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\Silver_Surfer_Backs.pdf
+PNG sheet previews: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files
+Print at Actual Size / 100% on US Letter paper. Inspect a test page first.
+====================================================================
+[START] print_files.py is running: C:\Users\alech\OneDrive\Documents\GitHub\beta-LT-v3\print_files (3).py
+[INFO] Loaded script file: C:\Users\alech\OneDrive\Documents\GitHub\beta-LT-v3\print_files (3).py
+[INFO] Python executable: C:\Users\alech\OneDrive\Documents\GitHub\beta-LT-v3\.venv-1\Scripts\python.exe
+====================================================================
+Marvel Champions — Silver Surfer Print Sheet Generator
+====================================================================
+Project folder: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards
+Output folder:  C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files
+
+INPUT SUMMARY
+  Card image folder: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\3 Card Images
+  Unique card fronts: 21
+  Duplicate '- Copy' files ignored: 21
+  Canonical card back: Card Back.png  |  C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\3 Card Images\backs
+  Ego the Planet and Ego the Living Planet ally are both retained as separate cards.
+  Total front images: 21
+  Total back images: 21
+
+Front and back order: natural filename order from the curated card images.
+Each sheet holds up to 9 images; the canonical card back is repeated once per front.
+
+Creating front sheets from 21 PNG files (3 page(s))...
+  [1/3] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_01.png
+  [2/3] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_02.png
+  [3/3] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_03.png
+
+Creating back sheets from 21 PNG files (3 page(s))...
+  [1/3] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_01.png
+  [2/3] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_02.png
+  [3/3] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_03.png
+Writing PDF: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\Silver_Surfer_Fronts.pdf
+SUCCESS: Created PDF (3 pages): C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\Silver_Surfer_Fronts.pdf
+Writing PDF: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\Silver_Surfer_Backs.pdf
+SUCCESS: Created PDF (3 pages): C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\Silver_Surfer_Backs.pdf
+Site front PDF replaced: C:\Users\alech\OneDrive\Documents\GitHub\beta-LT-v3\static\Silver_Surfer_Fronts.pdf
+Site back PDF replaced:  C:\Users\alech\OneDrive\Documents\GitHub\beta-LT-v3\static\Silver_Surfer_Backs.pdf
+
+====================================================================
+SUCCESS — print files generated
+Output folder: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files
+Front PDF: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\Silver_Surfer_Fronts.pdf
+Back PDF:  C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\Silver_Surfer_Backs.pdf
+PNG sheet previews: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files
+Print at Actual Size / 100% on US Letter paper. Inspect a test page first.
+====================================================================
+[START] print_files.py is running: C:\Users\alech\OneDrive\Documents\GitHub\beta-LT-v3\print_files (3).py
+[INFO] Loaded script file: C:\Users\alech\OneDrive\Documents\GitHub\beta-LT-v3\print_files (3).py
+[INFO] Python executable: C:\Users\alech\OneDrive\Documents\GitHub\beta-LT-v3\.venv-1\Scripts\python.exe
+====================================================================
+Marvel Champions — Silver Surfer Print Sheet Generator
+====================================================================
+Project folder: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards
+Output folder:  C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files
+
+INPUT SUMMARY
+  Card image folder: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\3 Card Images
+  Unique card fronts: 21
+  Duplicate '- Copy' files ignored: 21
+  Canonical card back: Card Back.png  |  C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\3 Card Images\backs
+  Ego the Planet and Ego the Living Planet ally are both retained as separate cards.
+  Total front images: 21
+  Total back images: 21
+
+Front and back order: natural filename order from the curated card images.
+Each sheet holds up to 9 images; the canonical card back is repeated once per front.
+
+Creating front sheets from 21 PNG files (3 page(s))...
+  [1/3] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_01.png
+  [2/3] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_02.png
+  [3/3] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_03.png
+
+Creating back sheets from 21 PNG files (3 page(s))...
+  [1/3] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_01.png
+  [2/3] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_02.png
+  [3/3] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_03.png
+Writing PDF: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\Silver_Surfer_Fronts.pdf
+SUCCESS: Created PDF (3 pages): C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\Silver_Surfer_Fronts.pdf
+Writing PDF: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\Silver_Surfer_Backs.pdf
+SUCCESS: Created PDF (3 pages): C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\Silver_Surfer_Backs.pdf
+Removed stale sheet preview: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_04.png
+Removed stale sheet preview: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_05.png
+Removed stale sheet preview: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_06.png
+Removed stale sheet preview: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_07.png
+Removed stale sheet preview: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_08.png
+Removed stale sheet preview: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_09.png
+Removed stale sheet preview: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_10.png
+Removed stale sheet preview: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_11.png
+Removed stale sheet preview: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_12.png
+Removed stale sheet preview: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_04.png
+Removed stale sheet preview: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_05.png
+Removed stale sheet preview: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_06.png
+Removed stale sheet preview: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_07.png
+Removed stale sheet preview: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_08.png
+Removed stale sheet preview: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_09.png
+Removed stale sheet preview: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_10.png
+Removed stale sheet preview: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_11.png
+Removed stale sheet preview: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_12.png
+Site front PDF replaced: C:\Users\alech\OneDrive\Documents\GitHub\beta-LT-v3\static\Silver_Surfer_Fronts.pdf
+Site back PDF replaced:  C:\Users\alech\OneDrive\Documents\GitHub\beta-LT-v3\static\Silver_Surfer_Backs.pdf
+
+====================================================================
+SUCCESS — print files generated
+Output folder: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files
+Front PDF: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\Silver_Surfer_Fronts.pdf
+Back PDF:  C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\Silver_Surfer_Backs.pdf
+PNG sheet previews: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files
+Print at Actual Size / 100% on US Letter paper. Inspect a test page first.
+====================================================================
+[START] print_files.py is running: C:\Users\alech\OneDrive\Documents\GitHub\beta-LT-v3\print_files (3).py
+[INFO] Loaded script file: C:\Users\alech\OneDrive\Documents\GitHub\beta-LT-v3\print_files (3).py
+[INFO] Python executable: C:\Users\alech\OneDrive\Documents\GitHub\beta-LT-v3\.venv-1\Scripts\python.exe
+====================================================================
+Marvel Champions — Silver Surfer Print Sheet Generator
+====================================================================
+Project folder: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards
+Output folder:  C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files
+
+INPUT SUMMARY
+  Main card fronts: 29  |  C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\absolute order png fronts
+  Aspect card fronts: 71  |  C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Aspect Cards\_OUTPUT_V4_3\png_all
+  Total front images: 100
+  Available back-image files: 28  |  C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\absolute order png backs
+  Player-card back template: 1 Hero_Back - Copy (2).png
+  Original ordered back images retained: 28
+  Player backs added for aspect cards: 71
+  Total back images: 99
+
+Front order: numbered main cards first, then aspect cards in natural filename order.
+Back order: all supplied back PNGs in natural filename order, followed by player-card backs for aspect cards.
+Each sheet holds up to 9 images. Front and back page counts may differ if supplied main-card backs do not match the main-front count.
+
+Creating front sheets from 100 PNG files (12 page(s))...
+  [1/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_01.png
+  [2/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_02.png
+  [3/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_03.png
+  [4/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_04.png
+  [5/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_05.png
+  [6/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_06.png
+  [7/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_07.png
+  [8/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_08.png
+  [9/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_09.png
+  [10/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_10.png
+  [11/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_11.png
+  [12/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_12.png
+
+Creating back sheets from 99 PNG files (11 page(s))...
+  [1/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_01.png
+  [2/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_02.png
+  [3/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_03.png
+  [4/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_04.png
+  [5/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_05.png
+  [6/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_06.png
+  [7/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_07.png
+  [8/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_08.png
+  [9/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_09.png
+  [10/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_10.png
+  [11/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_11.png
+Writing PDF: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\Silver_Surfer_Fronts.pdf
+SUCCESS: Created PDF (12 pages): C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\Silver_Surfer_Fronts.pdf
+Writing PDF: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\Silver_Surfer_Backs.pdf
+SUCCESS: Created PDF (11 pages): C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\Silver_Surfer_Backs.pdf
+
+====================================================================
+SUCCESS — print files generated
+Output folder: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files
+Front PDF: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\Silver_Surfer_Fronts.pdf
+Back PDF:  C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\Silver_Surfer_Backs.pdf
+PNG sheet previews: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files
+Print at Actual Size / 100% on US Letter paper. Inspect a test page first.
+====================================================================
+[START] print_files.py is running: C:\Users\alech\OneDrive\Documents\GitHub\beta-LT-v3\print_files (3).py
+[INFO] Loaded script file: C:\Users\alech\OneDrive\Documents\GitHub\beta-LT-v3\print_files (3).py
+[INFO] Python executable: C:\Users\alech\OneDrive\Documents\GitHub\beta-LT-v3\.venv-1\Scripts\python.exe
+====================================================================
+Marvel Champions — Silver Surfer Print Sheet Generator
+====================================================================
+Project folder: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards
+Output folder:  C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files
+
+INPUT SUMMARY
+  Main card fronts: 29  |  C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\absolute order png fronts
+  Aspect card fronts: 71  |  C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Aspect Cards\_OUTPUT_V4_3\png_all
+  Total front images: 100
+  Available back-image files: 28  |  C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\absolute order png backs
+  Player-card back template: 1 Hero_Back - Copy (2).png
+  Original ordered back images retained: 28
+  Player backs added for aspect cards: 71
+  Total back images: 99
+
+Front order: numbered main cards first, then aspect cards in natural filename order.
+Back order: all supplied back PNGs in natural filename order, followed by player-card backs for aspect cards.
+Each sheet holds up to 9 images. Front and back page counts may differ if supplied main-card backs do not match the main-front count.
+
+Creating front sheets from 100 PNG files (12 page(s))...
+  [1/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_01.png
+  [2/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_02.png
+  [3/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_03.png
+  [4/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_04.png
+  [5/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_05.png
+  [6/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_06.png
+  [7/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_07.png
+  [8/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_08.png
+  [9/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_09.png
+  [10/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_10.png
+  [11/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_11.png
+  [12/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\front_sheet_12.png
+
+Creating back sheets from 99 PNG files (11 page(s))...
+  [1/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_01.png
+  [2/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_02.png
+  [3/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_03.png
+  [4/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_04.png
+  [5/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_05.png
+  [6/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_06.png
+  [7/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_07.png
+  [8/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_08.png
+  [9/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_09.png
+  [10/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_10.png
+  [11/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\back_sheet_11.png
+Writing PDF: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\Silver_Surfer_Fronts.pdf
+SUCCESS: Created PDF (12 pages): C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\Silver_Surfer_Fronts.pdf
+Writing PDF: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\Silver_Surfer_Backs.pdf
+SUCCESS: Created PDF (11 pages): C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\Silver_Surfer_Backs.pdf
+
+====================================================================
+SUCCESS — print files generated
+Output folder: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files
+Front PDF: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\Silver_Surfer_Fronts.pdf
+Back PDF:  C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files\Silver_Surfer_Backs.pdf
+PNG sheet previews: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer v2\cards\Silver Surfer Print Files
+Print at Actual Size / 100% on US Letter paper. Inspect a test page first.
+====================================================================
+[START] print_files.py is running: C:\Users\alech\OneDrive\Documents\GitHub\beta-LT-v3\print_files (3).py
+[INFO] Loaded script file: C:\Users\alech\OneDrive\Documents\GitHub\beta-LT-v3\print_files (3).py
+[INFO] Python executable: C:\Users\alech\OneDrive\Documents\GitHub\beta-LT-v3\.venv-1\Scripts\python.exe
+====================================================================
+Marvel Champions — Silver Surfer Print Sheet Generator
+====================================================================
+Project folder: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards
+Output folder:  C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards\Silver Surfer Print Files
+
+INPUT SUMMARY
+  Main card fronts: 29  |  C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards\absolute order png fronts
+  Aspect card fronts: 71  |  C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards\Aspect Cards\_OUTPUT_V4_3\png_all
+  Total front images: 100
+  Available back-image files: 28  |  C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards\absolute order png backs
+  Player-card back template: 1 Hero_Back - Copy (2).png
+  Original ordered back images retained: 28
+  Player backs added for aspect cards: 71
+  Total back images: 99
+
+Front order: numbered main cards first, then aspect cards in natural filename order.
+Back order: all supplied back PNGs in natural filename order, followed by player-card backs for aspect cards.
+Each sheet holds up to 9 images. Front and back page counts may differ if supplied main-card backs do not match the main-front count.
+
+Creating front sheets from 100 PNG files (12 page(s))...
+  [1/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards\Silver Surfer Print Files\front_sheet_01.png
+  [2/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards\Silver Surfer Print Files\front_sheet_02.png
+  [3/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards\Silver Surfer Print Files\front_sheet_03.png
+  [4/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards\Silver Surfer Print Files\front_sheet_04.png
+  [5/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards\Silver Surfer Print Files\front_sheet_05.png
+  [6/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards\Silver Surfer Print Files\front_sheet_06.png
+  [7/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards\Silver Surfer Print Files\front_sheet_07.png
+  [8/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards\Silver Surfer Print Files\front_sheet_08.png
+  [9/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards\Silver Surfer Print Files\front_sheet_09.png
+  [10/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards\Silver Surfer Print Files\front_sheet_10.png
+  [11/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards\Silver Surfer Print Files\front_sheet_11.png
+  [12/12] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards\Silver Surfer Print Files\front_sheet_12.png
+
+Creating back sheets from 99 PNG files (11 page(s))...
+  [1/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards\Silver Surfer Print Files\back_sheet_01.png
+  [2/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards\Silver Surfer Print Files\back_sheet_02.png
+  [3/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards\Silver Surfer Print Files\back_sheet_03.png
+  [4/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards\Silver Surfer Print Files\back_sheet_04.png
+  [5/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards\Silver Surfer Print Files\back_sheet_05.png
+  [6/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards\Silver Surfer Print Files\back_sheet_06.png
+  [7/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards\Silver Surfer Print Files\back_sheet_07.png
+  [8/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards\Silver Surfer Print Files\back_sheet_08.png
+  [9/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards\Silver Surfer Print Files\back_sheet_09.png
+  [10/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards\Silver Surfer Print Files\back_sheet_10.png
+  [11/11] Saved: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards\Silver Surfer Print Files\back_sheet_11.png
+Writing PDF: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards\Silver Surfer Print Files\Silver_Surfer_Fronts.pdf
+SUCCESS: Created PDF (12 pages): C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards\Silver Surfer Print Files\Silver_Surfer_Fronts.pdf
+Writing PDF: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards\Silver Surfer Print Files\Silver_Surfer_Backs.pdf
+SUCCESS: Created PDF (11 pages): C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards\Silver Surfer Print Files\Silver_Surfer_Backs.pdf
+
+====================================================================
+SUCCESS — print files generated
+Output folder: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards\Silver Surfer Print Files
+Front PDF: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards\Silver Surfer Print Files\Silver_Surfer_Fronts.pdf
+Back PDF:  C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards\Silver Surfer Print Files\Silver_Surfer_Backs.pdf
+PNG sheet previews: C:\Users\alech\Desktop\Custom MC designs\Silver Surfer Public\cards\Silver Surfer Print Files
+Print at Actual Size / 100% on US Letter paper. Inspect a test page first.
+====================================================================
