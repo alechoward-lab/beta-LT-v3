@@ -13,8 +13,7 @@ from components.nav_banner import render_footer, render_nav_banner, render_page_
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 STATIC_DIR = PROJECT_ROOT / "static"
 SOURCE_JSON = STATIC_DIR / "Silver Surfer v9 Public.json"
-FRONTS_PDF = STATIC_DIR / "Silver_Surfer_Fronts.pdf"
-BACKS_PDF = STATIC_DIR / "Silver_Surfer_Backs.pdf"
+PDF_DRIVE_FOLDER_URL = "https://drive.google.com/drive/folders/1SEvVI5f8KEuyC6oM75CcnmuDzkKDq0og"
 
 
 def numbered_pngs(folder_name: str) -> list[Path]:
@@ -179,7 +178,7 @@ st.markdown(
     """
 I created a custom Silver Surfer hero for Marvel Champions because he is one of my favorite characters. His main mechanic is to travel to and from planets. You begin the game with your trusty surfboard and Zenn-La, his home world, in play and a planet deck. Your alter-ego ability allows you to use the surfboard to bring the top card of the planet deck into play. Once a planet is in play, you can use your surfboard to arrive at the planet, and your hero ability to depart the planet and return to fighting the villain. Each planet has a unique bonus for arriving and departing, and since the planet deck is shuffled during set up, every game will play out differently! Key to mastering Silver Surfer is to be thoughtful about when and where you travel to.
 
-Click the buttons below to download print files and the tabletop simulator object. If you have any feedback feel free to join my discord and post a message with your thoughts! I playtested Silver Surfer a lot with my friends, but there's always room to make improvements. I plan on eventually taking people's feedback into account to make some improvements and keep the files up to date. There are also a bunch of aspect cards I made. They are less tested and in a more alpha state. The justice cards are fairly refined as that is the precon I envisioned him with. To make his precon deck just put all the justice cards with the however many of the basic cards you want. The precon is already assembled in Tabletop Simulator, so you can just load it up and play.
+Use the buttons below to access the print files on Google Drive and download the tabletop simulator object. If you have any feedback feel free to join my discord and post a message with your thoughts! I playtested Silver Surfer a lot with my friends, but there's always room to make improvements. I plan on eventually taking people's feedback into account to make some improvements and keep the files up to date. There are also a bunch of aspect cards I made. They are less tested and in a more alpha state. The justice cards are fairly refined as that is the precon I envisioned him with. To make his precon deck just put all the justice cards with the however many of the basic cards you want. The precon is already assembled in Tabletop Simulator, so you can just load it up and play.
 ### Some rules clarifications:
 
 - During setup, start with Zenn-La and your Cosmic Surfboard in play. Shuffle the planet deck and set it aside facedown. Set the linked Ego The Living Planet ally aside. The rest of setup is just like normal Marvel Champions.
@@ -253,19 +252,19 @@ with download_columns[0]:
 
 with download_columns[1]:
     st.subheader("Card Fronts")
-    st.write("Printable PDF of the card fronts.")
+    st.write("Printable PDF of the card fronts, hosted on Google Drive.")
     st.markdown(
-        f'<a class="pdf-download-link" href="/app/static/{FRONTS_PDF.name}" '
-        f'download="{FRONTS_PDF.name}">Download Fronts PDF</a>',
+        f'<a class="pdf-download-link" href="{PDF_DRIVE_FOLDER_URL}" '
+        'target="_blank" rel="noopener noreferrer">Open Fronts PDF in Google Drive</a>',
         unsafe_allow_html=True,
     )
 
 with download_columns[2]:
     st.subheader("Card Backs")
-    st.write("Printable PDF of the card backs.")
+    st.write("Printable PDF of the card backs, hosted on Google Drive.")
     st.markdown(
-        f'<a class="pdf-download-link" href="/app/static/{BACKS_PDF.name}" '
-        f'download="{BACKS_PDF.name}">Download Backs PDF</a>',
+        f'<a class="pdf-download-link" href="{PDF_DRIVE_FOLDER_URL}" '
+        'target="_blank" rel="noopener noreferrer">Open Backs PDF in Google Drive</a>',
         unsafe_allow_html=True,
     )
 
