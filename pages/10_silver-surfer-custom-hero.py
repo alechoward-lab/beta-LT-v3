@@ -192,6 +192,27 @@ Click the buttons below to download print files and the tabletop simulator objec
 
 download_columns = st.columns(3)
 
+st.markdown(
+    """<style>
+.pdf-download-link {
+    align-items: center;
+    background: #ed1c24;
+    border-radius: 0.5rem;
+    color: #fff !important;
+    display: flex;
+    font-weight: 600;
+    justify-content: center;
+    min-height: 2.75rem;
+    text-decoration: none !important;
+    width: 100%;
+}
+.pdf-download-link:hover {
+    background: #c8171d;
+}
+</style>""",
+    unsafe_allow_html=True,
+)
+
 try:
     save_data = json.loads(SOURCE_JSON.read_text(encoding="utf-8"))
     silver_surfer_bag = next(
@@ -233,25 +254,19 @@ with download_columns[0]:
 with download_columns[1]:
     st.subheader("Card Fronts")
     st.write("Printable PDF of the card fronts.")
-    st.download_button(
-        "Download Fronts PDF",
-        data=lambda: FRONTS_PDF.read_bytes(),
-        file_name=FRONTS_PDF.name,
-        mime="application/pdf",
-        key="download_silver_surfer_fronts_pdf",
-        width="stretch",
+    st.markdown(
+        f'<a class="pdf-download-link" href="/app/static/{FRONTS_PDF.name}" '
+        f'download="{FRONTS_PDF.name}">Download Fronts PDF</a>',
+        unsafe_allow_html=True,
     )
 
 with download_columns[2]:
     st.subheader("Card Backs")
     st.write("Printable PDF of the card backs.")
-    st.download_button(
-        "Download Backs PDF",
-        data=lambda: BACKS_PDF.read_bytes(),
-        file_name=BACKS_PDF.name,
-        mime="application/pdf",
-        key="download_silver_surfer_backs_pdf",
-        width="stretch",
+    st.markdown(
+        f'<a class="pdf-download-link" href="/app/static/{BACKS_PDF.name}" '
+        f'download="{BACKS_PDF.name}">Download Backs PDF</a>',
+        unsafe_allow_html=True,
     )
 
 with st.expander("How to install and open the object in Tabletop Simulator"):
