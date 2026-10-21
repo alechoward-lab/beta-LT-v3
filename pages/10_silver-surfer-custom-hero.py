@@ -198,7 +198,20 @@ try:
         obj for obj in save_data["ObjectStates"]
         if obj.get("Name") == "Bag" and obj.get("Nickname") == "Silver Surfer v9 Public"
     )
-    object_json = json.dumps(silver_surfer_bag, indent=2).encode("utf-8")
+    save_data["Grid"] = {
+        "Type": 0,
+        "Lines": False,
+        "Color": {"r": 0.5, "g": 0.5, "b": 0.5},
+        "Opacity": 0.75,
+        "ThickLines": False,
+        "Snapping": False,
+        "Offset": False,
+        "BothSnapping": False,
+        "xSize": 2.0,
+        "ySize": 2.0,
+    }
+    save_data["ObjectStates"] = [silver_surfer_bag]
+    object_json = json.dumps(save_data, indent=2).encode("utf-8")
 except (OSError, json.JSONDecodeError, KeyError, StopIteration) as exc:
     object_json = None
     object_error = str(exc)
